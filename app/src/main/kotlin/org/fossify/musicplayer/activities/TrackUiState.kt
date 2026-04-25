@@ -1,12 +1,13 @@
 package org.fossify.musicplayer.activities
 
 import android.graphics.Bitmap
+import androidx.compose.runtime.Immutable
 
+@Immutable
 data class TrackUiState(
     val title: String = "",
     val artist: String = "",
-    val coverArt: Any? = null,          // Glide model (Uri / File / null)
-    val blurredBg: Bitmap? = null,      // pre-blurred bg bitmap
+    val coverArt: Any? = null,
     val durationSecs: Int = 0,
     val progressSecs: Int = 0,
     val isPlaying: Boolean = false,
@@ -16,9 +17,10 @@ data class TrackUiState(
     val nextTrack: NextTrackUi? = null,
 )
 
+@Immutable
 data class NextTrackUi(
     val label: String,
-    val coverArt: Any?,
+    val coverArt: Any? = null,
 )
 
 enum class PlaybackSettingUi { REPEAT_OFF, REPEAT_ALL, REPEAT_ONE, STOP_AFTER_CURRENT }

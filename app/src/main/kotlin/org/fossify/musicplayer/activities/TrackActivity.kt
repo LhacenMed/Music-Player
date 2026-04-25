@@ -43,14 +43,11 @@ class TrackActivity : SimpleControllerActivity(), PlaybackSpeedListener {
     companion object {
         private const val SEEK_COALESCE_MS = 150L
         private const val UPDATE_INTERVAL_MS = 150L
-        private const val BG_BLUR_RADIUS = 25f
-        private const val BG_SAMPLE_SIZE = 4
     }
 
     private var isThirdPartyIntent = false
 
     private val handler = Handler(Looper.getMainLooper())
-    private val scope = CoroutineScope(Dispatchers.Default)
     private var seekJob: Job? = null
     private var seekCount = 0
 
@@ -134,8 +131,10 @@ class TrackActivity : SimpleControllerActivity(), PlaybackSpeedListener {
             artist = track.artist,
             durationSecs = track.duration,
         )
-        loadCoverArt(track)
-        loadBlurredBackground(track)
+        // Cover art drives both the foreground image and the blurred background (via Modifier.blur)
+        getTrackCoverArt(track) { coverArt ->
+            runOnUiThread { uiState = uiState.copy(coverArt = coverArt) }
+        }
     }
 
     private fun applyNextTrackInfo(item: MediaItem?) {
@@ -157,30 +156,6 @@ class TrackActivity : SimpleControllerActivity(), PlaybackSpeedListener {
         getTrackCoverArt(track) { coverArt ->
             runOnUiThread {
                 uiState = uiState.copy(nextTrack = uiState.nextTrack?.copy(coverArt = coverArt))
-            }
-        }
-    }
-
-    private fun loadCoverArt(track: Track) {
-        getTrackCoverArt(track) { coverArt ->
-            runOnUiThread { uiState = uiState.copy(coverArt = coverArt) }
-        }
-    }
-
-    private fun loadBlurredBackground(track: Track) {
-        getTrackCoverArt(track) { coverArt ->
-            scope.launch(Dispatchers.IO) {
-                try {
-                    val screenW = realScreenSize.x
-                    val screenH = realScreenSize.y
-                    val raw = Glide.with(this@TrackActivity)
-                        .asBitmap()
-                        .load(coverArt)
-                        .submit(screenW / BG_SAMPLE_SIZE, screenH / BG_SAMPLE_SIZE)
-                        .get()
-                    val blurred = blurBitmap(raw, BG_BLUR_RADIUS).scale(screenW, screenH, false)
-                    launch(Dispatchers.Main) { uiState = uiState.copy(blurredBg = blurred) }
-                } catch (_: Exception) { /* dark fallback already shown */ }
             }
         }
     }
@@ -278,8 +253,8 @@ class TrackActivity : SimpleControllerActivity(), PlaybackSpeedListener {
 
     private fun seekWithDelay() {
         seekJob?.cancel()
-        seekJob = scope.launch {
-            delay(SEEK_COALESCE_MS)
+        seekJob = kotlinx.coroutines.GlobalScope.launch {
+            kotlinx.coroutines.delay(SEEK_COALESCE_MS)
             if (seekCount != 0) seekByCount(seekCount)
         }
     }
@@ -331,72 +306,6 @@ class TrackActivity : SimpleControllerActivity(), PlaybackSpeedListener {
     }
 
     private fun rotateIndex(total: Int, index: Int): Int = (index % total + total) % total
-
-    // ── Stack blur (pure Kotlin, no RenderScript) ─────────────────────────────
-
-    private fun blurBitmap(src: Bitmap, radius: Float): Bitmap {
-        val r = radius.toInt().coerceIn(1, 25)
-        val w = src.width; val h = src.height
-        val pix = IntArray(w * h).also { src.getPixels(it, 0, w, 0, 0, w, h) }
-
-        val div = r + r + 1; val r1 = r + 1
-        val dv = IntArray(256 * (r1 * (r1 + 1) / 2)) { it / (r1 * (r1 + 1) / 2) }
-        val stack = Array(div) { IntArray(3) }
-        val vmin = IntArray(maxOf(w, h)); val vmax = IntArray(maxOf(w, h))
-
-        // horizontal
-        var yi = 0
-        for (row in 0 until h) {
-            var rs = 0; var gs = 0; var bs = 0
-            for (dx in -r..r) {
-                val p = pix[yi + dx.coerceIn(0, w - 1)]; val si = dx + r
-                stack[si][0] = (p shr 16) and 0xff; stack[si][1] = (p shr 8) and 0xff; stack[si][2] = p and 0xff
-                val wt = r1 - Math.abs(dx); rs += stack[si][0] * wt; gs += stack[si][1] * wt; bs += stack[si][2] * wt
-            }
-            var sp = r
-            for (col in 0 until w) {
-                pix[yi + col] = -0x1000000 or (dv[rs] shl 16) or (dv[gs] shl 8) or dv[bs]
-                if (row == 0) { vmin[col] = minOf(col + r1, w - 1); vmax[col] = maxOf(col - r, 0) }
-                val sp1 = (sp + 1) % div
-                val pIn = pix[yi + vmin[col]]; val pOut = pix[yi + vmax[col]]
-                rs += ((pIn shr 16) and 0xff) - stack[sp1][0]; stack[sp1][0] = (pIn shr 16) and 0xff
-                gs += ((pIn shr 8) and 0xff) - stack[sp1][1]; stack[sp1][1] = (pIn shr 8) and 0xff
-                bs += (pIn and 0xff) - stack[sp1][2]; stack[sp1][2] = pIn and 0xff
-                rs -= stack[sp][0] - ((pOut shr 16) and 0xff)
-                gs -= stack[sp][1] - ((pOut shr 8) and 0xff)
-                bs -= stack[sp][2] - (pOut and 0xff)
-                sp = sp1
-            }
-            yi += w
-        }
-
-        // vertical
-        for (col in 0 until w) {
-            var rs = 0; var gs = 0; var bs = 0; var yp = -r * w
-            for (dy in -r..r) {
-                val yi2 = maxOf(0, yp) + col; val si = dy + r
-                stack[si][0] = (pix[yi2] shr 16) and 0xff; stack[si][1] = (pix[yi2] shr 8) and 0xff; stack[si][2] = pix[yi2] and 0xff
-                val wt = r1 - Math.abs(dy); rs += stack[si][0] * wt; gs += stack[si][1] * wt; bs += stack[si][2] * wt
-                yp += w
-            }
-            var yi2 = col; var sp = r
-            for (row in 0 until h) {
-                pix[yi2] = -0x1000000 or (dv[rs] shl 16) or (dv[gs] shl 8) or dv[bs]
-                if (col == 0) { vmin[row] = minOf(row + r1, h - 1) * w; vmax[row] = maxOf(row - r, 0) * w }
-                val sp1 = (sp + 1) % div
-                val pIn = pix[vmin[row] + col]; val pOut = pix[vmax[row] + col]
-                rs += ((pIn shr 16) and 0xff) - stack[sp1][0]; stack[sp1][0] = (pIn shr 16) and 0xff
-                gs += ((pIn shr 8) and 0xff) - stack[sp1][1]; stack[sp1][1] = (pIn shr 8) and 0xff
-                bs += (pIn and 0xff) - stack[sp1][2]; stack[sp1][2] = pIn and 0xff
-                rs -= stack[sp][0] - ((pOut shr 16) and 0xff)
-                gs -= stack[sp][1] - ((pOut shr 8) and 0xff)
-                bs -= stack[sp][2] - (pOut and 0xff)
-                sp = sp1; yi2 += w
-            }
-        }
-
-        return Bitmap.createBitmap(pix, w, h, Bitmap.Config.ARGB_8888)
-    }
 }
 
 // ── Extension: PlaybackSetting → PlaybackSettingUi ────────────────────────────

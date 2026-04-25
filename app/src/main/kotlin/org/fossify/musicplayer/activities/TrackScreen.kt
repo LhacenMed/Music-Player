@@ -10,13 +10,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -29,9 +28,13 @@ import org.fossify.musicplayer.R
 
 private val White70 = Color.White.copy(alpha = 0.7f)
 private val White40 = Color.White.copy(alpha = 0.4f)
-private val Scrim = Color(0x99000000)
+// Reduced to ~40% opacity so blurred album art colors bleed through visibly
+private val Scrim = Color(0x80000000)
 private val PlayCircle = Color(0x55FFFFFF)
 private val AddPill = Color(0x44FFFFFF)
+
+/** Single horizontal padding used across all screen elements for visual alignment. */
+private val HPad = 30.dp
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
@@ -57,15 +60,17 @@ fun TrackScreen(
             .swipeDownToClose(onSwipeDown)
     ) {
         // ── Blurred background ──────────────────────────────────────────────
-        if (state.blurredBg != null) {
-            androidx.compose.foundation.Image(
-                bitmap = state.blurredBg.asImageBitmap(),
+        if (state.coverArt != null) {
+            GlideImage(
+                model = state.coverArt,
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .blur(radiusX = 80.dp, radiusY = 80.dp),
             )
         } else {
-            Box(Modifier.fillMaxSize().background(Color(0xFF1A1A1A)))
+            Box(Modifier.fillMaxSize().background(Color(0x80000000)))
         }
 
         // Dark scrim
@@ -96,28 +101,22 @@ fun TrackScreen(
         ) {
             TopBar(onBack = onBack, onSpeedClick = onSpeedClick)
 
-            // Album art — takes ~50% of remaining height
-            BoxWithConstraints(
+            // Album art — square, aligned to the universal horizontal padding
+            GlideImage(
+                model = state.coverArt,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
                 modifier = Modifier
-                    .padding(horizontal = 32.dp)
+                    .padding(horizontal = HPad)
                     .padding(top = 8.dp)
-                    .fillMaxWidth(),
-                contentAlignment = Alignment.Center,
+                    .fillMaxWidth()
+                    .aspectRatio(1f)
+                    .clip(RoundedCornerShape(16.dp)),
             ) {
-                val size = minOf(maxWidth, 320.dp)
-                GlideImage(
-                    model = state.coverArt,
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(size)
-                        .clip(RoundedCornerShape(16.dp)),
-                ) {
-                    it.placeholder(R.drawable.ic_headset).error(R.drawable.ic_headset)
-                }
+                it.placeholder(R.drawable.ic_headset).error(R.drawable.ic_headset)
             }
 
-            Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.height(10.dp))
 
             // Track info
             TrackInfo(
@@ -151,15 +150,15 @@ fun TrackScreen(
                 onPlaybackSettingToggle = onPlaybackSettingToggle,
             )
 
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(48.dp))
 
-            // Next track strip
-            if (state.nextTrack != null) {
-                NextTrackStrip(
-                    next = state.nextTrack,
-                    onClick = onNextTrackClick,
-                )
-            }
+//            // Next track strip
+//            if (state.nextTrack != null) {
+//                NextTrackStrip(
+//                    next = state.nextTrack,
+//                    onClick = onNextTrackClick,
+//                )
+//            }
         }
     }
 }
@@ -174,7 +173,8 @@ private fun TopBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp),
+            // Icon buttons have built-in 12.dp padding; subtract to align icon edges with HPad
+            .padding(horizontal = HPad - 12.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         IconButton(onClick = onBack) {
@@ -182,6 +182,7 @@ private fun TopBar(
                 painter = painterResource(R.drawable.ic_arrow_left_vector),
                 contentDescription = stringResource(org.fossify.commons.R.string.back),
                 tint = Color.White,
+                modifier = Modifier.size(30.dp),
             )
         }
         Spacer(Modifier.weight(1f))
@@ -190,7 +191,7 @@ private fun TopBar(
                 painter = painterResource(R.drawable.ic_playback_speed_vector),
                 contentDescription = null,
                 tint = White70,
-                modifier = Modifier.size(20.dp),
+                modifier = Modifier.size(30.dp),
             )
         }
     }
@@ -207,11 +208,11 @@ private fun TrackInfo(
     onAddLyrics: () -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        // Title + star
+        // Title + star — icon button has 12.dp built-in padding on its right edge
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp),
+                .padding(start = HPad, end = HPad - 12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
@@ -231,7 +232,7 @@ private fun TrackInfo(
                     ),
                     contentDescription = null,
                     tint = if (isFavorite) Color(0xFFFFC107) else White70,
-                    modifier = Modifier.size(24.dp),
+                    modifier = Modifier.size(30.dp),
                 )
             }
         }
@@ -240,23 +241,23 @@ private fun TrackInfo(
         Text(
             text = artist,
             color = White70,
-            fontSize = 15.sp,
+            fontSize = 20.sp,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(horizontal = 20.dp),
+            modifier = Modifier.padding(horizontal = HPad),
         )
 
         Spacer(Modifier.height(10.dp))
 
         // Lyrics row
         Row(
-            modifier = Modifier.padding(horizontal = 20.dp),
+            modifier = Modifier.padding(horizontal = HPad),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 text = stringResource(R.string.no_lyrics),
                 color = White40,
-                fontSize = 13.sp,
+                fontSize = 15.sp,
             )
             Spacer(Modifier.width(8.dp))
             Surface(
@@ -267,8 +268,8 @@ private fun TrackInfo(
                 Text(
                     text = stringResource(R.string.add),
                     color = Color.White,
-                    fontSize = 12.sp,
-                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 2.dp),
+                    fontSize = 15.sp,
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
                 )
             }
         }
@@ -283,7 +284,8 @@ private fun SeekSection(
     durationSecs: Int,
     onSeek: (Int) -> Unit,
 ) {
-    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+    // Slider has ~10.dp built-in horizontal padding on thumb edges; subtract to align track with HPad
+    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = HPad)) {
         Slider(
             value = if (durationSecs > 0) progressSecs.toFloat() / durationSecs else 0f,
             onValueChange = { onSeek((it * durationSecs).toInt()) },
@@ -294,7 +296,7 @@ private fun SeekSection(
             ),
             modifier = Modifier.fillMaxWidth(),
         )
-        Row(modifier = Modifier.fillMaxWidth()) {
+        Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp)) {
             Text(text = progressSecs.formatDuration(), color = White70, fontSize = 12.sp)
             Spacer(Modifier.weight(1f))
             Text(text = durationSecs.formatDuration(), color = White70, fontSize = 12.sp)
@@ -315,10 +317,11 @@ private fun ControlsRow(
     onShuffleToggle: () -> Unit,
     onPlaybackSettingToggle: () -> Unit,
 ) {
+    // Icon buttons have 12.dp built-in padding; subtract to keep outer icons flush with HPad
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = HPad - 12.dp),
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -331,7 +334,7 @@ private fun ControlsRow(
                     if (isShuffleOn) R.string.disable_shuffle else R.string.enable_shuffle
                 ),
                 tint = Color.White.copy(alpha = shuffleAlpha),
-                modifier = Modifier.size(24.dp),
+                modifier = Modifier.size(30.dp),
             )
         }
 
@@ -341,7 +344,7 @@ private fun ControlsRow(
                 painter = painterResource(R.drawable.ic_previous_vector),
                 contentDescription = null,
                 tint = Color.White,
-                modifier = Modifier.size(28.dp),
+                modifier = Modifier.size(30.dp),
             )
         }
 
@@ -371,7 +374,7 @@ private fun ControlsRow(
                 painter = painterResource(R.drawable.ic_next_vector),
                 contentDescription = null,
                 tint = Color.White,
-                modifier = Modifier.size(28.dp),
+                modifier = Modifier.size(30.dp),
             )
         }
 
@@ -385,7 +388,7 @@ private fun ControlsRow(
                 painter = painterResource(playbackSetting.iconRes()),
                 contentDescription = stringResource(R.string.repeat_song),
                 tint = repeatTint,
-                modifier = Modifier.size(24.dp),
+                modifier = Modifier.size(30.dp),
             )
         }
     }
