@@ -33,6 +33,7 @@ class PlaybackService : MediaLibraryService(), MediaSessionService.Listener {
     override fun onCreate() {
         super.onCreate()
         setListener(this)
+        setMediaNotificationProvider(MusicNotificationProvider(this))
         initializeSessionAndPlayer(handleAudioFocus = true, handleAudioBecomingNoisy = true)
         initializeLibrary()
     }

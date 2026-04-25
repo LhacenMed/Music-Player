@@ -2,7 +2,9 @@ package org.fossify.musicplayer.activities
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,6 +24,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
+import com.airbnb.lottie.LottieAnimationView
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import org.fossify.musicplayer.R
@@ -348,25 +352,12 @@ private fun ControlsRow(
             )
         }
 
-        // Play / Pause — large circle button
-        Box(
-            modifier = Modifier
-                .size(60.dp)
-                .clip(CircleShape)
-                .background(PlayCircle),
-            contentAlignment = Alignment.Center,
-        ) {
-            IconButton(onClick = onPlayPause, modifier = Modifier.fillMaxSize()) {
-                Icon(
-                    painter = painterResource(
-                        if (isPlaying) R.drawable.ic_pause_vector else R.drawable.ic_play_vector
-                    ),
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(30.dp),
-                )
-            }
-        }
+        // Play / Pause — Lottie animated, matching activity_track.xml
+        LottiePlayPause(
+            isPlaying = isPlaying,
+            onClick = onPlayPause,
+            modifier = Modifier.size(60.dp),
+        )
 
         // Next
         IconButton(onClick = onNext) {
@@ -393,6 +384,74 @@ private fun ControlsRow(
         }
     }
 }
+
+// ── Lottie play/pause button ─────────────────────────────────────────────────
+
+/**
+ * Wraps the same [LottieAnimationView] and @raw/playpause asset used in activity_track.xml.
+ *
+ * Key design decision: [prevPlaying] uses a plain (non-Compose-state) holder so that
+ * writing to it inside [AndroidView]'s update block does NOT trigger recomposition.
+ * A mutableStateOf would cause an immediate re-run of update → prev == isPlaying →
+ * animation skipped. The plain holder breaks that cycle entirely.
+ *
+ * Animation direction:
+ *   forward  (speed +1): play-icon → pause-icon  (music started)
+ *   backward (speed -1): pause-icon → play-icon  (music stopped)
+ */
+@Composable
+private fun LottiePlayPause(
+    isPlaying: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    // Non-state holder: writes are invisible to Compose, so update is called exactly once per
+    // isPlaying change — which is what we need to trigger the animation exactly once.
+    val prevPlaying = remember { NonStateRef<Boolean?>(null) }
+
+    Box(
+        modifier = modifier
+            .clip(CircleShape)
+            .background(PlayCircle)
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = onClick,
+            ),
+        contentAlignment = Alignment.Center,
+    ) {
+        AndroidView(
+            factory = { ctx ->
+                LottieAnimationView(ctx).apply {
+                    setAnimation(R.raw.playpause)
+                    repeatCount = 0          // play once per trigger, same as lottie_loop="false"
+                    isClickable = false
+                    isFocusable = false
+                }
+            },
+            update = { lottie ->
+                val prev = prevPlaying.value
+                when {
+                    prev == null -> {
+                        // First bind — jump to the correct frame with no animation
+                        lottie.frame = if (isPlaying) lottie.maxFrame.toInt() else lottie.minFrame.toInt()
+                    }
+                    prev != isPlaying -> {
+                        // State transition — animate forward (→ pause icon) or backward (→ play icon)
+                        lottie.speed = if (isPlaying) 4f else -4f
+                        lottie.playAnimation()
+                    }
+                    // prev == isPlaying: unrelated recomposition, do nothing
+                }
+                prevPlaying.value = isPlaying
+            },
+            modifier = Modifier.fillMaxSize(0.45f),
+        )
+    }
+}
+
+/** Mutable box whose writes never schedule a recomposition. */
+private class NonStateRef<T>(var value: T)
 
 // ── Next track strip ─────────────────────────────────────────────────────────
 
