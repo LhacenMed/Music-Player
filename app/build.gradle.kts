@@ -5,6 +5,7 @@ import java.io.FileInputStream
 
 plugins {
     alias(libs.plugins.android)
+    alias(libs.plugins.kotlin.compose)     // ← Compose compiler plugin
     alias(libs.plugins.ksp)
     alias(libs.plugins.detekt)
 }
@@ -17,9 +18,9 @@ if (keystorePropertiesFile.exists()) {
 
 fun hasSigningVars(): Boolean {
     return providers.environmentVariable("SIGNING_KEY_ALIAS").orNull != null
-            && providers.environmentVariable("SIGNING_KEY_PASSWORD").orNull != null
-            && providers.environmentVariable("SIGNING_STORE_FILE").orNull != null
-            && providers.environmentVariable("SIGNING_STORE_PASSWORD").orNull != null
+        && providers.environmentVariable("SIGNING_KEY_PASSWORD").orNull != null
+        && providers.environmentVariable("SIGNING_STORE_FILE").orNull != null
+        && providers.environmentVariable("SIGNING_STORE_PASSWORD").orNull != null
 }
 
 base {
@@ -65,6 +66,7 @@ android {
     buildFeatures {
         viewBinding = true
         buildConfig = true
+        compose = true                     // ← enable Compose
     }
 
     buildTypes {
@@ -158,4 +160,19 @@ dependencies {
     implementation(libs.bundles.room)
     ksp(libs.androidx.room.compiler)
     detektPlugins(libs.compose.detekt)
+
+    // ── Compose ───────────────────────────────────────────────────────────────
+    implementation(libs.androidx.activity.compose)
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.graphics)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material.icons.core)
+    implementation(libs.androidx.compose.material.icons.extended)
+    debugImplementation(libs.androidx.compose.ui.tooling)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
+
+    // ── Glide Compose (cover art in TrackScreen) ──────────────────────────────
+    implementation(libs.glide.compose)
 }
