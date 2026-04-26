@@ -290,11 +290,20 @@ private fun SeekSection(
     durationSecs: Int,
     onSeek: (Int) -> Unit,
 ) {
-    // Slider has ~10.dp built-in horizontal padding on thumb edges; subtract to align track with HPad
+    // Holds the in-flight thumb position while dragging; null when idle.
+    var dragValue by remember { mutableStateOf<Float?>(null) }
+
+    val committedValue = if (durationSecs > 0) progressSecs.toFloat() / durationSecs else 0f
+    val displayValue = dragValue ?: committedValue
+
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = HPad)) {
         Slider(
-            value = if (durationSecs > 0) progressSecs.toFloat() / durationSecs else 0f,
-            onValueChange = { onSeek((it * durationSecs).toInt()) },
+            value = displayValue,
+            onValueChange = { dragValue = it },
+            onValueChangeFinished = {
+                dragValue?.let { onSeek((it * durationSecs).toInt()) }
+                dragValue = null
+            },
             colors = SliderDefaults.colors(
                 thumbColor = Color.White,
                 activeTrackColor = Color.White,
@@ -303,7 +312,7 @@ private fun SeekSection(
             modifier = Modifier.fillMaxWidth(),
         )
         Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp)) {
-            Text(text = progressSecs.formatDuration(), color = White70, fontSize = 12.sp)
+            Text(text = (displayValue * durationSecs).toInt().formatDuration(), color = White70, fontSize = 12.sp)
             Spacer(Modifier.weight(1f))
             Text(text = durationSecs.formatDuration(), color = White70, fontSize = 12.sp)
         }
