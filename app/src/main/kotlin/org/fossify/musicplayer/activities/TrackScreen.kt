@@ -1,11 +1,15 @@
 package org.fossify.musicplayer.activities
 
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Slider
@@ -30,6 +34,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.airbnb.lottie.LottieAnimationView
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
+import kotlinx.coroutines.flow.distinctUntilChanged
 import org.fossify.musicplayer.R
 
 private val White70 = Color.White.copy(alpha = 0.7f)
@@ -58,6 +63,7 @@ fun TrackScreen(
     onAddLyrics: () -> Unit,
     onNextTrackClick: () -> Unit,
     onSpeedClick: () -> Unit,
+    onSeekToQueueIndex: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -66,17 +72,25 @@ fun TrackScreen(
             .swipeDownToClose(onSwipeDown)
     ) {
         // ── Blurred background ──────────────────────────────────────────────
-        if (state.coverArt != null) {
-            GlideImage(
-                model = state.coverArt,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .blur(radiusX = 80.dp, radiusY = 80.dp),
-            )
-        } else {
-            Box(Modifier.fillMaxSize().background(Color(0x80000000)))
+        // Crossfade waits for state.coverArt to update (which only happens after the bitmap
+        // is fully loaded in TrackActivity) then fades smoothly to the new cover.
+        Crossfade(
+            targetState = state.coverArt,
+            animationSpec = tween(durationMillis = 600),
+            label = "bg_cover",
+        ) { bgModel ->
+            if (bgModel != null) {
+                GlideImage(
+                    model = bgModel,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .blur(radiusX = 80.dp, radiusY = 80.dp),
+                )
+            } else {
+                Box(Modifier.fillMaxSize().background(Color(0x80000000)))
+            }
         }
 
         // Dark scrim
@@ -107,20 +121,11 @@ fun TrackScreen(
         ) {
             TopBar(onBack = onBack, onSpeedClick = onSpeedClick)
 
-            // Album art — square, aligned to the universal horizontal padding
-            GlideImage(
-                model = state.coverArt,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .padding(horizontal = HPad)
-                    .padding(top = 8.dp)
-                    .fillMaxWidth()
-                    .aspectRatio(1f)
-                    .clip(RoundedCornerShape(16.dp)),
-            ) {
-                it.placeholder(R.drawable.ic_headset).error(R.drawable.ic_headset)
-            }
+            // Album art pager — swipeable through the full queue
+            CoverArtPager(
+                state = state,
+                onSeekToQueueIndex = onSeekToQueueIndex,
+            )
 
             Spacer(Modifier.height(10.dp))
 
@@ -199,6 +204,101 @@ private fun TopBar(
                 tint = White70,
                 modifier = Modifier.size(30.dp),
             )
+        }
+    }
+}
+
+// ── Cover art pager ───────────────────────────────────────────────────────────
+
+/**
+ * Horizontally swipeable pager of album art for every track in the queue.
+ *
+ * Layout: the pager fills the full screen width with no container padding.
+ * Each page applies [HPad] to its own image, so the rendered cover is a perfect
+ * square of size (screenWidth − 2×HPad). Adjacent covers live completely off-screen
+ * and slide in from beyond the device edge when swiping.
+ *
+ * Programmatic scrolls (driven by [TrackUiState.currentQueueIndex]) are guarded by
+ * [isProgrammaticScroll] so they do not re-fire [onSeekToQueueIndex], breaking the
+ * feedback loop: external track change → pager scroll → seek → track change → ...
+ *
+ * Track switching fires only on [androidx.compose.foundation.pager.PagerState.settledPage] —
+ * the song changes only after the user releases and the page fully comes to rest.
+ * Swiping and returning to the same page never fires a seek.
+ */
+@OptIn(ExperimentalGlideComposeApi::class)
+@Composable
+private fun CoverArtPager(
+    state: TrackUiState,
+    onSeekToQueueIndex: (Int) -> Unit,
+) {
+    val pageCount = state.queue.size.coerceAtLeast(1)
+    val pagerState = rememberPagerState(
+        initialPage = state.currentQueueIndex,
+        pageCount = { pageCount },
+    )
+
+    // Non-state flag: true while we are programmatically scrolling the pager,
+    // so the snapshotFlow observer below knows not to call onSeekToQueueIndex.
+    val isProgrammaticScroll = remember { NonStateRef(false) }
+
+    // External track change → animate pager to new position
+    LaunchedEffect(state.currentQueueIndex) {
+        if (pagerState.currentPage != state.currentQueueIndex) {
+            isProgrammaticScroll.value = true
+            pagerState.animateScrollToPage(state.currentQueueIndex)
+            isProgrammaticScroll.value = false
+        }
+    }
+
+    // User swipe settle → seek to that queue position.
+    // settledPage only updates after the drag is released and the page fully animates into place,
+    // so the track never changes mid-swipe.
+    // page == state.currentQueueIndex means user swiped and returned — no seek fired.
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.settledPage }
+            .distinctUntilChanged()
+            .collect { page ->
+                if (!isProgrammaticScroll.value && page != state.currentQueueIndex) {
+                    onSeekToQueueIndex(page)
+                }
+            }
+    }
+
+    // BoxWithConstraints lets us derive the exact square size from the available width,
+    // so the pager gets a fixed height = screenWidth − 2×HPad and each page fills it perfectly.
+    BoxWithConstraints(
+        modifier = Modifier
+            .padding(top = 8.dp)
+            .fillMaxWidth(),
+    ) {
+        val imageSize = maxWidth - HPad * 2
+
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(imageSize),
+        ) { page ->
+            val model = if (state.queue.isNotEmpty()) {
+                state.queue.getOrNull(page)?.coverArt ?: state.queueCovers[page]
+            } else {
+                state.coverArt
+            }
+
+            // padding(horizontal = HPad) insets the image within the full-width page,
+            // then fillMaxSize fills the padded area = imageSize × imageSize (perfect square).
+            GlideImage(
+                model = model,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .padding(horizontal = HPad)
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(16.dp)),
+            ) {
+                it.placeholder(R.drawable.ic_headset).error(R.drawable.ic_headset)
+            }
         }
     }
 }

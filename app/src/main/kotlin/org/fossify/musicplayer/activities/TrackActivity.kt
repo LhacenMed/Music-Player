@@ -1,42 +1,26 @@
 package org.fossify.musicplayer.activities
 
 import android.content.Intent
-import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.*
-import androidx.core.graphics.scale
 import androidx.core.os.postDelayed
 import androidx.media3.common.MediaItem
-import com.bumptech.glide.Glide
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import org.fossify.commons.extensions.realScreenSize
+import androidx.media3.session.MediaController
+import kotlinx.coroutines.*
 import org.fossify.commons.extensions.toast
 import org.fossify.musicplayer.R
-import org.fossify.musicplayer.extensions.config
-import org.fossify.musicplayer.extensions.getPlaybackSetting
-import org.fossify.musicplayer.extensions.getTrackCoverArt
-import org.fossify.musicplayer.extensions.getTrackFromUri
-import org.fossify.musicplayer.extensions.isReallyPlaying
-import org.fossify.musicplayer.extensions.maybeRestartOnPrevious
-import org.fossify.musicplayer.extensions.nextMediaItem
-import org.fossify.musicplayer.extensions.sendCommand
-import org.fossify.musicplayer.extensions.setRepeatMode
-import org.fossify.musicplayer.extensions.shuffledMediaItemsIndices
-import org.fossify.musicplayer.extensions.toTrack
+import org.fossify.musicplayer.extensions.*
 import org.fossify.musicplayer.fragments.PlaybackSpeedFragment
 import org.fossify.musicplayer.helpers.PlaybackSetting
 import org.fossify.musicplayer.interfaces.PlaybackSpeedListener
 import org.fossify.musicplayer.models.Track
 import org.fossify.musicplayer.playback.CustomCommands
 import org.fossify.musicplayer.playback.PlaybackService
+import kotlin.coroutines.resume
 import kotlin.time.Duration.Companion.milliseconds
 
 class TrackActivity : SimpleControllerActivity(), PlaybackSpeedListener {
@@ -48,7 +32,10 @@ class TrackActivity : SimpleControllerActivity(), PlaybackSpeedListener {
     private var isThirdPartyIntent = false
 
     private val handler = Handler(Looper.getMainLooper())
+    private val activityScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+
     private var seekJob: Job? = null
+    private var prefetchJob: Job? = null
     private var seekCount = 0
 
     // Single source of truth for the entire screen
@@ -76,6 +63,7 @@ class TrackActivity : SimpleControllerActivity(), PlaybackSpeedListener {
                     startActivity(Intent(applicationContext, QueueActivity::class.java))
                 },
                 onSpeedClick = ::showPlaybackSpeedPicker,
+                onSeekToQueueIndex = ::seekToQueueIndex,
             )
         }
 
@@ -108,6 +96,7 @@ class TrackActivity : SimpleControllerActivity(), PlaybackSpeedListener {
     override fun onDestroy() {
         super.onDestroy()
         cancelProgressUpdate()
+        activityScope.cancel()
         if (isThirdPartyIntent && !isChangingConfigurations) {
             withPlayer {
                 if (!isReallyPlaying) sendCommand(CustomCommands.CLOSE_PLAYER)
@@ -121,6 +110,7 @@ class TrackActivity : SimpleControllerActivity(), PlaybackSpeedListener {
         withPlayer {
             applyTrackInfo(currentMediaItem)
             applyNextTrackInfo(nextMediaItem)
+            launchPrefetchQueue(this)
         }
     }
 
@@ -159,6 +149,55 @@ class TrackActivity : SimpleControllerActivity(), PlaybackSpeedListener {
             }
         }
     }
+
+    // ── Queue pre-fetching ────────────────────────────────────────────────────
+
+    /**
+     * Resolves the full ordered queue and current index from [controller], then kicks off
+     * concurrent cover-art pre-fetching. Must be called with a live [MediaController] reference
+     * (i.e. inside a [withPlayer] block) so player state is consistent.
+     */
+    private fun launchPrefetchQueue(controller: MediaController) {
+        val resolved = resolveQueue(controller) ?: return
+        val (tracks, currentIdx) = resolved
+
+        prefetchJob?.cancel()
+        prefetchJob = activityScope.launch {
+            // Immediately publish lightweight queue items so the pager has metadata
+            val existingCovers = uiState.queueCovers
+            val queueItems = tracks.mapIndexed { i, track ->
+                QueueTrack(
+                    index = i,
+                    title = track.title,
+                    artist = track.artist,
+                    coverArt = existingCovers[i],
+                )
+            }
+            uiState = uiState.copy(queue = queueItems, currentQueueIndex = currentIdx)
+
+            // Fetch covers concurrently, skipping indices already resolved
+            val deferred: List<Deferred<Pair<Int, Any?>>> = tracks.mapIndexed { i, track ->
+                async(Dispatchers.IO) {
+                    val art: Any? = existingCovers[i] ?: fetchCoverArt(track)
+                    i to art
+                }
+            }
+
+            val newCovers: Map<Int, Any?> = existingCovers.toMutableMap().apply {
+                putAll(deferred.awaitAll())
+            }
+
+            // Rebuild queue with resolved cover art
+            val updatedQueue = queueItems.map { it.copy(coverArt = newCovers[it.index]) }
+            uiState = uiState.copy(queue = updatedQueue, queueCovers = newCovers)
+        }
+    }
+
+    /** Suspend wrapper around the callback-based [getTrackCoverArt]. */
+    private suspend fun fetchCoverArt(track: Track): Any? =
+        suspendCancellableCoroutine { cont ->
+            getTrackCoverArt(track) { art -> cont.resume(art) }
+        }
 
     // ── Player state sync ─────────────────────────────────────────────────────
 
@@ -204,14 +243,23 @@ class TrackActivity : SimpleControllerActivity(), PlaybackSpeedListener {
 
     override fun onShuffleModeEnabledChanged(shuffleModeEnabled: Boolean) {
         uiState = uiState.copy(isShuffleOn = shuffleModeEnabled)
+        // Re-fetch queue in new shuffle order — covers are re-used from existing map
+        withPlayer { launchPrefetchQueue(this) }
     }
 
     override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
         super.onMediaItemTransition(mediaItem, reason)
-        if (mediaItem == null) finish()
-        else {
+        if (mediaItem == null) {
+            finish()
+        } else {
             uiState = uiState.copy(progressSecs = 0)
-            refreshTrackInfo()
+            applyTrackInfo(mediaItem)
+            // Update next-track info and current queue index inside withPlayer where nextMediaItem is accessible
+            withPlayer {
+                applyNextTrackInfo(nextMediaItem)
+                val newIdx = currentQueueIndexFor(this)
+                uiState = uiState.copy(currentQueueIndex = newIdx)
+            }
         }
     }
 
@@ -230,12 +278,22 @@ class TrackActivity : SimpleControllerActivity(), PlaybackSpeedListener {
         withPlayer {
             shuffleModeEnabled = enabled
             applyNextTrackInfo(nextMediaItem)
+            // Queue order changed — re-fetch with existing cover cache
+            launchPrefetchQueue(this)
         }
     }
 
     private fun seekTo(seconds: Int) {
         uiState = uiState.copy(progressSecs = seconds)
         withPlayer { seekTo(seconds * 1000L) }
+    }
+
+    private fun seekToQueueIndex(queueIndex: Int) {
+        withPlayer {
+            val playerIndex = queueIndexToPlayerIndex(this, queueIndex) ?: return@withPlayer
+            play()
+            seekTo(playerIndex, 0)
+        }
     }
 
     private fun seekToNext() {
@@ -253,8 +311,8 @@ class TrackActivity : SimpleControllerActivity(), PlaybackSpeedListener {
 
     private fun seekWithDelay() {
         seekJob?.cancel()
-        seekJob = kotlinx.coroutines.GlobalScope.launch {
-            kotlinx.coroutines.delay(SEEK_COALESCE_MS)
+        seekJob = activityScope.launch {
+            delay(SEEK_COALESCE_MS)
             if (seekCount != 0) seekByCount(seekCount)
         }
     }
@@ -306,6 +364,57 @@ class TrackActivity : SimpleControllerActivity(), PlaybackSpeedListener {
     }
 
     private fun rotateIndex(total: Int, index: Int): Int = (index % total + total) % total
+}
+
+// ── Queue helpers (plain functions — no receiver ambiguity) ───────────────────
+
+/**
+ * Returns the ordered list of [Track]s (respecting shuffle) and the position of the
+ * currently playing track within that ordered list. Returns null if the player is empty.
+ */
+private fun resolveQueue(controller: MediaController): Pair<List<Track>, Int>? {
+    if (controller.mediaItemCount == 0) return null
+
+    val orderedIndices: List<Int> = if (controller.shuffleModeEnabled) {
+        controller.shuffledMediaItemsIndices.takeIf { it.isNotEmpty() }
+            ?: (0 until controller.mediaItemCount).toList()
+    } else {
+        (0 until controller.mediaItemCount).toList()
+    }
+
+    val tracks: List<Track> = orderedIndices.mapNotNull { playerIdx ->
+        controller.getMediaItemAt(playerIdx).toTrack()
+    }
+
+    val currentQueueIdx = orderedIndices.indexOf(controller.currentMediaItemIndex).coerceAtLeast(0)
+    return tracks to currentQueueIdx
+}
+
+/**
+ * Returns the position of the currently playing track within the ordered queue.
+ * Mirrors the index logic in [resolveQueue] without rebuilding the full track list.
+ */
+private fun currentQueueIndexFor(controller: MediaController): Int {
+    val orderedIndices: List<Int> = if (controller.shuffleModeEnabled) {
+        controller.shuffledMediaItemsIndices.takeIf { it.isNotEmpty() }
+            ?: (0 until controller.mediaItemCount).toList()
+    } else {
+        (0 until controller.mediaItemCount).toList()
+    }
+    return orderedIndices.indexOf(controller.currentMediaItemIndex).coerceAtLeast(0)
+}
+
+/**
+ * Maps a queue-order index back to the raw player media-item index for [MediaController.seekTo].
+ */
+private fun queueIndexToPlayerIndex(controller: MediaController, queueIndex: Int): Int? {
+    val orderedIndices: List<Int> = if (controller.shuffleModeEnabled) {
+        controller.shuffledMediaItemsIndices.takeIf { it.isNotEmpty() }
+            ?: (0 until controller.mediaItemCount).toList()
+    } else {
+        (0 until controller.mediaItemCount).toList()
+    }
+    return orderedIndices.getOrNull(queueIndex)
 }
 
 // ── Extension: PlaybackSetting → PlaybackSettingUi ────────────────────────────

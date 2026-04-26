@@ -1,6 +1,5 @@
 package org.fossify.musicplayer.activities
 
-import android.graphics.Bitmap
 import androidx.compose.runtime.Immutable
 
 @Immutable
@@ -15,11 +14,22 @@ data class TrackUiState(
     val isFavorite: Boolean = false,
     val playbackSetting: PlaybackSettingUi = PlaybackSettingUi.REPEAT_OFF,
     val nextTrack: NextTrackUi? = null,
+    val queue: List<QueueTrack> = emptyList(),
+    val queueCovers: Map<Int, Any?> = emptyMap(),
+    val currentQueueIndex: Int = 0,
 )
 
 @Immutable
 data class NextTrackUi(
     val label: String,
+    val coverArt: Any? = null,
+)
+
+@Immutable
+data class QueueTrack(
+    val index: Int,
+    val title: String,
+    val artist: String,
     val coverArt: Any? = null,
 )
 
