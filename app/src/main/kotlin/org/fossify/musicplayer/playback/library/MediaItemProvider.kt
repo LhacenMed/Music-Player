@@ -168,6 +168,18 @@ internal class MediaItemProvider(private val context: Context) {
         }
     }
 
+    /**
+     * Forget the stored queue, so nothing is left for a later launch to restore.
+     *
+     * Runs on the same executor as [saveRecentItemsWithStartPosition] so that a save already in
+     * flight cannot land afterwards and bring the queue back.
+     */
+    fun clearRecentItems() {
+        executor.execute {
+            audioHelper.clearQueue()
+        }
+    }
+
     fun reload() {
         state = STATE_INITIALIZING
         executor.execute {

@@ -38,7 +38,6 @@ import org.fossify.musicplayer.extensions.toTracks
 import org.fossify.musicplayer.helpers.EXTRA_SHUFFLE_INDICES
 import org.fossify.musicplayer.playback.CustomCommands
 import org.fossify.musicplayer.playback.PlaybackService
-import org.fossify.musicplayer.playback.PlaybackService.Companion.updatePlaybackInfo
 import org.fossify.musicplayer.views.CurrentTrackBar
 import org.fossify.musicplayer.views.PlaybackBottomSheetBehavior
 import org.fossify.musicplayer.views.PlaybackPanel
@@ -113,6 +112,14 @@ abstract class SimpleMusicActivity : SimpleControllerActivity(), Player.Listener
 
     /** Wire up the playback bar, panel and queue sheet that `view_playback_sheet` brought in. */
     protected fun setupPlaybackSheet() {
+        // A bottom sheet rests collapsed, which is already on screen, so with nothing playing the
+        // bar would be laid out empty for a frame before anything could hide it. Seat it where the
+        // player actually is. This runs before the first layout, making it a resting position
+        // rather than a slide, and it leaves the sheet in place when a track is already going.
+        if (PlaybackService.currentMediaItem == null) {
+            playbackSheetBehavior.state = BackportBottomSheetBehavior.STATE_HIDDEN
+        }
+
         playbackSheetBehavior.makeBackgroundDrawable(this)
         normalCornerSize = playbackSheetBehavior.sheetBackgroundDrawable.topLeftCornerResolvedSize
         elevationNormal = resources.getDimension(MR.dimen.m3_sys_elevation_level1)
@@ -167,16 +174,11 @@ abstract class SimpleMusicActivity : SimpleControllerActivity(), Player.Listener
     }
 
     /**
-     * End playback and let go of the queue. Dropping the media items is what keeps the bar away:
-     * everything that brings it back keys off the player still holding a track.
+     * Close the player for good. The service empties the player and forgets the stored queue
+     * together, so the bar goes away here and stays away on every later launch.
      */
     private fun stopPlayback(bottomSheet: View) {
-        withPlayer {
-            clearMediaItems()
-            updatePlaybackInfo(this)
-            sendCommand(CustomCommands.CLOSE_PLAYER)
-        }
-
+        withPlayer { sendCommand(CustomCommands.CLOSE_PLAYER) }
         bottomSheet.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
         toast(R.string.playback_stopped)
     }

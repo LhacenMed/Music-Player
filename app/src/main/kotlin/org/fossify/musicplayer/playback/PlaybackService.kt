@@ -47,12 +47,18 @@ class PlaybackService : MediaLibraryService(), MediaSessionService.Listener {
         SimpleEqualizer.release()
     }
 
+    /**
+     * End playback and forget what was playing. Dropping the media items empties the player, and
+     * clearing the stored queue is what keeps it empty: everything that would otherwise bring the
+     * player back on a later launch restores from that queue.
+     */
     fun stopService() {
         withPlayer {
             pause()
-            stop()
+            clearMediaItems()
         }
 
+        mediaItemProvider.clearRecentItems()
         stopSelf()
     }
 

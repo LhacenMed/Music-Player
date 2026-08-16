@@ -257,15 +257,13 @@ class AudioHelper(private val context: Context) {
 
     /**
      * Executes [callback] with current track as quickly as possible and then proceeds to load the complete queue with all tracks.
+     *
+     * An empty queue means nothing is playing, so nothing is handed back. That is the state
+     * [clearQueue] leaves behind, and it is what keeps a closed player closed across launches.
      */
     fun getQueuedTracksLazily(callback: (tracks: List<Track>, startIndex: Int, startPositionMs: Long) -> Unit) {
         ensureBackgroundThread {
-            var queueItems = context.queueDAO.getAll()
-            if (queueItems.isEmpty()) {
-                initQueue()
-                queueItems = context.queueDAO.getAll()
-            }
-
+            val queueItems = context.queueDAO.getAll()
             val currentItem = context.queueDAO.getCurrent()
             if (currentItem == null) {
                 callback(emptyList(), 0, 0)
@@ -289,14 +287,9 @@ class AudioHelper(private val context: Context) {
         }
     }
 
-    fun initQueue(): ArrayList<Track> {
-        val tracks = getAllTracks()
-        val queueItems = tracks.mapIndexed { index, mediaItem ->
-            QueueItem(trackId = mediaItem.mediaStoreId, trackOrder = index, isCurrent = index == 0, lastPosition = 0)
-        }
-
-        resetQueue(queueItems)
-        return tracks
+    /** Forget the queue entirely, leaving nothing for a later launch to restore. */
+    fun clearQueue() {
+        context.queueDAO.deleteAllItems()
     }
 
     fun resetQueue(items: List<QueueItem>, currentTrackId: Long? = null, startPosition: Long? = null) {
