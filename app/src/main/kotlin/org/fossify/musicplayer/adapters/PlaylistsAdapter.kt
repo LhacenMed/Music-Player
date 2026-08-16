@@ -6,9 +6,9 @@ import android.view.ViewGroup
 import com.qtalk.recyclerviewfastscroller.RecyclerViewFastScroller
 import org.fossify.commons.activities.BaseSimpleActivity
 import org.fossify.commons.extensions.highlightTextPart
-import org.fossify.commons.extensions.setupViewBackground
 import org.fossify.commons.helpers.ensureBackgroundThread
 import org.fossify.commons.views.MyRecyclerView
+import org.fossify.musicplayer.extensions.setupActivatableBackground
 import org.fossify.musicplayer.R
 import org.fossify.musicplayer.databinding.ItemPlaylistBinding
 import org.fossify.musicplayer.dialogs.NewPlaylistDialog
@@ -96,8 +96,8 @@ class PlaylistsAdapter(
 
     private fun setupView(view: View, playlist: Playlist) {
         ItemPlaylistBinding.bind(view).apply {
-            root.setupViewBackground(context)
-            playlistFrame.isSelected = selectedKeys.contains(playlist.hashCode())
+            root.setupActivatableBackground(context)
+            playlistFrame.isActivated = selectedKeys.contains(playlist.hashCode())
             playlistTitle.text = if (textToHighlight.isEmpty()) playlist.title else playlist.title.highlightTextPart(textToHighlight, properPrimaryColor)
             playlistTitle.setTextColor(textColor)
 

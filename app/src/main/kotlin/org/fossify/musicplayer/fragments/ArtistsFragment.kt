@@ -31,6 +31,8 @@ class ArtistsFragment(context: Context, attributeSet: AttributeSet) : MyViewPage
     private var artists = ArrayList<Artist>()
     private val binding by viewBinding(FragmentArtistsBinding::bind)
 
+    override val list get() = binding.artistsList
+
     override fun setupFragment(activity: BaseSimpleActivity) {
         ensureBackgroundThread {
             val cachedArtists = activity.audioHelper.getAllArtists()

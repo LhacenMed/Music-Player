@@ -58,6 +58,7 @@ const val SLEEP_IN_TS = "sleep_in_ts"
 const val EQUALIZER_PRESET = "EQUALIZER_PRESET"
 const val EQUALIZER_BANDS = "EQUALIZER_BANDS"
 const val PLAYBACK_SPEED = "PLAYBACK_SPEED"
+const val PLAYBACK_SOURCE = "PLAYBACK_SOURCE"
 const val PLAYBACK_SPEED_PROGRESS = "PLAYBACK_SPEED_PROGRESS"
 const val SHOW_TABS = "show_tabs"
 const val WAS_ALL_TRACKS_PLAYLIST_CREATED = "was_all_tracks_playlist_created"
@@ -85,15 +86,15 @@ const val ACTIVITY_PLAYLIST_FOLDER = 64
 const val FLAG_MANUAL_CACHE = 1
 const val FLAG_IS_CURRENT = 2
 
-const val ALL_TABS_MASK = TAB_PLAYLISTS or TAB_FOLDERS or TAB_ARTISTS or TAB_ALBUMS or TAB_TRACKS
+const val ALL_TABS_MASK = TAB_TRACKS or TAB_FOLDERS or TAB_ARTISTS or TAB_ALBUMS
 
+/** Tracks leads: it is the tab the app opens on and the one the back gesture returns to. */
 val tabsList: ArrayList<Int>
     get() = arrayListOf(
-        TAB_PLAYLISTS,
+        TAB_TRACKS,
         TAB_FOLDERS,
         TAB_ARTISTS,
         TAB_ALBUMS,
-        TAB_TRACKS,
         TAB_GENRES
     )
 

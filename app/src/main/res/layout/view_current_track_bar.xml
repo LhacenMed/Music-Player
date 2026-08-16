@@ -5,53 +5,111 @@
     android:id="@+id/current_track_bar"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_alignParentBottom="true"
     android:visibility="gone"
     tools:visibility="visible">
 
     <ImageView
-        android:id="@+id/current_track_divider"
-        android:layout_width="match_parent"
-        android:layout_height="1px"
-        android:background="@color/divider_grey"
-        android:importantForAccessibility="no" />
-
-    <ImageView
         android:id="@+id/current_track_image"
-        android:layout_width="@dimen/song_image_size"
-        android:layout_height="@dimen/song_image_size"
-        android:layout_marginStart="@dimen/normal_margin"
-        android:layout_marginTop="@dimen/normal_margin"
-        android:layout_marginEnd="@dimen/normal_margin"
-        android:layout_marginBottom="@dimen/normal_margin" />
+        android:layout_width="@dimen/size_touchable_small"
+        android:layout_height="@dimen/size_touchable_small"
+        android:layout_margin="@dimen/spacing_small"
+        android:importantForAccessibility="no"
+        app:layout_constraintBottom_toTopOf="@+id/current_track_progress_container"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <org.fossify.musicplayer.views.MarqueeTextView
-        android:id="@+id/current_track_label"
+    <TextView
+        android:id="@+id/current_track_title"
+        style="@style/Widget.TrackText.Primary.Compact"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_small"
+        android:layout_marginEnd="@dimen/spacing_tiny"
+        app:layout_constraintBottom_toTopOf="@+id/current_track_artist"
+        app:layout_constraintEnd_toStartOf="@+id/current_track_controls_wrapper"
+        app:layout_constraintStart_toEndOf="@+id/current_track_image"
+        app:layout_constraintTop_toTopOf="@+id/current_track_image"
+        app:layout_constraintVertical_chainStyle="packed"
+        tools:text="Track Name" />
+
+    <TextView
+        android:id="@+id/current_track_artist"
+        style="@style/Widget.TrackText.Secondary.Compact"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_small"
+        android:layout_marginEnd="@dimen/spacing_tiny"
+        android:ellipsize="marquee"
+        android:marqueeRepeatLimit="marquee_forever"
+        app:layout_constraintBottom_toBottomOf="@+id/current_track_image"
+        app:layout_constraintEnd_toStartOf="@+id/current_track_controls_wrapper"
+        app:layout_constraintStart_toEndOf="@+id/current_track_image"
+        app:layout_constraintTop_toBottomOf="@+id/current_track_title"
+        tools:text="Artist Name" />
+
+    <org.fossify.musicplayer.views.ForcedLTRFrameLayout
+        android:id="@+id/current_track_controls_wrapper"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/spacing_tiny"
+        app:layout_constraintBottom_toTopOf="@+id/current_track_progress_container"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.material.button.MaterialButtonGroup
+            android:id="@+id/current_track_controls_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:spacing="0dp">
+
+            <org.fossify.musicplayer.views.RippleFixMaterialButton
+                android:id="@+id/current_track_play_pause"
+                style="@style/Widget.PlaybackButton.PlayPause"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checkable="true"
+                android:contentDescription="@string/playpause"
+                app:icon="@drawable/sel_playing_state_24"
+                app:materialSizeOverlay="@style/SizeOverlay.Material3Expressive.Button.IconButton.Small"
+                tools:icon="@drawable/ic_play_24" />
+
+            <org.fossify.musicplayer.views.WidthFixMaterialButton
+                android:id="@+id/current_track_next"
+                style="@style/Widget.Material3Expressive.Button.IconButton.Outlined"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checkable="true"
+                android:contentDescription="@string/next"
+                app:icon="@drawable/ic_skip_next_24"
+                app:iconTint="@color/sel_checkable_icon"
+                app:materialSizeOverlay="@style/SizeOverlay.Material3Expressive.Button.IconButton.Small"
+                app:strokeColor="@color/sel_checkable_outline"
+                app:toggleCheckedStateOnClick="false" />
+
+        </com.google.android.material.button.MaterialButtonGroup>
+
+    </org.fossify.musicplayer.views.ForcedLTRFrameLayout>
+
+    <org.fossify.musicplayer.views.ForcedLTRFrameLayout
+        android:id="@+id/current_track_progress_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/current_track_image"
-        android:layout_alignBottom="@+id/current_track_image"
-        android:layout_toStartOf="@+id/current_track_play_pause"
-        android:layout_toEndOf="@+id/current_track_image"
-        android:gravity="center_vertical"
-        android:paddingEnd="@dimen/activity_margin"
-        android:textSize="@dimen/bigger_text_size"
-        tools:text="My Track" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
-    <com.airbnb.lottie.LottieAnimationView
-        android:id="@+id/current_track_play_pause"
-        android:layout_width="@dimen/smaller_icon_size"
-        android:layout_height="match_parent"
-        android:layout_alignTop="@+id/current_track_image"
-        android:layout_alignBottom="@+id/current_track_image"
-        android:layout_alignParentEnd="true"
-        android:layout_marginEnd="@dimen/normal_margin"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:paddingStart="@dimen/smaller_margin"
-        android:paddingEnd="@dimen/smaller_margin"
-        android:scaleType="fitCenter"
-        app:lottie_autoPlay="false"
-        app:lottie_loop="false"
-        app:lottie_rawRes="@raw/playpause" />
+        <com.google.android.material.progressindicator.LinearProgressIndicator
+            android:id="@+id/current_track_progress"
+            style="@style/Widget.CurrentTrackProgress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="@dimen/spacing_small"
+            android:layout_marginEnd="@dimen/spacing_small"
+            tools:progress="70" />
+
+    </org.fossify.musicplayer.views.ForcedLTRFrameLayout>
 
 </org.fossify.musicplayer.views.CurrentTrackBar>

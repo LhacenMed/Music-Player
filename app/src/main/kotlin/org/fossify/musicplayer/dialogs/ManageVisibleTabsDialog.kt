@@ -15,11 +15,10 @@ class ManageVisibleTabsDialog(val activity: BaseSimpleActivity, val callback: (r
 
     init {
         tabs.apply {
-            put(TAB_PLAYLISTS, binding.manageVisibleTabsPlaylists)
+            put(TAB_TRACKS, binding.manageVisibleTabsTracks)
             put(TAB_FOLDERS, binding.manageVisibleTabsFolders)
             put(TAB_ARTISTS, binding.manageVisibleTabsArtists)
             put(TAB_ALBUMS, binding.manageVisibleTabsAlbums)
-            put(TAB_TRACKS, binding.manageVisibleTabsTracks)
             put(TAB_GENRES, binding.manageVisibleTabsGenres)
         }
 

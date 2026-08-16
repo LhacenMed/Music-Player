@@ -1,7 +1,6 @@
 package org.fossify.musicplayer.activities
 
 import android.content.ContentUris
-import android.content.Intent
 import android.os.Bundle
 import android.provider.MediaStore
 import androidx.core.os.bundleOf
@@ -10,6 +9,7 @@ import androidx.media3.session.MediaController
 import org.fossify.commons.extensions.toast
 import org.fossify.commons.helpers.ensureBackgroundThread
 import org.fossify.commons.helpers.isRPlus
+import org.fossify.musicplayer.R
 import org.fossify.musicplayer.extensions.*
 import org.fossify.musicplayer.helpers.EXTRA_NEXT_MEDIA_ID
 import org.fossify.musicplayer.helpers.SimpleMediaController
@@ -50,14 +50,23 @@ abstract class SimpleControllerActivity : SimpleActivity(), Player.Listener {
 
     open fun onPlayerPrepared(success: Boolean) {}
 
+    /** Reveal the full player for the tracks that were just queued. */
+    open fun showPlayer() {}
+
     fun withPlayer(callback: MediaController.() -> Unit) = controller.withController(callback)
 
-    fun prepareAndPlay(tracks: List<Track>, startIndex: Int = 0, startPositionMs: Long = 0, startActivity: Boolean = true) {
+    fun prepareAndPlay(
+        tracks: List<Track>,
+        startIndex: Int = 0,
+        startPositionMs: Long = 0,
+        startActivity: Boolean = true,
+        source: String? = null
+    ) {
+        // Null means the queue was not started from a named place, which reads as the whole library.
+        config.playbackSource = source ?: getString(R.string.all_tracks)
         withPlayer {
             if (startActivity) {
-                startActivity(
-                    Intent(this@SimpleControllerActivity, TrackActivity::class.java)
-                )
+                showPlayer()
             }
 
             prepareUsingTracks(tracks = tracks, startIndex = startIndex, startPositionMs = startPositionMs, play = true) { success ->

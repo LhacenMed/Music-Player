@@ -10,6 +10,7 @@ import org.fossify.commons.helpers.NavigationIcon
 import org.fossify.commons.helpers.ensureBackgroundThread
 import org.fossify.musicplayer.R
 import org.fossify.musicplayer.adapters.AlbumsTracksAdapter
+import org.fossify.musicplayer.adapters.BaseMusicAdapter
 import org.fossify.musicplayer.databinding.ActivityAlbumsBinding
 import org.fossify.musicplayer.extensions.audioHelper
 import org.fossify.musicplayer.helpers.ALBUM
@@ -25,7 +26,9 @@ class AlbumsActivity : SimpleMusicActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-        setupEdgeToEdge(padBottomSystem = listOf(binding.albumsList, binding.currentTrackBar.root))
+        // The list pads itself from the insets the playback sheet hands down, which already carry
+        // the navigation bar, so nothing here may pad it a second time.
+        setupEdgeToEdge()
         setupMaterialScrollListener(binding.albumsList, binding.albumsAppbar)
 
         binding.albumsFastscroller.updateColors(getProperPrimaryColor())
@@ -81,11 +84,15 @@ class AlbumsActivity : SimpleMusicActivity() {
             }
         }
 
-        setupCurrentTrackBar(binding.currentTrackBar.root)
+        setupPlaybackSheet()
     }
 
     override fun onResume() {
         super.onResume()
         setupTopAppBar(binding.albumsAppbar, NavigationIcon.Arrow)
     }
+    override fun onPlayingTrackChanged(trackId: Long, isPlaying: Boolean) {
+        (binding.albumsList.adapter as? BaseMusicAdapter<*>)?.setPlayingTrack(trackId, isPlaying)
+    }
+
 }

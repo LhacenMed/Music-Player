@@ -14,12 +14,12 @@
         android:paddingEnd="@dimen/activity_margin">
 
         <org.fossify.commons.views.MyAppCompatCheckbox
-            android:id="@+id/manage_visible_tabs_playlists"
+            android:id="@+id/manage_visible_tabs_tracks"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingTop="@dimen/activity_margin"
             android:paddingBottom="@dimen/activity_margin"
-            android:text="@string/playlists" />
+            android:text="@string/tracks" />
 
         <org.fossify.commons.views.MyAppCompatCheckbox
             android:id="@+id/manage_visible_tabs_folders"
@@ -44,14 +44,6 @@
             android:paddingTop="@dimen/activity_margin"
             android:paddingBottom="@dimen/activity_margin"
             android:text="@string/albums" />
-
-        <org.fossify.commons.views.MyAppCompatCheckbox
-            android:id="@+id/manage_visible_tabs_tracks"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingTop="@dimen/activity_margin"
-            android:paddingBottom="@dimen/activity_margin"
-            android:text="@string/tracks" />
 
         <org.fossify.commons.views.MyAppCompatCheckbox
             android:id="@+id/manage_visible_tabs_genres"

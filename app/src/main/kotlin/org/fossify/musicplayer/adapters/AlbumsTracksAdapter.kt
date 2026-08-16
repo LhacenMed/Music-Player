@@ -8,9 +8,9 @@ import org.fossify.commons.dialogs.ConfirmationDialog
 import org.fossify.commons.extensions.beGone
 import org.fossify.commons.extensions.beVisible
 import org.fossify.commons.extensions.getFormattedDuration
-import org.fossify.commons.extensions.setupViewBackground
 import org.fossify.commons.helpers.ensureBackgroundThread
 import org.fossify.commons.views.MyRecyclerView
+import org.fossify.musicplayer.extensions.setupActivatableBackground
 import org.fossify.musicplayer.R
 import org.fossify.musicplayer.activities.SimpleActivity
 import org.fossify.musicplayer.databinding.ItemAlbumBinding
@@ -59,6 +59,15 @@ class AlbumsTracksAdapter(
             }
         }
         bindViewHolder(holder)
+    }
+
+    override fun onBindViewHolder(holder: ViewHolder, position: Int, payloads: List<Any>) {
+        val track = items.getOrNull(position) as? Track
+        if (track != null && payloads.contains(PAYLOAD_PLAYING_INDICATOR)) {
+            updatePlayingIndicator(holder.itemView, track)
+        } else {
+            super.onBindViewHolder(holder, position, payloads)
+        }
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -135,8 +144,8 @@ class AlbumsTracksAdapter(
 
     private fun setupAlbum(view: View, album: Album) {
         ItemAlbumBinding.bind(view).apply {
-            root.setupViewBackground(context)
-            albumFrame.isSelected = selectedKeys.contains(album.hashCode())
+            root.setupActivatableBackground(context)
+            albumFrame.isActivated = selectedKeys.contains(album.hashCode())
             albumTitle.text = album.title
             albumTitle.setTextColor(textColor)
             albumTracks.text = resources.getQuantityString(R.plurals.tracks_plural, album.trackCnt, album.trackCnt)
@@ -150,21 +159,32 @@ class AlbumsTracksAdapter(
 
     private fun setupTrack(view: View, track: Track) {
         ItemTrackBinding.bind(view).apply {
-            root.setupViewBackground(context)
-            trackFrame.isSelected = selectedKeys.contains(track.hashCode())
+            root.setupActivatableBackground(context)
+            trackFrame.isActivated = selectedKeys.contains(track.hashCode())
             trackTitle.text = track.title
             trackTitle.setTextColor(textColor)
             trackInfo.text = track.album
             trackInfo.setTextColor(textColor)
 
-            trackId.beGone()
             trackImage.beVisible()
             trackDuration.text = track.duration.getFormattedDuration()
             trackDuration.setTextColor(textColor)
 
             context.getTrackCoverArt(track) { coverArt ->
-                loadImage(trackImage, coverArt, placeholder)
+                trackImage.bind(coverArt)
             }
+
+            updatePlayingIndicator(view, track)
+        }
+    }
+
+    /** @see TracksAdapter.updatePlayingIndicator */
+    private fun updatePlayingIndicator(view: View, track: Track) {
+        ItemTrackBinding.bind(view).apply {
+            val isPlayingTrack = isPlayingTrack(track)
+            trackFrame.isSelected = isPlayingTrack
+            trackImage.setPlaying(isPlaybackOngoing)
+            trackTitle.setTextColor(if (isPlayingTrack) properPrimaryColor else textColor)
         }
     }
 

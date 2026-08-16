@@ -96,6 +96,11 @@ class Config(context: Context) : BaseConfig(context) {
         get() = prefs.getString(EQUALIZER_BANDS, "")!!
         set(equalizerBands) = prefs.edit().putString(EQUALIZER_BANDS, equalizerBands).apply()
 
+    /** Human-readable name of whatever the current queue was started from, shown under the title. */
+    var playbackSource: String
+        get() = prefs.getString(PLAYBACK_SOURCE, "")!!
+        set(playbackSource) = prefs.edit().putString(PLAYBACK_SOURCE, playbackSource).apply()
+
     var playbackSpeed: Float
         get() = prefs.getFloat(PLAYBACK_SPEED, 1f)
         set(playbackSpeed) = prefs.edit().putFloat(PLAYBACK_SPEED, playbackSpeed).apply()

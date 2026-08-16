@@ -20,6 +20,7 @@ import org.fossify.commons.helpers.NavigationIcon
 import org.fossify.commons.helpers.ensureBackgroundThread
 import org.fossify.commons.helpers.isQPlus
 import org.fossify.musicplayer.R
+import org.fossify.musicplayer.adapters.BaseMusicAdapter
 import org.fossify.musicplayer.adapters.TracksAdapter
 import org.fossify.musicplayer.adapters.TracksAdapter.Companion.TYPE_ALBUM
 import org.fossify.musicplayer.adapters.TracksAdapter.Companion.TYPE_FOLDER
@@ -60,10 +61,9 @@ class TracksActivity : SimpleMusicActivity() {
         setupOptionsMenu()
         refreshMenuItems()
 
-        setupEdgeToEdge(
-            padBottomImeAndSystem = listOf(binding.tracksList),
-            padBottomSystem = listOf(binding.currentTrackBar.root)
-        )
+        // The list pads itself from the insets the playback sheet hands down, which already carry
+        // the navigation bar and the keyboard, so nothing here may pad it a second time.
+        setupEdgeToEdge()
         setupMaterialScrollListener(binding.tracksList, binding.tracksAppbar)
 
         val properPrimaryColor = getProperPrimaryColor()
@@ -75,7 +75,7 @@ class TracksActivity : SimpleMusicActivity() {
             addFolderToPlaylist()
         }
 
-        setupCurrentTrackBar(binding.currentTrackBar.root)
+        setupPlaybackSheet()
     }
 
     override fun onResume() {
@@ -378,7 +378,7 @@ class TracksActivity : SimpleMusicActivity() {
         handleNotificationPermission { granted ->
             if (granted) {
                 val startIndex = tracks.indexOf(track)
-                prepareAndPlay(tracks, startIndex)
+                prepareAndPlay(tracks, startIndex, source = binding.tracksToolbar.title.toString())
             } else {
                 PermissionRequiredDialog(this, org.fossify.commons.R.string.allow_notifications_music_player, { openNotificationSettings() })
             }
@@ -432,4 +432,8 @@ class TracksActivity : SimpleMusicActivity() {
             )
         }
     }
+    override fun onPlayingTrackChanged(trackId: Long, isPlaying: Boolean) {
+        (binding.tracksList.adapter as? BaseMusicAdapter<*>)?.setPlayingTrack(trackId, isPlaying)
+    }
+
 }

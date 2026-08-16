@@ -29,6 +29,8 @@ class PlaylistsFragment(context: Context, attributeSet: AttributeSet) : MyViewPa
     private var playlists = ArrayList<Playlist>()
     private val binding by viewBinding(FragmentPlaylistsBinding::bind)
 
+    override val list get() = binding.playlistsList
+
     override fun setupFragment(activity: BaseSimpleActivity) {
         binding.playlistsPlaceholder2.underlineText()
         binding.playlistsPlaceholder2.setOnClickListener {

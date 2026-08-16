@@ -6,12 +6,12 @@ import android.view.View
 import android.view.ViewGroup
 import com.qtalk.recyclerviewfastscroller.RecyclerViewFastScroller
 import org.fossify.commons.dialogs.ConfirmationDialog
-import org.fossify.commons.extensions.beGone
 import org.fossify.commons.extensions.beVisible
+import org.fossify.commons.extensions.beVisibleIf
 import org.fossify.commons.extensions.getFormattedDuration
-import org.fossify.commons.extensions.setupViewBackground
 import org.fossify.commons.helpers.ensureBackgroundThread
 import org.fossify.commons.views.MyRecyclerView
+import org.fossify.musicplayer.extensions.setupActivatableBackground
 import org.fossify.musicplayer.R
 import org.fossify.musicplayer.activities.SimpleActivity
 import org.fossify.musicplayer.databinding.ItemAlbumHeaderBinding
@@ -20,6 +20,7 @@ import org.fossify.musicplayer.dialogs.EditDialog
 import org.fossify.musicplayer.extensions.audioHelper
 import org.fossify.musicplayer.extensions.config
 import org.fossify.musicplayer.extensions.getAlbumCoverArt
+import org.fossify.musicplayer.extensions.getTrackCoverArt
 import org.fossify.musicplayer.models.AlbumHeader
 import org.fossify.musicplayer.models.ListItem
 import org.fossify.musicplayer.models.Track
@@ -30,7 +31,7 @@ class TracksHeaderAdapter(activity: SimpleActivity, items: ArrayList<ListItem>, 
     private val ITEM_HEADER = 0
     private val ITEM_TRACK = 1
 
-    override val cornerRadius = resources.getDimension(org.fossify.commons.R.dimen.rounded_corner_radius_big).toInt()
+    override val cornerRadius = resources.getDimension(R.dimen.corner_radius_large).toInt()
 
     override fun getActionMenuId() = R.menu.cab_tracks_header
 
@@ -53,6 +54,15 @@ class TracksHeaderAdapter(activity: SimpleActivity, items: ArrayList<ListItem>, 
             }
         }
         bindViewHolder(holder)
+    }
+
+    override fun onBindViewHolder(holder: ViewHolder, position: Int, payloads: List<Any>) {
+        val track = items.getOrNull(position) as? Track
+        if (track != null && payloads.contains(PAYLOAD_PLAYING_INDICATOR)) {
+            updatePlayingIndicator(holder.itemView, track)
+        } else {
+            super.onBindViewHolder(holder, position, payloads)
+        }
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -122,24 +132,41 @@ class TracksHeaderAdapter(activity: SimpleActivity, items: ArrayList<ListItem>, 
 
     private fun setupTrack(view: View, track: Track) {
         ItemTrackBinding.bind(view).apply {
-            root.setupViewBackground(context)
-            trackFrame.isSelected = selectedKeys.contains(track.hashCode())
+            root.setupActivatableBackground(context)
+            trackFrame.isActivated = selectedKeys.contains(track.hashCode())
             trackTitle.text = track.title
-            trackInfo.beGone()
 
-            arrayOf(trackId, trackTitle, trackDuration).forEach {
+            // The number is a detail of the track, so it reads under the title where the artist
+            // sits in every other list, rather than standing in for the artwork.
+            trackInfo.text = if (track.discNumber != null) {
+                val trackNumber = track.trackId?.toString()?.padStart(2, '0').orEmpty()
+                context.getString(R.string.track_on_disk, track.discNumber, trackNumber)
+            } else {
+                track.trackId?.toString().orEmpty()
+            }
+            trackInfo.beVisibleIf(track.trackId != null)
+
+            arrayOf(trackTitle, trackInfo, trackDuration).forEach {
                 it.setTextColor(textColor)
             }
 
             trackDuration.text = track.duration.getFormattedDuration()
-            if (track.discNumber != null) {
-                val trackNumber = if (track.trackId != null) track.trackId.toString().padStart(2, '0') else ""
-                trackId.text = context.getString(R.string.track_on_disk, track.discNumber, trackNumber)
-            } else {
-                trackId.text = if (track.trackId != null) track.trackId.toString() else ""
+            trackImage.beVisible()
+            context.getTrackCoverArt(track) { coverArt ->
+                trackImage.bind(coverArt)
             }
-            trackImage.beGone()
-            trackId.beVisible()
+
+            updatePlayingIndicator(view, track)
+        }
+    }
+
+    /** @see TracksAdapter.updatePlayingIndicator */
+    private fun updatePlayingIndicator(view: View, track: Track) {
+        ItemTrackBinding.bind(view).apply {
+            val isPlayingTrack = isPlayingTrack(track)
+            trackFrame.isSelected = isPlayingTrack
+            trackImage.setPlaying(isPlaybackOngoing)
+            trackTitle.setTextColor(if (isPlayingTrack) properPrimaryColor else textColor)
         }
     }
 

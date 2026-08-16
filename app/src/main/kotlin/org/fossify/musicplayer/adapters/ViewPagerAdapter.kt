@@ -10,7 +10,6 @@ import org.fossify.musicplayer.activities.SimpleActivity
 import org.fossify.musicplayer.databinding.*
 import org.fossify.musicplayer.extensions.getVisibleTabs
 import org.fossify.musicplayer.fragments.MyViewPagerFragment
-import org.fossify.musicplayer.fragments.PlaylistsFragment
 import org.fossify.musicplayer.fragments.TracksFragment
 import org.fossify.musicplayer.helpers.*
 
@@ -23,7 +22,6 @@ class ViewPagerAdapter(val activity: SimpleActivity) : PagerAdapter() {
         val tab = activity.getVisibleTabs()[position]
         val layoutInflater = activity.layoutInflater
         val fragment =  when (tab) {
-            TAB_PLAYLISTS -> FragmentPlaylistsBinding.inflate(layoutInflater, container, false).root
             TAB_FOLDERS -> FragmentFoldersBinding.inflate(layoutInflater, container, false).root
             TAB_ARTISTS -> FragmentArtistsBinding.inflate(layoutInflater, container, false).root
             TAB_ALBUMS -> FragmentAlbumsBinding.inflate(layoutInflater, container, false).root
@@ -60,8 +58,6 @@ class ViewPagerAdapter(val activity: SimpleActivity) : PagerAdapter() {
     fun getCurrentFragment() = primaryItem
 
     fun getFragmentAt(position: Int): MyViewPagerFragment? = items.get(position)
-
-    fun getPlaylistsFragment() = fragments.find { it is PlaylistsFragment }
 
     fun getTracksFragment() = fragments.find { it is TracksFragment }
 }

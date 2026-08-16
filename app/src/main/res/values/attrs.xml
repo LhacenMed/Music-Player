@@ -9,4 +9,11 @@
         <attr name="waveAmplitudeRampProgressMin" format="float" />
     </declare-styleable>
 
+    <declare-styleable name="LyricsView">
+        <attr name="lyricsDensity" format="enum">
+            <enum name="compact" value="0" />
+            <enum name="expanded" value="1" />
+        </attr>
+    </declare-styleable>
+
 </resources>

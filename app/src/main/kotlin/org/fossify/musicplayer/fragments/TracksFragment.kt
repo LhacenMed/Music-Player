@@ -25,6 +25,8 @@ class TracksFragment(context: Context, attributeSet: AttributeSet) : MyViewPager
     private var tracks = ArrayList<Track>()
     private val binding by viewBinding(FragmentTracksBinding::bind)
 
+    override val list get() = binding.tracksList
+
     override fun setupFragment(activity: BaseSimpleActivity) {
         ensureBackgroundThread {
             tracks = context.audioHelper.getAllTracks()
@@ -109,6 +111,10 @@ class TracksFragment(context: Context, attributeSet: AttributeSet) : MyViewPager
         binding.tracksPlaceholder.setTextColor(textColor)
         binding.tracksFastscroller.updateColors(adjustedPrimaryColor)
         getAdapter()?.updateColors(textColor)
+    }
+
+    override fun onPlayingTrackChanged(trackId: Long, isPlaying: Boolean) {
+        getAdapter()?.setPlayingTrack(trackId, isPlaying)
     }
 
     private fun getAdapter() = binding.tracksList.adapter as? TracksAdapter

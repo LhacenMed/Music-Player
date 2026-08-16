@@ -24,7 +24,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <org.fossify.commons.views.MyRecyclerView
+        <org.fossify.musicplayer.views.BottomInsetRecyclerView
             android:id="@+id/genres_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

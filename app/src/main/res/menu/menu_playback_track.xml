@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/action_add_to_playlist"
+        android:icon="@drawable/ic_playlist_add_24"
+        android:title="@string/add_to_playlist" />
+    <item
+        android:id="@+id/action_play_next"
+        android:icon="@drawable/ic_play_next_24"
+        android:title="@string/play_next" />
+    <item
+        android:id="@+id/action_add_to_queue"
+        android:icon="@drawable/ic_queue_add_24"
+        android:title="@string/add_to_queue" />
+    <item
+        android:id="@+id/action_properties"
+        android:icon="@drawable/ic_details_24"
+        android:title="@string/properties" />
+    <item
+        android:id="@+id/action_share"
+        android:icon="@drawable/ic_share_24"
+        android:title="@string/share" />
+</menu>

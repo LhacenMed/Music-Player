@@ -53,7 +53,31 @@
             android:name=".activities.MainActivity"
             android:configChanges="orientation"
             android:exported="true"
-            android:launchMode="singleTask" />
+            android:launchMode="singleTask">
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:scheme="content" />
+                <data android:mimeType="audio/*" />
+                <data android:mimeType="application/ogg" />
+                <data android:mimeType="application/x-ogg" />
+                <data android:mimeType="application/itunes" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:scheme="file" />
+                <data android:mimeType="audio/*" />
+                <data android:mimeType="application/ogg" />
+                <data android:mimeType="application/x-ogg" />
+                <data android:mimeType="application/itunes" />
+            </intent-filter>
+
+        </activity>
 
         <activity
             android:name=".activities.WidgetConfigureActivity"
@@ -63,6 +87,7 @@
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>
+
         </activity>
 
         <activity
@@ -107,6 +132,13 @@
             android:parentActivityName=".activities.MainActivity" />
 
         <activity
+            android:name=".activities.PlaylistsActivity"
+            android:configChanges="orientation"
+            android:exported="false"
+            android:label="@string/playlists"
+            android:parentActivityName=".activities.MainActivity" />
+
+        <activity
             android:name="org.fossify.musicplayer.activities.AlbumsActivity"
             android:configChanges="orientation"
             android:exported="false"
@@ -120,43 +152,13 @@
             android:label="@string/artist"
             android:parentActivityName="org.fossify.musicplayer.activities.AlbumsActivity" />
 
-        <activity
-            android:name=".activities.TrackActivity"
-            android:configChanges="orientation"
-            android:exported="true"
-            android:parentActivityName=".activities.MainActivity"
-            android:theme="@style/TranslucentTheme">
-
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <data android:scheme="content" />
-                <data android:mimeType="audio/*" />
-                <data android:mimeType="application/ogg" />
-                <data android:mimeType="application/x-ogg" />
-                <data android:mimeType="application/itunes" />
-            </intent-filter>
-
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <data android:scheme="file" />
-                <data android:mimeType="audio/*" />
-                <data android:mimeType="application/ogg" />
-                <data android:mimeType="application/x-ogg" />
-                <data android:mimeType="application/itunes" />
-            </intent-filter>
-
-        </activity>
 
         <activity
             android:name=".activities.QueueActivity"
             android:configChanges="orientation"
             android:exported="false"
             android:label="@string/track_queue"
-            android:parentActivityName=".activities.TrackActivity" />
+            android:parentActivityName=".activities.MainActivity" />
 
         <service
             android:name=".playback.PlaybackService"

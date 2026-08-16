@@ -140,8 +140,8 @@ class QueueAdapter(activity: SimpleActivity, items: ArrayList<Track>, var curren
     @SuppressLint("ClickableViewAccessibility")
     private fun setupView(view: View, track: Track, holder: ViewHolder) {
         ItemTrackQueueBinding.bind(view).apply {
-            root.setupViewBackground(context)
-            trackQueueFrame.isSelected = selectedKeys.contains(track.hashCode())
+            root.setupActivatableBackground(context)
+            trackQueueFrame.isActivated = selectedKeys.contains(track.hashCode())
             trackQueueTitle.text = if (textToHighlight.isEmpty()) track.title else track.title.highlightTextPart(textToHighlight, properPrimaryColor)
 
             arrayOf(trackQueueTitle, trackQueueDuration).forEach {
@@ -164,7 +164,7 @@ class QueueAdapter(activity: SimpleActivity, items: ArrayList<Track>, var curren
             }
 
             context.getTrackCoverArt(track) { coverArt ->
-                loadImage(trackQueueImage, coverArt, placeholderBig)
+                loadImage(trackQueueImage, coverArt, trackPlaceholder)
             }
         }
     }

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/playback_coordinator"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <org.fossify.musicplayer.views.EatInsetsFrameLayout
+        android:id="@+id/playback_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="org.fossify.musicplayer.views.BottomSheetContentBehavior">
+
+        <androidx.coordinatorlayout.widget.CoordinatorLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <org.fossify.commons.views.MyAppBarLayout
+                android:id="@+id/playlists_appbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <com.google.android.material.appbar.MaterialToolbar
+                    android:id="@+id/playlists_toolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="?attr/actionBarSize"
+                    android:background="@color/color_primary"
+                    app:title="@string/playlists"
+                    app:titleTextAppearance="@style/AppTheme.ActionBar.TitleTextStyle" />
+
+            </org.fossify.commons.views.MyAppBarLayout>
+
+            <include
+                android:id="@+id/playlists_fragment"
+                layout="@layout/fragment_playlists"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+        </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+    </org.fossify.musicplayer.views.EatInsetsFrameLayout>
+
+    <include layout="@layout/view_playback_sheet" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

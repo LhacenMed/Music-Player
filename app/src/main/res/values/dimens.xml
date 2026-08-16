@@ -7,4 +7,48 @@
     <dimen name="bottom_bar_height">50dp</dimen>
     <dimen name="equalizer_seekbar_height">300dp</dimen>
     <dimen name="smaller_icon_size">36dp</dimen>
+
+    <!-- Corner radius scale. Auxio derives its radii from the Material 3 corner sizes but pulls
+         the largest one down to 20dp so that sheets, artwork and controls harmonise instead of the
+         sheet dwarfing everything next to it. These are the single source of truth: the theme maps
+         the Material corner attributes onto them, so every Material component picks them up, and
+         the few views drawn by hand read the same dimens. -->
+    <dimen name="corner_radius_small">12dp</dimen>
+    <dimen name="corner_radius_medium">16dp</dimen>
+    <dimen name="corner_radius_large">20dp</dimen>
+
+    <!-- Bottom sheet metrics -->
+    <dimen name="spacing_tiny">4dp</dimen>
+    <dimen name="spacing_small">8dp</dimen>
+    <dimen name="spacing_mid_medium">12dp</dimen>
+    <dimen name="spacing_medium">16dp</dimen>
+    <dimen name="spacing_mid_large">20dp</dimen>
+    <dimen name="spacing_large">24dp</dimen>
+    <dimen name="size_icon_small">24dp</dimen>
+    <dimen name="size_touchable_small">48dp</dimen>
+    <dimen name="size_touchable_large">64dp</dimen>
+    <dimen name="size_menu_cover">80dp</dimen>
+
+    <!-- Library shortcuts -->
+    <dimen name="size_library_shortcut">72dp</dimen>
+    <dimen name="size_library_shortcut_icon">20dp</dimen>
+
+    <!-- Lyrics -->
+    <dimen name="size_lyric_line">36dp</dimen>
+    <dimen name="size_lyric_fade">8dp</dimen>
+    <!-- The compact strip is exactly one line tall, so the active line is the only one on screen.
+         The neighbouring lines only ever show while one is sliding into the other's place. -->
+    <dimen name="size_lyrics_section">@dimen/size_lyric_line</dimen>
+    <dimen name="size_lyric_line_large">52dp</dimen>
+    <dimen name="size_lyric_fade_large">128dp</dimen>
+
+    <!-- Effectively "fully rounded" for the mini player's progress line. -->
+    <dimen name="m3_shape_corners_full">128dp</dimen>
+
+    <!-- Playback seek bar -->
+    <dimen name="slider_track_height">4dp</dimen>
+    <dimen name="slider_thumb_height">24dp</dimen>
+    <dimen name="progress_amplitude">3dp</dimen>
+    <dimen name="progress_wavelength">40dp</dimen>
+    <dimen name="progress_wave_speed">20dp</dimen>
 </resources>

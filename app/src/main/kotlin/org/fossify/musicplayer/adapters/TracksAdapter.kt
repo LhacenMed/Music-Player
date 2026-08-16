@@ -16,6 +16,7 @@ import org.fossify.commons.interfaces.ItemMoveCallback
 import org.fossify.commons.interfaces.ItemTouchHelperContract
 import org.fossify.commons.interfaces.StartReorderDragListener
 import org.fossify.commons.views.MyRecyclerView
+import org.fossify.musicplayer.extensions.setupActivatableBackground
 import org.fossify.musicplayer.R
 import org.fossify.musicplayer.databinding.ItemTrackBinding
 import org.fossify.musicplayer.dialogs.EditDialog
@@ -67,6 +68,15 @@ class TracksAdapter(
             setupView(itemView, track, holder)
         }
         bindViewHolder(holder)
+    }
+
+    override fun onBindViewHolder(holder: ViewHolder, position: Int, payloads: List<Any>) {
+        val track = items.getOrNull(position)
+        if (track != null && payloads.contains(PAYLOAD_PLAYING_INDICATOR)) {
+            updatePlayingIndicator(holder.itemView, track)
+        } else {
+            super.onBindViewHolder(holder, position, payloads)
+        }
     }
 
     override fun prepareActionMode(menu: Menu) {
@@ -181,8 +191,8 @@ class TracksAdapter(
     @SuppressLint("ClickableViewAccessibility")
     private fun setupView(view: View, track: Track, holder: ViewHolder) {
         ItemTrackBinding.bind(view).apply {
-            root.setupViewBackground(context)
-            trackFrame.isSelected = selectedKeys.contains(track.hashCode())
+            root.setupActivatableBackground(context)
+            trackFrame.isActivated = selectedKeys.contains(track.hashCode())
             trackTitle.text = if (textToHighlight.isEmpty()) track.title else track.title.highlightTextPart(textToHighlight, properPrimaryColor)
             trackInfo.text = if (textToHighlight.isEmpty()) {
                 "${track.artist} • ${track.album}"
@@ -198,17 +208,33 @@ class TracksAdapter(
                 false
             }
 
-            arrayOf(trackId, trackTitle, trackInfo, trackDuration).forEach {
+            arrayOf(trackInfo, trackDuration).forEach {
                 it.setTextColor(textColor)
             }
 
             trackDuration.text = track.duration.getFormattedDuration()
             activity.getTrackCoverArt(track) { coverArt ->
-                loadImage(trackImage, coverArt, placeholderBig)
+                trackImage.bind(coverArt)
             }
 
             trackImage.beVisible()
-            trackId.beGone()
+            updatePlayingIndicator(view, track)
+        }
+    }
+
+    /**
+     * Mark the row as the one the player is on. Selecting it is what hands its cover over to the
+     * equalizer, and the title takes the accent alongside it.
+     *
+     * Kept apart from the rest of the binding so a track change only has to repaint this much,
+     * rather than reloading artwork that has not changed.
+     */
+    private fun updatePlayingIndicator(view: View, track: Track) {
+        ItemTrackBinding.bind(view).apply {
+            val isPlayingTrack = isPlayingTrack(track)
+            trackFrame.isSelected = isPlayingTrack
+            trackImage.setPlaying(isPlaybackOngoing)
+            trackTitle.setTextColor(if (isPlayingTrack) properPrimaryColor else textColor)
         }
     }
 

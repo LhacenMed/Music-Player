@@ -6,9 +6,9 @@ import com.qtalk.recyclerviewfastscroller.RecyclerViewFastScroller
 import org.fossify.commons.activities.BaseSimpleActivity
 import org.fossify.commons.dialogs.ConfirmationDialog
 import org.fossify.commons.extensions.highlightTextPart
-import org.fossify.commons.extensions.setupViewBackground
 import org.fossify.commons.helpers.ensureBackgroundThread
 import org.fossify.commons.views.MyRecyclerView
+import org.fossify.musicplayer.extensions.setupActivatableBackground
 import org.fossify.musicplayer.R
 import org.fossify.musicplayer.databinding.ItemAlbumBinding
 import org.fossify.musicplayer.extensions.audioHelper
@@ -79,8 +79,8 @@ class AlbumsAdapter(activity: BaseSimpleActivity, items: ArrayList<Album>, recyc
 
     private fun setupView(view: View, album: Album) {
         ItemAlbumBinding.bind(view).apply {
-            root.setupViewBackground(context)
-            albumFrame.isSelected = selectedKeys.contains(album.hashCode())
+            root.setupActivatableBackground(context)
+            albumFrame.isActivated = selectedKeys.contains(album.hashCode())
             albumTitle.text = if (textToHighlight.isEmpty()) album.title else album.title.highlightTextPart(textToHighlight, properPrimaryColor)
             albumTitle.setTextColor(textColor)
 

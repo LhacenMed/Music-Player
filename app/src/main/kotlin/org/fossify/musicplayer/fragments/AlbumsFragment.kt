@@ -31,6 +31,8 @@ class AlbumsFragment(context: Context, attributeSet: AttributeSet) : MyViewPager
     private var albums = ArrayList<Album>()
     private val binding by viewBinding(FragmentAlbumsBinding::bind)
 
+    override val list get() = binding.albumsList
+
     override fun setupFragment(activity: BaseSimpleActivity) {
         ensureBackgroundThread {
             val cachedAlbums = activity.audioHelper.getAllAlbums()

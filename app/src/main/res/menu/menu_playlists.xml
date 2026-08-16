@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="AppCompatResource">
+    <item
+        android:id="@+id/search"
+        android:icon="@drawable/ic_search_vector"
+        android:title="@string/search"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
+        app:showAsAction="collapseActionView|always" />
+    <item
+        android:id="@+id/sort"
+        android:icon="@drawable/ic_sort_vector"
+        android:title="@string/sort_by"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/create_new_playlist"
+        android:title="@string/create_new_playlist"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/create_playlist_from_folder"
+        android:title="@string/create_playlist_from_folder"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/import_playlist"
+        android:title="@string/import_playlist"
+        app:showAsAction="never" />
+</menu>

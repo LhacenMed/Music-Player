@@ -30,6 +30,8 @@ class GenresFragment(context: Context, attributeSet: AttributeSet) : MyViewPager
     private var genres = ArrayList<Genre>()
     private val binding by viewBinding(FragmentGenresBinding::bind)
 
+    override val list get() = binding.genresList
+
     override fun setupFragment(activity: BaseSimpleActivity) {
         ensureBackgroundThread {
             val cachedGenres = activity.audioHelper.getAllGenres()

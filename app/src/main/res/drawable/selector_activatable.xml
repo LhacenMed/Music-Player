@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+    The multi-select highlight, keyed on the activated state rather than the selected one so that
+    "selected" is left free to mean "this is the track the player is on", as it does in Auxio.
+    Otherwise identical to commons' selector_clickable.
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <selector>
+            <item
+                android:drawable="@color/activated_item_foreground"
+                android:state_activated="true" />
+            <item android:drawable="@drawable/ripple_selector_background" />
+        </selector>
+    </item>
+</layer-list>

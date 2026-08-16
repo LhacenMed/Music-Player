@@ -8,9 +8,9 @@ import org.fossify.commons.adapters.MyRecyclerViewAdapter
 import org.fossify.commons.extensions.getPopupMenuTheme
 import org.fossify.commons.extensions.getProperTextColor
 import org.fossify.commons.extensions.humanizePath
-import org.fossify.commons.extensions.setupViewBackground
 import org.fossify.commons.interfaces.RefreshRecyclerViewListener
 import org.fossify.commons.views.MyRecyclerView
+import org.fossify.musicplayer.extensions.setupActivatableBackground
 import org.fossify.musicplayer.databinding.ItemExcludedFolderBinding
 import org.fossify.musicplayer.extensions.config
 
@@ -69,8 +69,8 @@ class ExcludedFoldersAdapter(
 
     private fun setupView(view: View, folder: String) {
         ItemExcludedFolderBinding.bind(view).apply {
-            root.setupViewBackground(activity)
-            excludedFolderHolder.isSelected = selectedKeys.contains(folder.hashCode())
+            root.setupActivatableBackground(activity)
+            excludedFolderHolder.isActivated = selectedKeys.contains(folder.hashCode())
             excludedFolderTitle.apply {
                 @SuppressLint("SetTextI18n")
                 text = context.humanizePath(folder) + "/"

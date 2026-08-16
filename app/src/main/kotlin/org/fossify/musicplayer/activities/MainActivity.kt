@@ -1,18 +1,12 @@
 package org.fossify.musicplayer.activities
 
-import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.graphics.drawable.ColorDrawable
-import android.graphics.drawable.Drawable
 import android.media.AudioManager
-import android.net.Uri
 import android.os.Bundle
-import android.widget.Toast
 import androidx.viewpager.widget.ViewPager
-import me.grantland.widget.AutofitHelper
+import com.google.android.material.tabs.TabLayout
 import org.fossify.musicplayer.BuildConfig
-import org.fossify.commons.databinding.BottomTablayoutItemBinding
-import org.fossify.commons.dialogs.FilePickerDialog
 import org.fossify.commons.dialogs.RadioGroupDialog
 import org.fossify.commons.extensions.*
 import org.fossify.commons.helpers.*
@@ -22,22 +16,16 @@ import org.fossify.commons.models.Release
 import org.fossify.musicplayer.R
 import org.fossify.musicplayer.adapters.ViewPagerAdapter
 import org.fossify.musicplayer.databinding.ActivityMainBinding
-import org.fossify.musicplayer.dialogs.NewPlaylistDialog
-import org.fossify.musicplayer.dialogs.SelectPlaylistDialog
 import org.fossify.musicplayer.dialogs.SleepTimerCustomDialog
 import org.fossify.musicplayer.extensions.*
 import org.fossify.musicplayer.helpers.*
-import org.fossify.musicplayer.helpers.M3uImporter.ImportResult
 import org.fossify.musicplayer.models.Events
 import org.fossify.musicplayer.playback.CustomCommands
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
-import java.io.FileOutputStream
 
 class MainActivity : SimpleMusicActivity() {
-    private val PICK_IMPORT_SOURCE_INTENT = 1
-
     private var bus: EventBus? = null
     private var storedShowTabs = 0
     private var storedExcludedFolders = 0
@@ -46,23 +34,22 @@ class MainActivity : SimpleMusicActivity() {
 
     private val binding by viewBinding(ActivityMainBinding::inflate)
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         appLaunched(BuildConfig.APPLICATION_ID)
         setupOptionsMenu()
         refreshMenuItems()
-        setupEdgeToEdge(
-            padBottomImeAndSystem = buildList {
-                add(binding.mainTabsHolder)
-                if (getVisibleTabs().size == 1) {
-                    add(binding.currentTrackBar.root)
-                }
-            }
-        )
+        // Each tab's list pads itself from the insets the playback sheet hands down, which already
+        // carry the navigation bar and the keyboard, so the column around them must stay unpadded
+        // or the two would stack. Only the sleep timer strip, which floats over the lists rather
+        // than scrolling with them, still has to be moved clear of the navigation bar.
+        setupEdgeToEdge(moveBottomSystem = listOf(binding.sleepTimerHolder))
         storeStateVariables()
         setupTabs()
-        setupCurrentTrackBar(binding.currentTrackBar.root)
+        setupLibraryShortcuts()
+        setupPlaybackSheet()
 
         handlePermission(getPermissionToRequest()) {
             if (it) {
@@ -81,8 +68,8 @@ class MainActivity : SimpleMusicActivity() {
     override fun onResume() {
         super.onResume()
         handleNotificationIntent(intent)
+        handleViewIntent(intent)
         if (storedShowTabs != config.showTabs) {
-            config.lastUsedViewPagerPage = 0
             System.exit(0)
             return
         }
@@ -90,9 +77,11 @@ class MainActivity : SimpleMusicActivity() {
         updateMenuColors()
         updateTextColors(binding.mainHolder)
         setupTabColors()
+        setupLibraryShortcutColors()
         val properTextColor = getProperTextColor()
         val properPrimaryColor = getProperPrimaryColor()
-        binding.sleepTimerHolder.background = ColorDrawable(getProperBackgroundColor())
+        sheetContent.setBackgroundColor(getContentSurfaceColor())
+        binding.sleepTimerHolder.background = ColorDrawable(getContentSurfaceColor())
         binding.sleepTimerStop.applyColorFilter(properTextColor)
         binding.loadingProgressBar.setIndicatorColor(properPrimaryColor)
         binding.loadingProgressBar.trackColor = properPrimaryColor.adjustAlpha(LOWER_ALPHA)
@@ -100,6 +89,7 @@ class MainActivity : SimpleMusicActivity() {
         getAllFragments().forEach {
             it.setupColors(properTextColor, properPrimaryColor)
         }
+
 
         if (storedExcludedFolders != config.excludedFolders.hashCode()) {
             refreshAllFragments()
@@ -115,7 +105,6 @@ class MainActivity : SimpleMusicActivity() {
     override fun onPause() {
         super.onPause()
         storeStateVariables()
-        config.lastUsedViewPagerPage = binding.viewPager.currentItem
     }
 
     override fun onDestroy() {
@@ -123,22 +112,28 @@ class MainActivity : SimpleMusicActivity() {
         bus?.unregister(this)
     }
 
+    /**
+     * The tabs behave like navigation destinations: back closes the search first, then returns to
+     * Tracks from anywhere else, and only leaves the app once Tracks itself is showing.
+     */
     override fun onBackPressedCompat(): Boolean {
-        return if (binding.mainMenu.isSearchOpen) {
-            binding.mainMenu.closeSearch()
-            true
-        } else {
-            false
+        return when {
+            binding.mainMenu.isSearchOpen -> {
+                binding.mainMenu.closeSearch()
+                true
+            }
+
+            binding.viewPager.currentItem != HOME_TAB_POSITION -> {
+                binding.viewPager.currentItem = HOME_TAB_POSITION
+                true
+            }
+
+            else -> false
         }
     }
 
-    private fun refreshMenuItems(position: Int = binding.viewPager.currentItem) {
+    private fun refreshMenuItems() {
         binding.mainMenu.requireToolbar().menu.apply {
-            val tab = getVisibleTabs()[position]
-            val isPlaylistFragment = tab == TAB_PLAYLISTS
-            findItem(R.id.create_new_playlist).isVisible = isPlaylistFragment
-            findItem(R.id.create_playlist_from_folder).isVisible = isPlaylistFragment
-            findItem(R.id.import_playlist).isVisible = isPlaylistFragment
             findItem(R.id.more_apps_from_us).isVisible = !resources.getBoolean(org.fossify.commons.R.bool.hide_google_relations)
         }
     }
@@ -163,9 +158,6 @@ class MainActivity : SimpleMusicActivity() {
                 R.id.sort -> showSortingDialog()
                 R.id.rescan_media -> refreshAllFragments(showProgress = true)
                 R.id.sleep_timer -> showSleepTimer()
-                R.id.create_new_playlist -> createNewPlaylist()
-                R.id.create_playlist_from_folder -> createPlaylistFromFolder()
-                R.id.import_playlist -> tryImportPlaylist()
                 R.id.equalizer -> launchEqualizer()
                 R.id.more_apps_from_us -> launchMoreAppsFromUsIntent()
                 R.id.settings -> launchSettings()
@@ -178,6 +170,9 @@ class MainActivity : SimpleMusicActivity() {
 
     private fun updateMenuColors() {
         binding.mainMenu.updateColors()
+        // Commons paints the app bar from the plain background, so re-apply the content surface
+        // afterwards to keep the bar, the tabs and the list behind them on one continuous colour.
+        binding.mainMenu.setBackgroundColor(getContentSurfaceColor())
     }
 
     private fun storeStateVariables() {
@@ -234,77 +229,88 @@ class MainActivity : SimpleMusicActivity() {
             override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {}
 
             override fun onPageSelected(position: Int) {
-                binding.mainTabsHolder.getTabAt(position)?.select()
+                // Only follow the pager when the pager led, which means a swipe. A tab tap has
+                // already moved the selection, and selecting it again would come back as a
+                // reselection and send the list it just opened to the top.
+                if (binding.mainTabsHolder.selectedTabPosition != position) {
+                    binding.mainTabsHolder.getTabAt(position)?.select()
+                }
+
                 getAllFragments().forEach {
                     it.finishActMode()
                 }
-                refreshMenuItems(position)
             }
         })
-        binding.viewPager.currentItem = config.lastUsedViewPagerPage
     }
 
     private fun setupTabs() {
         binding.mainTabsHolder.removeAllTabs()
         getVisibleTabs().forEach { value ->
-            binding.mainTabsHolder.newTab().setCustomView(org.fossify.commons.R.layout.bottom_tablayout_item).apply {
-                val tabItemBinding = BottomTablayoutItemBinding.bind(customView!!)
-                tabItemBinding.tabItemIcon.setImageDrawable(getTabIcon(value))
-                tabItemBinding.tabItemLabel.text = getTabLabel(value)
-                AutofitHelper.create(tabItemBinding.tabItemLabel)
+            binding.mainTabsHolder.newTab().apply {
+                text = getTabLabel(value)
                 binding.mainTabsHolder.addTab(this)
             }
         }
 
-        binding.mainTabsHolder.onTabSelectionChanged(
-            tabUnselectedAction = {
-                updateBottomTabItemColors(it.customView, false)
-            },
-            tabSelectedAction = {
-                binding.viewPager.currentItem = it.position
-                updateBottomTabItemColors(it.customView, true)
+        binding.mainTabsHolder.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab) {
+                binding.viewPager.currentItem = tab.position
                 binding.viewPager.post {
-                    getAdapter()?.getFragmentAt(it.position)?.onSearchQueryChanged(
+                    getAdapter()?.getFragmentAt(tab.position)?.onSearchQueryChanged(
                         text = binding.mainMenu.getCurrentQuery()
                     )
                 }
             }
-        )
+
+            override fun onTabUnselected(tab: TabLayout.Tab) {}
+
+            // Tapping the tab you are already on returns its list to the top, as it does in every
+            // other tabbed app.
+            override fun onTabReselected(tab: TabLayout.Tab) {
+                getAdapter()?.getFragmentAt(tab.position)?.scrollToTop()
+            }
+        })
 
         binding.mainTabsHolder.beGoneIf(binding.mainTabsHolder.tabCount == 1)
     }
 
-    private fun setupTabColors() {
-        val activeView = binding.mainTabsHolder.getTabAt(binding.viewPager.currentItem)?.customView
-        updateBottomTabItemColors(activeView, true)
-
-        getInactiveTabIndexes(binding.viewPager.currentItem).forEach { index ->
-            val inactiveView = binding.mainTabsHolder.getTabAt(index)?.customView
-            updateBottomTabItemColors(inactiveView, false)
+    /**
+     * The fixed entry points above the tabs. Favorites and Recent are presentational for now; only
+     * Playlists leads anywhere.
+     */
+    private fun setupLibraryShortcuts() {
+        binding.libraryShortcuts.shortcutPlaylists.setOnClickListener {
+            hideKeyboard()
+            startActivity(Intent(applicationContext, PlaylistsActivity::class.java))
         }
-
-        val bottomBarColor = getBottomNavigationBackgroundColor()
-        binding.mainTabsHolder.setBackgroundColor(bottomBarColor)
     }
 
-    private fun getInactiveTabIndexes(activeIndex: Int) = (0 until tabsList.size).filter { it != activeIndex }
+    /** The cards sit one surface step above the app bar behind them, so they read as raised. */
+    private fun setupLibraryShortcutColors() = binding.libraryShortcuts.apply {
+        val cardColor = getProperBackgroundColor()
+        val iconTint = getProperPrimaryColor()
+        val labelColor = getProperTextColor()
+        val outlineColor = labelColor.adjustAlpha(LOWER_ALPHA)
 
-    private fun getTabIcon(position: Int): Drawable {
-        val drawableId = when (position) {
-            TAB_PLAYLISTS -> R.drawable.ic_playlist_vector
-            TAB_FOLDERS -> R.drawable.ic_folders_vector
-            TAB_ARTISTS -> org.fossify.commons.R.drawable.ic_person_vector
-            TAB_ALBUMS -> R.drawable.ic_album_vector
-            TAB_GENRES -> R.drawable.ic_genre_vector
-            else -> R.drawable.ic_music_note_vector
+        listOf(shortcutFavorites, shortcutPlaylists, shortcutRecent).forEach {
+            it.setCardBackgroundColor(cardColor)
+            it.strokeColor = outlineColor
         }
+        listOf(shortcutFavoritesIcon, shortcutPlaylistsIcon, shortcutRecentIcon)
+            .forEach { it.applyColorFilter(iconTint) }
+        listOf(shortcutFavoritesLabel, shortcutPlaylistsLabel, shortcutRecentLabel)
+            .forEach { it.setTextColor(labelColor) }
+    }
 
-        return resources.getColoredDrawableWithColor(drawableId, getProperTextColor())
+    private fun setupTabColors() {
+        val properTextColor = getProperTextColor()
+        val properPrimaryColor = getProperPrimaryColor()
+        binding.mainTabsHolder.setTabTextColors(properTextColor.adjustAlpha(MEDIUM_ALPHA), properPrimaryColor)
+        binding.mainTabsHolder.setSelectedTabIndicatorColor(properPrimaryColor)
     }
 
     private fun getTabLabel(position: Int): String {
         val stringId = when (position) {
-            TAB_PLAYLISTS -> R.string.playlists
             TAB_FOLDERS -> R.string.folders
             TAB_ARTISTS -> R.string.artists
             TAB_ALBUMS -> R.string.albums
@@ -317,125 +323,6 @@ class MainActivity : SimpleMusicActivity() {
 
     private fun showSortingDialog() {
         getCurrentFragment()?.onSortOpen(this)
-    }
-
-    private fun createNewPlaylist() {
-        NewPlaylistDialog(this) {
-            EventBus.getDefault().post(Events.PlaylistsUpdated())
-        }
-    }
-
-    private fun createPlaylistFromFolder() {
-        FilePickerDialog(this, pickFile = false, enforceStorageRestrictions = false) {
-            createPlaylistFrom(it)
-        }
-    }
-
-    private fun createPlaylistFrom(path: String) {
-        ensureBackgroundThread {
-            getFolderTracks(path, true) { tracks ->
-                runOnUiThread {
-                    NewPlaylistDialog(this) { playlistId ->
-                        tracks.forEach {
-                            it.playListId = playlistId
-                        }
-
-                        ensureBackgroundThread {
-                            audioHelper.insertTracks(tracks)
-                            EventBus.getDefault().post(Events.PlaylistsUpdated())
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, resultData: Intent?) {
-        super.onActivityResult(requestCode, resultCode, resultData)
-        if (requestCode == PICK_IMPORT_SOURCE_INTENT && resultCode == RESULT_OK && resultData?.data != null) {
-            tryImportPlaylistFromFile(resultData.data!!)
-        }
-    }
-
-    private fun tryImportPlaylistFromFile(uri: Uri) {
-        when {
-            uri.scheme == "file" -> showImportPlaylistDialog(uri.path!!)
-            uri.scheme == "content" -> {
-                val tempFile = getTempFile("imports", uri.path!!.getFilenameFromPath())
-                if (tempFile == null) {
-                    toast(org.fossify.commons.R.string.unknown_error_occurred)
-                    return
-                }
-
-                try {
-                    val inputStream = contentResolver.openInputStream(uri)
-                    val out = FileOutputStream(tempFile)
-                    inputStream!!.copyTo(out)
-
-                    showImportPlaylistDialog(tempFile.absolutePath)
-                } catch (e: Exception) {
-                    showErrorToast(e)
-                }
-            }
-
-            else -> toast(org.fossify.commons.R.string.invalid_file_format)
-        }
-    }
-
-    private fun tryImportPlaylist() {
-        if (isQPlus()) {
-            hideKeyboard()
-            Intent(Intent.ACTION_GET_CONTENT).apply {
-                addCategory(Intent.CATEGORY_OPENABLE)
-                type = MIME_TYPE_M3U
-
-                try {
-                    startActivityForResult(this, PICK_IMPORT_SOURCE_INTENT)
-                } catch (e: ActivityNotFoundException) {
-                    toast(org.fossify.commons.R.string.system_service_disabled, Toast.LENGTH_LONG)
-                } catch (e: Exception) {
-                    showErrorToast(e)
-                }
-            }
-        } else {
-            handlePermission(PERMISSION_READ_STORAGE) { granted ->
-                if (granted) {
-                    showFilePickerDialog()
-                }
-            }
-        }
-    }
-
-    private fun showFilePickerDialog() {
-        FilePickerDialog(this, enforceStorageRestrictions = false) { path ->
-            SelectPlaylistDialog(this) { id ->
-                importPlaylist(path, id)
-            }
-        }
-    }
-
-    private fun showImportPlaylistDialog(path: String) {
-        SelectPlaylistDialog(this) { id ->
-            importPlaylist(path, id)
-        }
-    }
-
-    private fun importPlaylist(path: String, id: Int) {
-        ensureBackgroundThread {
-            M3uImporter(this) { result ->
-                runOnUiThread {
-                    toast(
-                        when (result) {
-                            ImportResult.IMPORT_OK -> org.fossify.commons.R.string.importing_successful
-                            ImportResult.IMPORT_PARTIAL -> org.fossify.commons.R.string.importing_some_entries_failed
-                            else -> org.fossify.commons.R.string.importing_failed
-                        }
-                    )
-
-                    getAdapter()?.getPlaylistsFragment()?.setupFragment(this)
-                }
-            }.importPlaylist(path, id)
-        }
     }
 
     private fun showSleepTimer() {
@@ -492,6 +379,10 @@ class MainActivity : SimpleMusicActivity() {
         }
     }
 
+    override fun onPlayingTrackChanged(trackId: Long, isPlaying: Boolean) {
+        getAllFragments().forEach { it.onPlayingTrackChanged(trackId, isPlaying) }
+    }
+
     private fun getAdapter() = binding.viewPager.adapter as? ViewPagerAdapter
 
     private fun getAllFragments() = getAdapter()?.getAllFragments().orEmpty()
@@ -506,11 +397,6 @@ class MainActivity : SimpleMusicActivity() {
         if (event.seconds == 0) {
             finish()
         }
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    fun playlistsUpdated(event: Events.PlaylistsUpdated) {
-        getAdapter()?.getPlaylistsFragment()?.setupFragment(this)
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -557,14 +443,36 @@ class MainActivity : SimpleMusicActivity() {
         }
     }
 
+    /** Play a track handed to us by another app, then reveal it in the panel. */
+    private fun handleViewIntent(intent: Intent) {
+        if (intent.action != Intent.ACTION_VIEW) {
+            return
+        }
+
+        val uri = intent.data ?: return
+        intent.data = null
+        getTrackFromUri(uri) { track ->
+            runOnUiThread {
+                if (track != null) {
+                    prepareAndPlay(listOf(track))
+                } else {
+                    toast(org.fossify.commons.R.string.unknown_error_occurred)
+                }
+            }
+        }
+    }
+
     private fun handleNotificationIntent(intent: Intent) {
         val shouldOpenPlayer = intent.getBooleanExtra(EXTRA_OPEN_PLAYER, false)
 
         if (shouldOpenPlayer) {
             intent.removeExtra(EXTRA_OPEN_PLAYER)
-            Intent(this, TrackActivity::class.java).apply {
-                startActivity(this)
-            }
+            tryOpenPlaybackPanel()
         }
+    }
+
+    private companion object {
+        /** The leading tab, which [tabsList] puts Tracks in. Back unwinds to it from anywhere else. */
+        const val HOME_TAB_POSITION = 0
     }
 }

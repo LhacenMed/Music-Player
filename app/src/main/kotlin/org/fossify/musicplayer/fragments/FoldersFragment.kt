@@ -26,6 +26,8 @@ class FoldersFragment(context: Context, attributeSet: AttributeSet) : MyViewPage
     private var folders = ArrayList<Folder>()
     private val binding by viewBinding(FragmentFoldersBinding::bind)
 
+    override val list get() = binding.foldersList
+
     override fun setupFragment(activity: BaseSimpleActivity) {
         ensureBackgroundThread {
             val folders = context.audioHelper.getAllFolders()

@@ -7,9 +7,9 @@ import com.qtalk.recyclerviewfastscroller.RecyclerViewFastScroller
 import org.fossify.commons.activities.BaseSimpleActivity
 import org.fossify.commons.dialogs.ConfirmationDialog
 import org.fossify.commons.extensions.highlightTextPart
-import org.fossify.commons.extensions.setupViewBackground
 import org.fossify.commons.helpers.ensureBackgroundThread
 import org.fossify.commons.views.MyRecyclerView
+import org.fossify.musicplayer.extensions.setupActivatableBackground
 import org.fossify.musicplayer.R
 import org.fossify.musicplayer.databinding.ItemArtistBinding
 import org.fossify.musicplayer.extensions.audioHelper
@@ -81,8 +81,8 @@ class ArtistsAdapter(activity: BaseSimpleActivity, items: ArrayList<Artist>, rec
 
     private fun setupView(view: View, artist: Artist) {
         ItemArtistBinding.bind(view).apply {
-            root.setupViewBackground(context)
-            artistFrame.isSelected = selectedKeys.contains(artist.hashCode())
+            root.setupActivatableBackground(context)
+            artistFrame.isActivated = selectedKeys.contains(artist.hashCode())
             artistTitle.text = if (textToHighlight.isEmpty()) artist.title else artist.title.highlightTextPart(textToHighlight, properPrimaryColor)
             artistTitle.setTextColor(textColor)
 

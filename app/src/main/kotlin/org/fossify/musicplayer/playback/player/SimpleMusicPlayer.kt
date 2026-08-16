@@ -9,7 +9,6 @@ import androidx.media3.exoplayer.source.ShuffleOrder.DefaultShuffleOrder
 import org.fossify.musicplayer.extensions.currentMediaItems
 import org.fossify.musicplayer.extensions.maybeForceNext
 import org.fossify.musicplayer.extensions.maybeForcePrevious
-import org.fossify.musicplayer.extensions.maybeRestartOnPrevious
 import org.fossify.musicplayer.extensions.move
 import org.fossify.musicplayer.extensions.shuffledMediaItemsIndices
 import org.fossify.musicplayer.inlines.indexOfFirstOrNull
@@ -44,7 +43,6 @@ class SimpleMusicPlayer(private val exoPlayer: ExoPlayer) : ForwardingPlayer(exo
 
     override fun seekToPrevious() {
         play()
-        if (maybeRestartOnPrevious()) return
         if (maybeForcePrevious()) return
         super.seekToPrevious()
     }
@@ -52,6 +50,23 @@ class SimpleMusicPlayer(private val exoPlayer: ExoPlayer) : ForwardingPlayer(exo
     override fun seekToNextMediaItem() = seekToNext()
 
     override fun seekToPreviousMediaItem() = seekToPrevious()
+
+    /**
+     * ExoPlayer builds one shuffle order when the queue is set and keeps it for the queue's
+     * lifetime, so turning shuffle off and on again would deal out the very same order every time.
+     * Seeding a fresh one here, anchored on whatever is playing, is what makes each turn of the
+     * shuffle button a genuinely new run through the queue.
+     *
+     * Every way of enabling shuffle passes through the session's player, so this covers the panel,
+     * the notification and any external controller alike.
+     */
+    override fun setShuffleModeEnabled(shuffleModeEnabled: Boolean) {
+        super.setShuffleModeEnabled(shuffleModeEnabled)
+        if (shuffleModeEnabled && mediaItemCount > 0) {
+            @Suppress("DEPRECATION")
+            setShuffleIndices(createShuffledIndices(mediaItemCount, currentMediaItemIndex))
+        }
+    }
 
     override fun getAudioSessionId() = exoPlayer.audioSessionId
 
@@ -98,4 +113,28 @@ class SimpleMusicPlayer(private val exoPlayer: ExoPlayer) : ForwardingPlayer(exo
             )
         }
     }
+}
+
+/**
+ * Deal out a fresh play order over [length] tracks, bringing the track at [startIndex] to the
+ * front so that shuffling never interrupts what is already playing.
+ *
+ * An inside-out Fisher-Yates shuffle, so every ordering is equally likely and the whole queue is
+ * laid out in one pass. Ported from Auxio's `BetterShuffleOrder`.
+ */
+private fun createShuffledIndices(length: Int, startIndex: Int): IntArray {
+    val shuffled = IntArray(length)
+    for (i in 0 until length) {
+        val swapIndex = (0..i).random()
+        shuffled[i] = shuffled[swapIndex]
+        shuffled[swapIndex] = i
+    }
+
+    val startIndexInShuffled = shuffled.indexOf(startIndex)
+    if (startIndexInShuffled != -1) {
+        shuffled[startIndexInShuffled] = shuffled[0]
+        shuffled[0] = startIndex
+    }
+
+    return shuffled
 }

@@ -5,8 +5,8 @@ import android.view.ViewGroup
 import com.qtalk.recyclerviewfastscroller.RecyclerViewFastScroller
 import org.fossify.commons.activities.BaseSimpleActivity
 import org.fossify.commons.extensions.highlightTextPart
-import org.fossify.commons.extensions.setupViewBackground
 import org.fossify.commons.views.MyRecyclerView
+import org.fossify.musicplayer.extensions.setupActivatableBackground
 import org.fossify.musicplayer.R
 import org.fossify.musicplayer.databinding.ItemFolderBinding
 import org.fossify.musicplayer.extensions.audioHelper
@@ -62,8 +62,8 @@ class FoldersAdapter(
 
     private fun setupView(view: View, folder: Folder) {
         ItemFolderBinding.bind(view).apply {
-            root.setupViewBackground(context)
-            folderFrame.isSelected = selectedKeys.contains(folder.hashCode())
+            root.setupActivatableBackground(context)
+            folderFrame.isActivated = selectedKeys.contains(folder.hashCode())
             folderTitle.text = if (textToHighlight.isEmpty()) folder.title else folder.title.highlightTextPart(textToHighlight, properPrimaryColor)
             folderTitle.setTextColor(textColor)
 

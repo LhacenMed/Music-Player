@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.FrameLayout">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/lyrics_recycler"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:overScrollMode="never"
+        android:scrollbars="none"
+        tools:itemCount="3"
+        tools:listitem="@layout/item_lyric_line" />
+
+    <TextView
+        android:id="@+id/lyrics_placeholder"
+        style="@style/Widget.LyricLine.Placeholder"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/size_lyric_line"
+        android:layout_gravity="center_vertical"
+        android:text="@string/no_lyrics_found" />
+
+</merge>

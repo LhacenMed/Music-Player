@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.media.ThumbnailUtils
 import android.net.Uri
@@ -12,6 +13,7 @@ import android.os.Looper
 import android.provider.MediaStore
 import android.provider.MediaStore.Audio
 import android.util.Size
+import androidx.core.graphics.ColorUtils
 import androidx.core.net.toUri
 import androidx.media3.common.Player
 import com.bumptech.glide.Glide
@@ -20,6 +22,7 @@ import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.Target
+import com.google.android.material.color.MaterialColors
 import org.fossify.commons.extensions.*
 import org.fossify.commons.helpers.ensureBackgroundThread
 import org.fossify.commons.helpers.isQPlus
@@ -305,3 +308,30 @@ fun Context.getFriendlyFolder(path: String): String {
         else -> parentPath.getFilenameFromPath()
     }
 }
+
+/** How far the browsing surface sits below the playback sheet, in percent. */
+private const val CONTENT_SURFACE_DARKEN_PERCENT = 4
+
+/** How far the queue sheet sits above the playback sheet it is stacked on, in percent. */
+private const val QUEUE_SURFACE_LIGHTEN_PERCENT = 4
+
+/**
+ * The surface hierarchy the playback UI is built on, mirroring Auxio's: browsing content sits at
+ * the bottom, and each sheet stacked over it steps one level lighter so the layers stay legible
+ * against each other.
+ */
+fun Context.getContentSurfaceColor() = getProperBackgroundColor().darkenColor(CONTENT_SURFACE_DARKEN_PERCENT)
+
+fun Context.getPlaybackSurfaceColor() = getProperBackgroundColor()
+
+fun Context.getQueueSurfaceColor() = getProperBackgroundColor().lightenColor(QUEUE_SURFACE_LIGHTEN_PERCENT)
+
+/**
+ * The colour a queue entry lifts to while it is being dragged. This is the entry's own pressed
+ * colour, so picking one up simply holds the shade that touching it already showed rather than
+ * introducing a third one.
+ */
+fun Context.getLiftedQueueSurfaceColor() = ColorUtils.compositeColors(
+    MaterialColors.getColor(this, android.R.attr.colorControlHighlight, Color.TRANSPARENT),
+    getQueueSurfaceColor()
+)
