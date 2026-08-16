@@ -2,11 +2,17 @@ package org.fossify.musicplayer.helpers
 
 import androidx.core.net.toUri
 import org.fossify.commons.helpers.PERMISSION_READ_MEDIA_AUDIO
+import org.fossify.commons.helpers.SORT_DESCENDING
 import org.fossify.commons.helpers.PERMISSION_WRITE_STORAGE
 import org.fossify.commons.helpers.isTiramisuPlus
 
 const val ALL_TRACKS_PLAYLIST_ID = 1
+const val FAVORITES_PLAYLIST_ID = 2
+const val HISTORY_PLAYLIST_ID = 3
 const val EQUALIZER_PRESET_CUSTOM = -1
+
+/** How long a track has to play before the listen is counted, rather than merely remembered. */
+const val PLAY_COUNT_THRESHOLD_MS = 10000L
 
 const val ARTIST = "artist"
 const val ALBUM = "album"
@@ -108,6 +114,14 @@ const val PLAYER_SORT_BY_ARTIST_TITLE = 32
 const val PLAYER_SORT_BY_TRACK_ID = 64
 const val PLAYER_SORT_BY_CUSTOM = 128
 const val PLAYER_SORT_BY_DATE_ADDED = 256
+const val PLAYER_SORT_BY_PLAY_COUNT = 512
+
+// a modifier of PLAYER_SORT_BY_DATE_ADDED rather than a sorting of its own, so it sits above
+// SORT_DESCENDING (1024) alongside the other flags instead of among the sortings.
+const val PLAYER_SORT_USE_PLAYLIST_DATE_ADDED = 2048
+
+/** The order the history playlist reads in until the user sorts it otherwise: last played first. */
+const val HISTORY_SORTING = PLAYER_SORT_BY_DATE_ADDED or PLAYER_SORT_USE_PLAYLIST_DATE_ADDED or SORT_DESCENDING
 
 const val PLAYLIST_SORTING = "playlist_sorting"
 const val PLAYLIST_TRACKS_SORTING = "playlist_tracks_sorting"

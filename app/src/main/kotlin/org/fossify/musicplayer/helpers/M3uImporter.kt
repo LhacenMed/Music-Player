@@ -36,13 +36,12 @@ class M3uImporter(
             for (m3uEntry in m3uEntries) {
                 for (track in existingTracks) {
                     if (m3uEntry.location.toString() == track.path || m3uEntry.title == track.title) {
-                        val copy = track.copy(id = 0, playListId = playListId)
-                        playlistItems.add(copy)
+                        playlistItems.add(track)
                     }
                 }
             }
 
-            activity.audioHelper.insertTracks(playlistItems)
+            activity.audioHelper.addTracksToPlaylist(playListId, playlistItems)
             exportedEvents = playlistItems.size
         } catch (e: Exception) {
             failedEvents++

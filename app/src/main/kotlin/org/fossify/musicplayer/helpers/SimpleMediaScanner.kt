@@ -198,7 +198,12 @@ class SimpleMediaScanner(private val context: Application) {
         val tracksRemovedFromAllTracks = config.tracksRemovedFromAllTracksPlaylist.map { it.toLong() }
         val tracksWithPlaylist = newTracks
             .filter { it.mediaStoreId !in tracksRemovedFromAllTracks && it.playListId == 0 && it.path.getParentPath() !in excludedFolders }
-            .onEach { it.playListId = ALL_TRACKS_PLAYLIST_ID }
+            // Joining 'All tracks' is not something the user did, it is the file turning up on the
+            // device, so that is the moment this playlist records rather than the moment of import.
+            .onEach {
+                it.playListId = ALL_TRACKS_PLAYLIST_ID
+                it.dateAddedToPlaylist = it.dateAdded
+            }
         RoomHelper(context).insertTracksWithPlaylist(tracksWithPlaylist as ArrayList<Track>)
     }
 

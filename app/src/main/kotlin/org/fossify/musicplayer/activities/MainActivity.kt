@@ -6,6 +6,7 @@ import android.media.AudioManager
 import android.os.Bundle
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
+import com.google.gson.Gson
 import org.fossify.musicplayer.BuildConfig
 import org.fossify.commons.dialogs.RadioGroupDialog
 import org.fossify.commons.extensions.*
@@ -20,6 +21,7 @@ import org.fossify.musicplayer.dialogs.SleepTimerCustomDialog
 import org.fossify.musicplayer.extensions.*
 import org.fossify.musicplayer.helpers.*
 import org.fossify.musicplayer.models.Events
+import org.fossify.musicplayer.models.Playlist
 import org.fossify.musicplayer.playback.CustomCommands
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
@@ -274,15 +276,30 @@ class MainActivity : SimpleMusicActivity() {
         binding.mainTabsHolder.beGoneIf(binding.mainTabsHolder.tabCount == 1)
     }
 
-    /**
-     * The fixed entry points above the tabs. Favorites and Recent are presentational for now; only
-     * Playlists leads anywhere.
-     */
+    /** The fixed entry points above the tabs. */
     private fun setupLibraryShortcuts() {
+        binding.libraryShortcuts.shortcutFavorites.setOnClickListener {
+            openManagedPlaylist(FAVORITES_PLAYLIST_ID, org.fossify.commons.R.string.favorites)
+        }
+
+        binding.libraryShortcuts.shortcutRecent.setOnClickListener {
+            openManagedPlaylist(HISTORY_PLAYLIST_ID, R.string.recent)
+        }
+
         binding.libraryShortcuts.shortcutPlaylists.setOnClickListener {
             hideKeyboard()
             startActivity(Intent(applicationContext, PlaylistsActivity::class.java))
         }
+    }
+
+    /** Playlists the app maintains are built in, so their id and title need no database read. */
+    private fun openManagedPlaylist(playlistId: Int, titleRes: Int) {
+        hideKeyboard()
+        val playlist = Playlist(playlistId, getString(titleRes))
+        startActivity(
+            Intent(applicationContext, TracksActivity::class.java)
+                .putExtra(PLAYLIST, Gson().toJson(playlist))
+        )
     }
 
     /** The cards sit one surface step above the app bar behind them, so they read as raised. */

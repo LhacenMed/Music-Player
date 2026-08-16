@@ -40,8 +40,11 @@ class PlaylistsAdapter(
     }
 
     override fun prepareActionMode(menu: Menu) {
+        // The playlists the app maintains itself can be neither renamed nor deleted.
+        val hasManaged = getSelectedItems().any { it.isManaged }
         menu.apply {
-            findItem(R.id.cab_rename).isVisible = isOneItemSelected()
+            findItem(R.id.cab_rename).isVisible = isOneItemSelected() && !hasManaged
+            findItem(R.id.cab_delete).isVisible = !hasManaged
         }
     }
 

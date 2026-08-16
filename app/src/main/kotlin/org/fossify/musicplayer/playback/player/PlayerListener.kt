@@ -8,6 +8,7 @@ import androidx.media3.common.util.UnstableApi
 import org.fossify.commons.extensions.toast
 import org.fossify.musicplayer.extensions.config
 import org.fossify.musicplayer.extensions.getPlaybackSetting
+import org.fossify.musicplayer.extensions.isReallyPlaying
 import org.fossify.musicplayer.helpers.PlaybackSetting
 import org.fossify.musicplayer.playback.PlaybackService
 
@@ -30,9 +31,15 @@ internal fun PlaybackService.getPlayerListener() = object : Player.Listener {
         ) {
             updatePlaybackState()
         }
+
+        if (events.containsAny(Player.EVENT_IS_PLAYING_CHANGED, Player.EVENT_POSITION_DISCONTINUITY)) {
+            playHistoryRecorder.onPlayingChanged(player.isReallyPlaying, player.currentPosition)
+        }
     }
 
     override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+        playHistoryRecorder.onTrackStarted(mediaItem)
+
         // customize repeat mode behaviour as the default behaviour doesn't align with our requirements.
         withPlayer {
             if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_REPEAT) {

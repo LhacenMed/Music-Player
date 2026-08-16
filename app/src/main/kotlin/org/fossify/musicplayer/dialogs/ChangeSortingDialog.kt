@@ -26,6 +26,10 @@ class ChangeSortingDialog(val activity: Activity, val location: Int, val playlis
             useForThisPlaylistDivider.beVisibleIf(playlist != null || path != null)
             sortingDialogUseForThisOnly.beVisibleIf(playlist != null || path != null)
 
+            // 'All tracks' holds the whole library, so the time a track joined it is the time its
+            // file turned up: there are no two readings of "date added" to choose between.
+            sortingDialogUsePlaylistDateAdded.beVisibleIf(playlist != null && !playlist.isAllTracks)
+
             if (playlist != null) {
                 sortingDialogUseForThisOnly.isChecked = config.hasCustomPlaylistSorting(playlist.id)
             } else if (path != null) {
@@ -49,6 +53,8 @@ class ChangeSortingDialog(val activity: Activity, val location: Int, val playlis
                 config.trackSorting
             }
         }
+
+        binding.sortingDialogUsePlaylistDateAdded.isChecked = currSorting and PLAYER_SORT_USE_PLAYLIST_DATE_ADDED != 0
 
         setupSortRadio()
         setupOrderRadio()
@@ -104,6 +110,7 @@ class ChangeSortingDialog(val activity: Activity, val location: Int, val playlis
 
                 if (playlist != null) {
                     radioItems.add(RadioItem(4, activity.getString(org.fossify.commons.R.string.custom), PLAYER_SORT_BY_CUSTOM))
+                    radioItems.add(RadioItem(5, activity.getString(R.string.most_played), PLAYER_SORT_BY_PLAY_COUNT))
                 }
             }
         }
@@ -111,6 +118,8 @@ class ChangeSortingDialog(val activity: Activity, val location: Int, val playlis
         binding.sortingDialogRadioSorting.setOnCheckedChangeListener { _, checkedId ->
             binding.sortingOrderDivider.beVisibleIf(checkedId != PLAYER_SORT_BY_CUSTOM)
             binding.sortingDialogRadioOrder.beVisibleIf(checkedId != PLAYER_SORT_BY_CUSTOM)
+            // Which of the two dates to sort by only means anything while sorting by one of them.
+            binding.sortingDialogUsePlaylistDateAdded.isEnabled = checkedId == PLAYER_SORT_BY_DATE_ADDED
         }
 
         radioItems.forEach { radioItem ->
@@ -145,6 +154,10 @@ class ChangeSortingDialog(val activity: Activity, val location: Int, val playlis
 
         if (binding.sortingDialogRadioOrder.checkedRadioButtonId == R.id.sorting_dialog_radio_descending) {
             sorting = sorting or SORT_DESCENDING
+        }
+
+        if (binding.sortingDialogUsePlaylistDateAdded.isChecked) {
+            sorting = sorting or PLAYER_SORT_USE_PLAYLIST_DATE_ADDED
         }
 
         if (currSorting != sorting || location == ACTIVITY_PLAYLIST_FOLDER) {

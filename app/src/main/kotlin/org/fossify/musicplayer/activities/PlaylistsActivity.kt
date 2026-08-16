@@ -133,12 +133,8 @@ class PlaylistsActivity : SimpleMusicActivity() {
             getFolderTracks(path, true) { tracks ->
                 runOnUiThread {
                     NewPlaylistDialog(this) { playlistId ->
-                        tracks.forEach {
-                            it.playListId = playlistId
-                        }
-
                         ensureBackgroundThread {
-                            audioHelper.insertTracks(tracks)
+                            audioHelper.addTracksToPlaylist(playlistId, tracks)
                             EventBus.getDefault().post(Events.PlaylistsUpdated())
                         }
                     }

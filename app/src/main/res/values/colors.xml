@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <color name="favorite_star">#FFC107</color>
     <color name="sel_item_activated_bg">#1FFFFFFF</color>
 </resources>

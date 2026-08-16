@@ -31,6 +31,7 @@ import org.fossify.commons.helpers.ensureBackgroundThread
 import org.fossify.musicplayer.R
 import org.fossify.musicplayer.activities.SimpleControllerActivity
 import org.fossify.musicplayer.databinding.ViewPlaybackPanelBinding
+import org.fossify.musicplayer.extensions.audioHelper
 import org.fossify.musicplayer.extensions.config
 import org.fossify.musicplayer.extensions.currentMediaItems
 import org.fossify.musicplayer.extensions.currentMediaItemsShuffled
@@ -48,7 +49,9 @@ import org.fossify.musicplayer.extensions.toTracks
 import org.fossify.musicplayer.extensions.viewBinding
 import org.fossify.musicplayer.helpers.LyricsExtractor
 import org.fossify.musicplayer.helpers.PlaybackSetting
+import org.fossify.musicplayer.models.Events
 import org.fossify.musicplayer.models.Track
+import org.greenrobot.eventbus.EventBus
 import kotlin.math.abs
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -90,6 +93,9 @@ class PlaybackPanel(context: Context, attributeSet: AttributeSet) : ConstraintLa
     /** Guards against a stale lyrics read landing after the track has already moved on. */
     private var lyricsToken = 0
 
+    /** Guards against a stale favorite read landing after the button already says otherwise. */
+    private var favoriteToken = 0
+
     /** Last wave state pushed to the seek bar, so it is only re-armed on a real play/pause flip. */
     private var isWaveEnabled: Boolean? = null
 
@@ -118,6 +124,7 @@ class PlaybackPanel(context: Context, attributeSet: AttributeSet) : ConstraintLa
                 false
             }
         }
+        playbackFavorite.setOnClickListener { toggleFavorite() }
         playbackMore.setOnClickListener { onMoreClick() }
 
         playbackPager.apply {
@@ -223,6 +230,7 @@ class PlaybackPanel(context: Context, attributeSet: AttributeSet) : ConstraintLa
 
         updateCarousel()
         loadLyrics(track)
+        loadFavorite(track)
     }
 
     fun updateTrackInfo() {
@@ -398,6 +406,51 @@ class PlaybackPanel(context: Context, attributeSet: AttributeSet) : ConstraintLa
                 val state = if (lyrics != null) LyricsState.Loaded(lyrics) else LyricsState.Empty
                 withPlayer { lyricsView.update(state, currentPosition) }
             }
+        }
+    }
+
+    /**
+     * Bring the heart onto whatever the favorites playlist holds now. The playlist is editable from
+     * its own screen too, so the panel cannot assume its own taps are the only thing to fill it.
+     */
+    fun updateFavorite() = withPlayer {
+        val track = currentMediaItem?.toTrack() ?: return@withPlayer
+        loadFavorite(track)
+    }
+
+    /**
+     * Read whether the track sits in the favorites playlist off the main thread. [favoriteToken]
+     * drops any read the user has already outrun, by moving on or by tapping the button.
+     */
+    private fun loadFavorite(track: Track) {
+        val favoriteButton = binding.playbackFavorite
+        val token = ++favoriteToken
+
+        ensureBackgroundThread {
+            val isFavorite = context.audioHelper.isFavorite(track.mediaStoreId)
+            favoriteButton.post {
+                if (token == favoriteToken) {
+                    // The icon is an activated-state selector, so the button's state fills the heart.
+                    favoriteButton.isActivated = isFavorite
+                }
+            }
+        }
+    }
+
+    /**
+     * Move the playing track in or out of the favorites playlist. The heart fills before the write
+     * is made, so the tap reads as instant, and the read it invalidates is the one the tap has just
+     * answered on the user's behalf.
+     */
+    private fun toggleFavorite() = withPlayer {
+        val track = currentMediaItem?.toTrack() ?: return@withPlayer
+        val isFavorite = !binding.playbackFavorite.isActivated
+        binding.playbackFavorite.isActivated = isFavorite
+        favoriteToken++
+
+        ensureBackgroundThread {
+            context.audioHelper.setFavorite(track, isFavorite)
+            EventBus.getDefault().post(Events.PlaylistsUpdated())
         }
     }
 

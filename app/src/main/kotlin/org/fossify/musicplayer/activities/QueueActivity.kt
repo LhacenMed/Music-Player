@@ -20,8 +20,9 @@ import org.fossify.musicplayer.adapters.QueueAdapter
 import org.fossify.musicplayer.databinding.ActivityQueueBinding
 import org.fossify.musicplayer.dialogs.NewPlaylistDialog
 import org.fossify.musicplayer.extensions.*
-import org.fossify.musicplayer.helpers.RoomHelper
+import org.fossify.musicplayer.models.Events
 import org.fossify.musicplayer.models.Track
+import org.greenrobot.eventbus.EventBus
 
 class QueueActivity : SimpleControllerActivity() {
     private var searchMenuItem: MenuItem? = null
@@ -161,14 +162,10 @@ class QueueActivity : SimpleControllerActivity() {
 
     private fun createPlaylistFromQueue() {
         NewPlaylistDialog(this) { newPlaylistId ->
-            val tracks = ArrayList<Track>()
-            getAdapter()?.items?.forEach {
-                it.playListId = newPlaylistId
-                tracks.add(it)
-            }
-
+            val tracks = getAdapter()?.items.orEmpty()
             ensureBackgroundThread {
-                RoomHelper(this).insertTracksWithPlaylist(tracks)
+                audioHelper.addTracksToPlaylist(newPlaylistId, tracks)
+                EventBus.getDefault().post(Events.PlaylistsUpdated())
             }
         }
     }

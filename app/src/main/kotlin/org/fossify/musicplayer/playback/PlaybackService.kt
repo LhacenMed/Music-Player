@@ -27,12 +27,14 @@ class PlaybackService : MediaLibraryService(), MediaSessionService.Listener {
     internal lateinit var playerListener: Player.Listener
     internal lateinit var mediaSession: MediaLibrarySession
     internal lateinit var mediaItemProvider: MediaItemProvider
+    internal lateinit var playHistoryRecorder: PlayHistoryRecorder
 
     internal var currentRoot = ""
 
     override fun onCreate() {
         super.onCreate()
         setListener(this)
+        playHistoryRecorder = PlayHistoryRecorder(this)
         initializeSessionAndPlayer(handleAudioFocus = true, handleAudioBecomingNoisy = true)
         initializeLibrary()
     }
@@ -43,6 +45,7 @@ class PlaybackService : MediaLibraryService(), MediaSessionService.Listener {
         super.onDestroy()
         releaseMediaSession()
         clearListener()
+        playHistoryRecorder.release()
         stopSleepTimer()
         SimpleEqualizer.release()
     }

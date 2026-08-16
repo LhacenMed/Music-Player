@@ -10,20 +10,15 @@ import org.fossify.commons.helpers.ensureBackgroundThread
 import org.fossify.musicplayer.BuildConfig
 import org.fossify.musicplayer.dialogs.SelectPlaylistDialog
 import org.fossify.musicplayer.helpers.FLAG_MANUAL_CACHE
-import org.fossify.musicplayer.helpers.RoomHelper
+import org.fossify.musicplayer.models.Events
 import org.fossify.musicplayer.models.Track
+import org.greenrobot.eventbus.EventBus
 
 fun Activity.addTracksToPlaylist(tracks: List<Track>, callback: () -> Unit) {
     SelectPlaylistDialog(this) { playlistId ->
-        val tracksToAdd = ArrayList<Track>()
-        tracks.forEach {
-            it.id = 0
-            it.playListId = playlistId
-            tracksToAdd.add(it)
-        }
-
         ensureBackgroundThread {
-            RoomHelper(this).insertTracksWithPlaylist(tracksToAdd)
+            audioHelper.addTracksToPlaylist(playlistId, tracks)
+            EventBus.getDefault().post(Events.PlaylistsUpdated())
 
             runOnUiThread {
                 callback()

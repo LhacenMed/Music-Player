@@ -63,12 +63,64 @@ class AudioHelper(private val context: Context) {
 
     fun deleteTrack(mediaStoreId: Long) {
         context.tracksDAO.removeTrack(mediaStoreId)
+        context.playStatsDAO.deletePlayStats(mediaStoreId)
     }
 
     fun deleteTracks(tracks: List<Track>) {
         tracks.forEach {
             deleteTrack(it.mediaStoreId)
         }
+    }
+
+    /**
+     * Put [tracks] in a playlist, stamped with the moment they joined it.
+     *
+     * Playlist membership is a copy of the track row, so this is the one place a copy is made: it is
+     * what lets a playlist be sorted by when its tracks were added to it rather than by when their
+     * files appeared on the device.
+     */
+    fun addTracksToPlaylist(playlistId: Int, tracks: List<Track>) {
+        val addedAt = System.currentTimeMillis().milliseconds.inWholeSeconds.toInt()
+        insertTracks(tracks.map { it.copy(id = 0, playListId = playlistId, dateAddedToPlaylist = addedAt) })
+    }
+
+    fun isFavorite(mediaStoreId: Long): Boolean {
+        return context.tracksDAO.isTrackInPlaylist(mediaStoreId, FAVORITES_PLAYLIST_ID)
+    }
+
+    /** Add [track] to the built-in favorites playlist, or take it back out again. */
+    fun setFavorite(track: Track, isFavorite: Boolean) {
+        if (isFavorite) {
+            addTracksToPlaylist(FAVORITES_PLAYLIST_ID, listOf(track))
+        } else {
+            removeTracksFromPlaylist(FAVORITES_PLAYLIST_ID, listOf(track.mediaStoreId))
+        }
+    }
+
+    /**
+     * Remember that [track] is being listened to, moving it to the front of the history playlist.
+     *
+     * The history row is the record of the listen, so re-adding it is what makes "when it joined the
+     * playlist" mean "when it was last played" — which is the order the Recent screen reads in.
+     */
+    fun recordPlayStarted(track: Track) {
+        // One row per track: a repeat listen replaces the row rather than piling up beside it,
+        // which is what keeps the history bounded by the library instead of growing forever.
+        addTracksToPlaylist(HISTORY_PLAYLIST_ID, listOf(track))
+    }
+
+    /** Count a listen that lasted long enough to be worth counting. */
+    fun recordPlayCounted(mediaStoreId: Long) {
+        context.playStatsDAO.incrementPlayCount(mediaStoreId)
+    }
+
+    /**
+     * Attach each track's play count, which lives per track rather than on the playlist rows, so
+     * that any playlist can be ordered by how often its tracks have been listened to.
+     */
+    private fun ArrayList<Track>.withPlayCounts(): ArrayList<Track> {
+        val playCounts = context.playStatsDAO.getAll().associate { it.mediaStoreId to it.playCount }
+        return onEach { it.playCount = playCounts[it.mediaStoreId] ?: 0 }
     }
 
     fun removeTracksFromPlaylist(playlistId: Int, mediaStoreIds: List<Long>) {
@@ -208,6 +260,7 @@ class AudioHelper(private val context: Context) {
     fun getPlaylistTracks(playlistId: Int): ArrayList<Track> {
         val tracks = context.tracksDAO.getTracksFromPlaylist(playlistId)
             .applyProperFilenames(config.showFilename)
+            .withPlayCounts()
 
         tracks.sortSafely(config.getProperPlaylistSorting(playlistId))
         return tracks
@@ -222,8 +275,10 @@ class AudioHelper(private val context: Context) {
     }
 
     fun deletePlaylists(playlists: ArrayList<Playlist>) {
-        context.playlistDAO.deletePlaylists(playlists)
-        playlists.forEach {
+        // The playlists the app maintains itself ship with it, so no path may delete them.
+        val deletablePlaylists = playlists.filterNot { it.isManaged }
+        context.playlistDAO.deletePlaylists(deletablePlaylists)
+        deletablePlaylists.forEach {
             context.tracksDAO.removePlaylistSongs(it.id)
         }
     }

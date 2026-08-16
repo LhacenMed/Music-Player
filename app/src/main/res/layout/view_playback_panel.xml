@@ -73,7 +73,6 @@
         android:layout_height="wrap_content"
         android:contentDescription="@string/favorite"
         app:icon="@drawable/sel_favorite_state_24"
-        app:iconTint="@color/sel_favorite_icon"
         app:layout_constraintBottom_toBottomOf="@+id/playback_info_container"
         app:layout_constraintEnd_toStartOf="@+id/playback_more"
         app:layout_constraintTop_toTopOf="@+id/playback_info_container"

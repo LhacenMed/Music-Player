@@ -6,16 +6,24 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import org.fossify.musicplayer.R
+import org.fossify.musicplayer.helpers.FAVORITES_PLAYLIST_ID
+import org.fossify.musicplayer.helpers.HISTORY_PLAYLIST_ID
 import org.fossify.musicplayer.interfaces.*
 import org.fossify.musicplayer.models.*
 import org.fossify.musicplayer.objects.MyExecutor
 
-@Database(entities = [Track::class, Playlist::class, QueueItem::class, Artist::class, Album::class, Genre::class], version = 15)
+@Database(
+    entities = [Track::class, Playlist::class, QueueItem::class, Artist::class, Album::class, Genre::class, PlayStats::class],
+    version = 17
+)
 abstract class SongsDatabase : RoomDatabase() {
 
     abstract fun SongsDao(): SongsDao
 
     abstract fun PlaylistsDao(): PlaylistsDao
+
+    abstract fun PlayStatsDao(): PlayStatsDao
 
     abstract fun QueueItemsDao(): QueueItemsDao
 
@@ -32,6 +40,8 @@ abstract class SongsDatabase : RoomDatabase() {
             if (db == null) {
                 synchronized(SongsDatabase::class) {
                     if (db == null) {
+                        val favoritesTitle = context.getString(org.fossify.commons.R.string.favorites)
+                        val historyTitle = context.getString(R.string.recent)
                         db = Room.databaseBuilder(context.applicationContext, SongsDatabase::class.java, "songs.db")
                             .setQueryExecutor(MyExecutor.myExecutor)
                             .addMigrations(MIGRATION_1_2)
@@ -48,6 +58,9 @@ abstract class SongsDatabase : RoomDatabase() {
                             .addMigrations(MIGRATION_12_13)
                             .addMigrations(MIGRATION_13_14)
                             .addMigrations(MIGRATION_14_15)
+                            .addMigrations(migration15To16(favoritesTitle))
+                            .addMigrations(migration16To17(historyTitle))
+                            .addCallback(ManagedPlaylistsCallback(favoritesTitle, historyTitle))
                             .build()
                     }
                 }
@@ -231,6 +244,67 @@ abstract class SongsDatabase : RoomDatabase() {
                     execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_tracks_id` ON `tracks` (`media_store_id`, `playlist_id`)")
                 }
             }
+        }
+
+        private fun migration15To16(favoritesTitle: String) = object : Migration(15, 16) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.reserveManagedPlaylist(FAVORITES_PLAYLIST_ID, favoritesTitle)
+            }
+        }
+
+        /**
+         * Give every playlist row the moment it joined its playlist, and open the tally that counts
+         * how often each track is listened to.
+         */
+        private fun migration16To17(historyTitle: String) = object : Migration(16, 17) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.apply {
+                    execSQL("ALTER TABLE tracks ADD COLUMN date_added_to_playlist INTEGER NOT NULL DEFAULT 0")
+                    // Rows that predate the column joined their playlist at a moment nobody recorded.
+                    // Seeding them with the file's own date keeps both readings of "date added"
+                    // agreeing on day one, and lets them part company from the next addition on.
+                    execSQL("UPDATE tracks SET date_added_to_playlist = date_added")
+
+                    execSQL("CREATE TABLE IF NOT EXISTS `play_stats` (`media_store_id` INTEGER NOT NULL, `play_count` INTEGER NOT NULL, PRIMARY KEY(`media_store_id`))")
+
+                    reserveManagedPlaylist(HISTORY_PLAYLIST_ID, historyTitle)
+                }
+            }
+        }
+
+        /** Seeds the playlists the app maintains into a database being created from scratch. */
+        private class ManagedPlaylistsCallback(
+            private val favoritesTitle: String,
+            private val historyTitle: String
+        ) : RoomDatabase.Callback() {
+            override fun onCreate(db: SupportSQLiteDatabase) {
+                db.reserveManagedPlaylist(FAVORITES_PLAYLIST_ID, favoritesTitle)
+                db.reserveManagedPlaylist(HISTORY_PLAYLIST_ID, historyTitle)
+            }
+        }
+
+        /**
+         * Claim [playlistId] for a playlist that ships with the app, seeding it with the database
+         * itself rather than with the scanner: it is there before anything reads a playlist.
+         *
+         * Playlist ids are handed out by SQLite, so on an install old enough to hold playlists the
+         * user made themselves, the reserved id is already taken. That playlist is moved to a free
+         * id, taking the track rows pointing at it along with it.
+         */
+        private fun SupportSQLiteDatabase.reserveManagedPlaylist(playlistId: Int, title: String) {
+            execSQL(
+                "UPDATE tracks SET playlist_id = (SELECT MAX(id) + 1 FROM playlists) " +
+                    "WHERE playlist_id = $playlistId AND EXISTS (SELECT 1 FROM playlists WHERE id = $playlistId)"
+            )
+            execSQL("UPDATE playlists SET id = (SELECT MAX(id) + 1 FROM playlists) WHERE id = $playlistId")
+            execSQL("INSERT OR REPLACE INTO playlists (id, title) VALUES ($playlistId, ?)", arrayOf(title))
+
+            // Moving a row does not advance the autoincrement counter, so the id just vacated would
+            // be handed out again to the next playlist the user creates.
+            execSQL(
+                "UPDATE sqlite_sequence SET seq = (SELECT MAX(id) FROM playlists) " +
+                    "WHERE name = 'playlists' AND seq < (SELECT MAX(id) FROM playlists)"
+            )
         }
     }
 }

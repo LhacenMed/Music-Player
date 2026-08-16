@@ -29,6 +29,9 @@ interface SongsDao {
     @Query("SELECT COUNT(*) FROM tracks WHERE playlist_id = :playlistId")
     fun getTracksCountFromPlaylist(playlistId: Int): Int
 
+    @Query("SELECT EXISTS(SELECT 1 FROM tracks WHERE media_store_id = :mediaStoreId AND playlist_id = :playlistId)")
+    fun isTrackInPlaylist(mediaStoreId: Long, playlistId: Int): Boolean
+
     @Query("SELECT * FROM tracks WHERE folder_name = :folderName COLLATE NOCASE GROUP BY media_store_id")
     fun getTracksFromFolder(folderName: String): List<Track>
 

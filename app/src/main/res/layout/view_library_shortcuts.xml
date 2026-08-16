@@ -13,7 +13,9 @@
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/shortcut_favorites"
         style="@style/Widget.LibraryShortcut"
-        android:layout_marginEnd="@dimen/small_margin">
+        android:layout_marginEnd="@dimen/small_margin"
+        android:clickable="true"
+        android:focusable="true">
 
         <LinearLayout style="@style/Widget.LibraryShortcut.Content">
 

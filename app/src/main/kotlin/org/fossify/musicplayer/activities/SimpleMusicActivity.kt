@@ -94,8 +94,10 @@ abstract class SimpleMusicActivity : SimpleControllerActivity(), Player.Listener
         updateCurrentTrackBar()
         panel.updateColors()
         // The track may well have moved on while this screen was stopped, and no callback for that
-        // arrives once it is listening again.
+        // arrives once it is listening again. The favorites playlist may equally have been edited
+        // from the screen the user is coming back from.
         refreshPlayingTrackIndicator()
+        panel.updateFavorite()
     }
 
     override fun onPause() {

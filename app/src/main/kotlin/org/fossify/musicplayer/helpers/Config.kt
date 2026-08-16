@@ -56,10 +56,12 @@ class Config(context: Context) : BaseConfig(context) {
 
     fun hasCustomPlaylistSorting(playlistId: Int) = prefs.contains(SORT_PLAYLIST_PREFIX + playlistId)
 
-    fun getProperPlaylistSorting(playlistId: Int) = if (hasCustomPlaylistSorting(playlistId)) {
-        getCustomPlaylistSorting(playlistId)
-    } else {
-        playlistTracksSorting
+    fun getProperPlaylistSorting(playlistId: Int) = when {
+        hasCustomPlaylistSorting(playlistId) -> getCustomPlaylistSorting(playlistId)
+        // A history reads newest first or it is not a history. The user can still sort it
+        // otherwise, which stores a custom sorting and takes over from here.
+        playlistId == HISTORY_PLAYLIST_ID -> HISTORY_SORTING
+        else -> playlistTracksSorting
     }
 
     fun getProperFolderSorting(path: String) = if (hasCustomSorting(path)) {

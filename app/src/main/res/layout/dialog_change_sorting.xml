@@ -18,6 +18,18 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
+        <!-- Qualifies the sorting above rather than standing on its own, so it sits with the
+             sortings and is disabled, never hidden, while another one is picked. -->
+        <org.fossify.commons.views.MyAppCompatCheckbox
+            android:id="@+id/sorting_dialog_use_playlist_date_added"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:checked="false"
+            android:paddingTop="@dimen/small_margin"
+            android:paddingBottom="@dimen/small_margin"
+            android:text="@string/use_date_added_to_playlist"
+            android:textSize="@dimen/normal_text_size" />
+
         <ImageView
             android:id="@+id/sorting_order_divider"
             android:layout_width="match_parent"

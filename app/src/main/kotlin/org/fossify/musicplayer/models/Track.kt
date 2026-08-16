@@ -6,6 +6,7 @@ import android.provider.MediaStore
 import androidx.media3.common.MediaItem
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Ignore
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import org.fossify.commons.extensions.getFilenameFromPath
@@ -39,8 +40,16 @@ data class Track(
     @ColumnInfo(name = "year") var year: Int,
     @ColumnInfo(name = "date_added") var dateAdded: Int,
     @ColumnInfo(name = "order_in_playlist") var orderInPlaylist: Int,
-    @ColumnInfo(name = "flags") var flags: Int = 0
+    @ColumnInfo(name = "flags") var flags: Int = 0,
+    @ColumnInfo(name = "date_added_to_playlist") var dateAddedToPlaylist: Int = 0
 ) : Serializable, ListItem() {
+
+    /**
+     * How often this track has been listened to. Play counts are kept per track rather than per
+     * playlist row, so this is attached when it is needed for sorting rather than read from here.
+     */
+    @Ignore
+    var playCount: Int = 0
 
     companion object {
         private const val serialVersionUID = 6717978793256852245L
@@ -71,7 +80,13 @@ data class Track(
                         discComparison
                     }
                 }
-                sorting and PLAYER_SORT_BY_DATE_ADDED != 0 -> first.dateAdded.compareTo(second.dateAdded)
+                sorting and PLAYER_SORT_BY_DATE_ADDED != 0 -> if (sorting and PLAYER_SORT_USE_PLAYLIST_DATE_ADDED != 0) {
+                    first.dateAddedToPlaylist.compareTo(second.dateAddedToPlaylist)
+                } else {
+                    first.dateAdded.compareTo(second.dateAdded)
+                }
+
+                sorting and PLAYER_SORT_BY_PLAY_COUNT != 0 -> first.playCount.compareTo(second.playCount)
                 sorting and PLAYER_SORT_BY_CUSTOM != 0 -> first.orderInPlaylist.compareTo(second.orderInPlaylist)
                 else -> first.duration.compareTo(second.duration)
             }
