@@ -69,7 +69,9 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
+    <!-- The sheet draws under the navigation bar, so the option list holds the last row clear of
+         it the same way the queue list does, and rows still scroll underneath. -->
+    <org.fossify.musicplayer.views.BottomInsetRecyclerView
         android:id="@+id/menu_option_recycler"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

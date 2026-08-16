@@ -53,6 +53,16 @@
     <style name="ThemeOverlay.TrackMenu.BottomSheetDialog" parent="ThemeOverlay.Material3.BottomSheetDialog">
         <item name="bottomSheetStyle">@style/Widget.TrackMenu.BottomSheet</item>
         <item name="enableEdgeToEdge">true</item>
+        <item name="android:windowAnimationStyle">@style/Animation.TrackMenu.BottomSheetDialog</item>
+    </style>
+
+    <!-- Material's sheet transition fades the dialog while sliding it only a fifth of the way, so
+         the sheet appears most of the way up and the fade covers for it. Auxio's replacement drops
+         the fade and travels the full height instead, which is the same motion the playback sheet
+         makes. -->
+    <style name="Animation.TrackMenu.BottomSheetDialog" parent="Animation.Material3.BottomSheetDialog">
+        <item name="android:windowEnterAnimation">@anim/bottom_sheet_slide_in</item>
+        <item name="android:windowExitAnimation">@anim/bottom_sheet_slide_out</item>
     </style>
 
     <style name="Widget.QueueTrack.DisableDropShadows" parent="">
