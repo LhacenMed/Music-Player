@@ -183,6 +183,10 @@
     <style name="Widget.TrackItem.Secondary" parent="Widget.TrackItem.Base">
         <item name="android:textAppearance">?attr/textAppearanceBodyMedium</item>
         <item name="android:textColor">?android:attr/textColorSecondary</item>
+        <!-- Held back from the title above it. The mute is alpha rather than a dimmer colour
+             because updateTextColors repaints every MyTextView it can reach with the one text
+             colour, so anything set on the row itself is overwritten the next time it runs. -->
+        <item name="android:alpha">0.6</item>
     </style>
 
     <style name="Widget.TrackItem.Menu" parent="Widget.Material3Expressive.Button.IconButton">

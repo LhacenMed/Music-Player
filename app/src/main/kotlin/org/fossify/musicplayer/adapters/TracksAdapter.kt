@@ -195,9 +195,9 @@ class TracksAdapter(
             trackFrame.isActivated = selectedKeys.contains(track.hashCode())
             trackTitle.text = if (textToHighlight.isEmpty()) track.title else track.title.highlightTextPart(textToHighlight, properPrimaryColor)
             trackInfo.text = if (textToHighlight.isEmpty()) {
-                "${track.artist} • ${track.album}"
+                "${track.artist} - ${track.album}"
             } else {
-                ("${track.artist} • ${track.album}").highlightTextPart(textToHighlight, properPrimaryColor)
+                ("${track.artist} - ${track.album}").highlightTextPart(textToHighlight, properPrimaryColor)
             }
             trackDragHandle.beVisibleIf(isPlaylistContent() && selectedKeys.isNotEmpty())
             trackDragHandle.applyColorFilter(textColor)
