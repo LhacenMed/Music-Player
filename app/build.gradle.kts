@@ -142,6 +142,9 @@ detekt {
 
 dependencies {
     implementation(libs.fossify.commons)
+    // Pinned ahead of the version Commons pulls in: the M3 Expressive button size overlays and
+    // carousel masking used by the playback panel only exist from 1.14 onwards.
+    implementation(libs.material)
     implementation(libs.eventbus)
     implementation(libs.androidx.media)
     implementation(libs.androidx.swiperefreshlayout)

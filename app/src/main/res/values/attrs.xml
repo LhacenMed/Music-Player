@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="WavySlider">
+        <attr name="wavelength" format="dimension" />
+        <attr name="waveAmplitude" format="dimension" />
+        <attr name="waveSpeed" format="dimension" />
+        <attr name="waveAmplitudeRampProgressMax" format="float" />
+        <attr name="waveAmplitudeRampProgressMin" format="float" />
+    </declare-styleable>
+
+</resources>
