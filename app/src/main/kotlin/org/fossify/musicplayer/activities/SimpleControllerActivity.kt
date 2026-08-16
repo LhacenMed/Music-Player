@@ -55,6 +55,25 @@ abstract class SimpleControllerActivity : SimpleActivity(), Player.Listener {
 
     fun withPlayer(callback: MediaController.() -> Unit) = controller.withController(callback)
 
+    /**
+     * Play the track the user tapped, among the [tracks] it was listed with.
+     *
+     * The row of the track already loaded is the one the user reaches for to stop the music, so a
+     * tap on it plays or pauses instead of starting it over, and leaves the panel as they left it.
+     * Which list the tap came from is beside the point: any row standing for the loaded track
+     * behaves as play/pause, so the gesture means the same thing everywhere.
+     */
+    fun playTrack(tracks: List<Track>, startIndex: Int, source: String? = null) {
+        val track = tracks.getOrNull(startIndex) ?: return
+        withPlayer {
+            if (currentMediaItem.isSameMedia(track)) {
+                togglePlayback()
+            } else {
+                prepareAndPlay(tracks, startIndex, source = source)
+            }
+        }
+    }
+
     fun prepareAndPlay(
         tracks: List<Track>,
         startIndex: Int = 0,

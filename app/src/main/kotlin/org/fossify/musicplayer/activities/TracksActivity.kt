@@ -372,7 +372,7 @@ class TracksActivity : SimpleMusicActivity() {
         handleNotificationPermission { granted ->
             if (granted) {
                 val startIndex = tracks.indexOf(track)
-                prepareAndPlay(tracks, startIndex, source = binding.tracksToolbar.title.toString())
+                playTrack(tracks, startIndex, source = binding.tracksToolbar.title.toString())
             } else {
                 PermissionRequiredDialog(this, org.fossify.commons.R.string.allow_notifications_music_player, { openNotificationSettings() })
             }

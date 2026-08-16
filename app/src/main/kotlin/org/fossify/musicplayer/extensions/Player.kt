@@ -87,6 +87,22 @@ fun Player.togglePlayback() {
     }
 }
 
+/**
+ * Move playback to the queue entry at [index], or simply play or pause if it is already there.
+ *
+ * The entry already loaded is the one the user reaches for to stop the music, so tapping it must
+ * never start the track over.
+ */
+fun Player.playOrTogglePlayback(index: Int) {
+    if (index == currentMediaItemIndex) {
+        togglePlayback()
+        return
+    }
+
+    play()
+    seekTo(index, 0)
+}
+
 fun Player.setRepeatMode(playbackSetting: PlaybackSetting) {
     repeatMode = when (playbackSetting) {
         PlaybackSetting.REPEAT_TRACK -> Player.REPEAT_MODE_ONE

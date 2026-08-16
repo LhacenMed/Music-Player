@@ -141,10 +141,7 @@ class QueueActivity : SimpleControllerActivity() {
                 ) {
                     withPlayer {
                         val startIndex = currentMediaItems.indexOfTrack(it as Track)
-                        seekTo(startIndex, 0)
-                        if (!isReallyPlaying) {
-                            play()
-                        }
+                        playOrTogglePlayback(startIndex)
                     }
                 }
 

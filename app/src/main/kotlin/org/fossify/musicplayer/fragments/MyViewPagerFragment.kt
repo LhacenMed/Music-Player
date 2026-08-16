@@ -49,14 +49,8 @@ abstract class MyViewPagerFragment(context: Context, attributeSet: AttributeSet)
         list.smoothScrollToPosition(0)
     }
 
-    fun prepareAndPlay(
-        tracks: List<Track>,
-        startIndex: Int = 0,
-        startPositionMs: Long = 0,
-        startActivity: Boolean = true,
-        source: String? = null
-    ) {
-        (context as SimpleControllerActivity).prepareAndPlay(tracks, startIndex, startPositionMs, startActivity, source)
+    fun playTrack(tracks: List<Track>, startIndex: Int) {
+        (context as SimpleControllerActivity).playTrack(tracks, startIndex)
     }
 
     private companion object {

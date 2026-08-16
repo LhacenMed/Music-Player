@@ -31,6 +31,7 @@ import org.fossify.musicplayer.extensions.coordinatorLayoutBehavior
 import org.fossify.musicplayer.extensions.getPlaybackSetting
 import org.fossify.musicplayer.extensions.getPlaybackSurfaceColor
 import org.fossify.musicplayer.extensions.isReallyPlaying
+import org.fossify.musicplayer.extensions.playOrTogglePlayback
 import org.fossify.musicplayer.extensions.sendCommand
 import org.fossify.musicplayer.extensions.shuffledMediaItemsIndices
 import org.fossify.musicplayer.extensions.toTrack
@@ -311,10 +312,7 @@ abstract class SimpleMusicActivity : SimpleControllerActivity(), Player.Listener
         val adapter = QueueAdapter { position ->
             withPlayer {
                 val target = mediaItemIndexOf(position) ?: return@withPlayer
-                seekTo(target, 0)
-                if (!isReallyPlaying) {
-                    play()
-                }
+                playOrTogglePlayback(target)
             }
         }
 
