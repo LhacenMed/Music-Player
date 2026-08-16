@@ -22,7 +22,6 @@ import org.fossify.commons.extensions.adjustAlpha
 import org.fossify.commons.extensions.copyToClipboard
 import org.fossify.commons.extensions.getContrastColor
 import org.fossify.commons.extensions.getProperPrimaryColor
-import org.fossify.commons.extensions.getProperTextColor
 import org.fossify.commons.extensions.toast
 import org.fossify.commons.extensions.value
 import org.fossify.commons.helpers.LOWER_ALPHA
@@ -38,6 +37,7 @@ import org.fossify.musicplayer.extensions.currentMediaItemsShuffled
 import org.fossify.musicplayer.extensions.dampen
 import org.fossify.musicplayer.extensions.getPlaybackSetting
 import org.fossify.musicplayer.extensions.getPlaybackSurfaceColor
+import org.fossify.musicplayer.extensions.getTintedTextColor
 import org.fossify.musicplayer.extensions.isReallyPlaying
 import org.fossify.musicplayer.extensions.recycler
 import org.fossify.musicplayer.extensions.setRepeatMode
@@ -208,7 +208,7 @@ class PlaybackPanel(context: Context, attributeSet: AttributeSet) : ConstraintLa
         }
 
         val skipContainer = ColorStateList.valueOf(primary.adjustAlpha(MEDIUM_ALPHA))
-        val skipIcon = ColorStateList.valueOf(context.getProperTextColor())
+        val skipIcon = ColorStateList.valueOf(context.getTintedTextColor())
         arrayOf(binding.playbackSkipPrev, binding.playbackSkipNext).forEach {
             it.backgroundTintList = skipContainer
             it.iconTint = skipIcon

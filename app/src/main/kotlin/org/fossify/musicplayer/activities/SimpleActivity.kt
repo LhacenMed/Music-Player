@@ -1,10 +1,25 @@
 package org.fossify.musicplayer.activities
 
+import android.os.Bundle
 import org.fossify.commons.activities.BaseSimpleActivity
 import org.fossify.musicplayer.R
 import org.fossify.musicplayer.helpers.REPOSITORY_NAME
 
 open class SimpleActivity : BaseSimpleActivity() {
+    // BaseSimpleActivity swaps in one of Commons' own accent-coloured themes via
+    // setTheme(getThemeId()) in both onCreate() and onResume(), which replaces our AppTheme
+    // wholesale. Re-applying the typography overlay after each call is what makes Inter survive
+    // that swap instead of silently falling back to the platform default font.
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        theme.applyStyle(R.style.ThemeOverlay_App_Typography, true)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        theme.applyStyle(R.style.ThemeOverlay_App_Typography, true)
+    }
+
     override fun getAppIconIDs() = arrayListOf(
         R.mipmap.ic_launcher_red,
         R.mipmap.ic_launcher_pink,

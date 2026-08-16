@@ -18,6 +18,65 @@
         <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.App.Large</item>
     </style>
 
+    <!-- Fossify Commons' BaseSimpleActivity swaps in one of its own accent-coloured themes via
+         setTheme(getThemeId()) in both onCreate() and onResume(), replacing AppTheme wholesale -
+         so typography set here never survives. SimpleActivity re-applies this overlay on top of
+         that swapped-in theme instead, right after each of those calls. -->
+    <style name="ThemeOverlay.App.Typography" parent="">
+        <!-- Typography, ported from Auxio: Inter throughout, with per-size letter-spacing. -->
+        <item name="textAppearanceDisplayLarge">@style/TextAppearance.App.DisplayLarge</item>
+        <item name="textAppearanceDisplayMedium">@style/TextAppearance.App.DisplayMedium</item>
+        <item name="textAppearanceDisplaySmall">@style/TextAppearance.App.DisplaySmall</item>
+        <item name="textAppearanceDisplayLargeEmphasized">@style/TextAppearance.App.DisplayLarge.Emphasized</item>
+        <item name="textAppearanceDisplayMediumEmphasized">@style/TextAppearance.App.DisplayMedium.Emphasized</item>
+        <item name="textAppearanceDisplaySmallEmphasized">@style/TextAppearance.App.DisplaySmall.Emphasized</item>
+
+        <item name="textAppearanceHeadlineLarge">@style/TextAppearance.App.HeadlineLarge</item>
+        <item name="textAppearanceHeadlineMedium">@style/TextAppearance.App.HeadlineMedium</item>
+        <item name="textAppearanceHeadlineSmall">@style/TextAppearance.App.HeadlineSmall</item>
+        <item name="textAppearanceHeadlineLargeEmphasized">@style/TextAppearance.App.HeadlineLarge.Emphasized</item>
+        <item name="textAppearanceHeadlineMediumEmphasized">@style/TextAppearance.App.HeadlineMedium.Emphasized</item>
+        <item name="textAppearanceHeadlineSmallEmphasized">@style/TextAppearance.App.HeadlineSmall.Emphasized</item>
+
+        <item name="textAppearanceTitleLarge">@style/TextAppearance.App.TitleLarge</item>
+        <item name="textAppearanceTitleMedium">@style/TextAppearance.App.TitleMedium</item>
+        <item name="textAppearanceTitleSmall">@style/TextAppearance.App.TitleSmall</item>
+        <item name="textAppearanceTitleLargeEmphasized">@style/TextAppearance.App.TitleLarge.Emphasized</item>
+        <item name="textAppearanceTitleMediumEmphasized">@style/TextAppearance.App.TitleMedium.Emphasized</item>
+        <item name="textAppearanceTitleSmallEmphasized">@style/TextAppearance.App.TitleSmall.Emphasized</item>
+
+        <item name="textAppearanceLabelLarge">@style/TextAppearance.App.LabelLarge</item>
+        <item name="textAppearanceLabelMedium">@style/TextAppearance.App.LabelMedium</item>
+        <item name="textAppearanceLabelSmall">@style/TextAppearance.App.LabelSmall</item>
+        <item name="textAppearanceLabelLargeEmphasized">@style/TextAppearance.App.LabelLarge.Emphasized</item>
+        <item name="textAppearanceLabelMediumEmphasized">@style/TextAppearance.App.LabelMedium.Emphasized</item>
+        <item name="textAppearanceLabelSmallEmphasized">@style/TextAppearance.App.LabelSmall.Emphasized</item>
+
+        <item name="textAppearanceBodyLarge">@style/TextAppearance.App.BodyLarge</item>
+        <item name="textAppearanceBodyMedium">@style/TextAppearance.App.BodyMedium</item>
+        <item name="textAppearanceBodySmall">@style/TextAppearance.App.BodySmall</item>
+        <item name="textAppearanceBodyLargeEmphasized">@style/TextAppearance.App.BodyLarge.Emphasized</item>
+        <item name="textAppearanceBodyMediumEmphasized">@style/TextAppearance.App.BodyMedium.Emphasized</item>
+        <item name="textAppearanceBodySmallEmphasized">@style/TextAppearance.App.BodySmall.Emphasized</item>
+
+        <!-- The textAppearance* attrs above only reach views that resolve a Material3 type-scale
+             role. Plain TextViews and EditTexts - including the ones inside Fossify Commons'
+             own layouts - fall back to whatever these default widget styles set instead, so Inter
+             has to be the default font here too for it to cover the whole app. -->
+        <item name="android:textViewStyle">@style/Widget.App.TextView</item>
+        <item name="android:editTextStyle">@style/Widget.App.EditText</item>
+    </style>
+
+    <style name="Widget.App.TextView" parent="Widget.AppCompat.TextView">
+        <item name="fontFamily">@font/inter_regular</item>
+        <item name="android:fontFamily">@font/inter_regular</item>
+    </style>
+
+    <style name="Widget.App.EditText" parent="Widget.AppCompat.EditText">
+        <item name="fontFamily">@font/inter_regular</item>
+        <item name="android:fontFamily">@font/inter_regular</item>
+    </style>
+
     <style name="ShapeAppearance.App.Small" parent="ShapeAppearance.Material3.Corner.Medium">
         <item name="cornerSize">@dimen/corner_radius_small</item>
     </style>

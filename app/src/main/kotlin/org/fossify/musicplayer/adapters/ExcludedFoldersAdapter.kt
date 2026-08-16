@@ -6,13 +6,13 @@ import androidx.appcompat.widget.PopupMenu
 import org.fossify.commons.activities.BaseSimpleActivity
 import org.fossify.commons.adapters.MyRecyclerViewAdapter
 import org.fossify.commons.extensions.getPopupMenuTheme
-import org.fossify.commons.extensions.getProperTextColor
 import org.fossify.commons.extensions.humanizePath
 import org.fossify.commons.interfaces.RefreshRecyclerViewListener
 import org.fossify.commons.views.MyRecyclerView
 import org.fossify.musicplayer.extensions.setupActivatableBackground
 import org.fossify.musicplayer.databinding.ItemExcludedFolderBinding
 import org.fossify.musicplayer.extensions.config
+import org.fossify.musicplayer.extensions.getTintedTextColor
 
 class ExcludedFoldersAdapter(
     activity: BaseSimpleActivity,
@@ -74,12 +74,12 @@ class ExcludedFoldersAdapter(
             excludedFolderTitle.apply {
                 @SuppressLint("SetTextI18n")
                 text = context.humanizePath(folder) + "/"
-                setTextColor(context.getProperTextColor())
+                setTextColor(context.getTintedTextColor())
             }
 
             overflowMenuIcon.drawable.apply {
                 mutate()
-                setTint(activity.getProperTextColor())
+                setTint(activity.getTintedTextColor())
             }
 
             overflowMenuIcon.setOnClickListener {

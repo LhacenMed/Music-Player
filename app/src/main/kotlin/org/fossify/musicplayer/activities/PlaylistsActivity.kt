@@ -23,6 +23,7 @@ import org.fossify.musicplayer.dialogs.NewPlaylistDialog
 import org.fossify.musicplayer.dialogs.SelectPlaylistDialog
 import org.fossify.musicplayer.extensions.audioHelper
 import org.fossify.musicplayer.extensions.getFolderTracks
+import org.fossify.musicplayer.extensions.getTintedTextColor
 import org.fossify.musicplayer.helpers.M3uImporter
 import org.fossify.musicplayer.helpers.M3uImporter.ImportResult
 import org.fossify.musicplayer.helpers.MIME_TYPE_M3U
@@ -60,7 +61,7 @@ class PlaylistsActivity : SimpleMusicActivity() {
     override fun onResume() {
         super.onResume()
         setupTopAppBar(binding.playlistsAppbar, NavigationIcon.Arrow, searchMenuItem = searchMenuItem)
-        playlistsFragment.setupColors(getProperTextColor(), getProperPrimaryColor())
+        playlistsFragment.setupColors(getTintedTextColor(), getProperPrimaryColor())
         playlistsFragment.setupFragment(this)
     }
 

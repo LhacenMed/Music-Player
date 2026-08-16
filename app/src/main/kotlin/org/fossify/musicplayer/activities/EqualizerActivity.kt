@@ -15,6 +15,7 @@ import org.fossify.commons.views.MySeekBar
 import org.fossify.musicplayer.databinding.ActivityEqualizerBinding
 import org.fossify.musicplayer.databinding.EqualizerBandBinding
 import org.fossify.musicplayer.extensions.config
+import org.fossify.musicplayer.extensions.getTintedTextColor
 import org.fossify.musicplayer.helpers.EQUALIZER_PRESET_CUSTOM
 import org.fossify.musicplayer.playback.SimpleEqualizer
 import java.text.DecimalFormat
@@ -86,7 +87,7 @@ class EqualizerActivity : SimpleActivity() {
                 binding.equalizerBandsHolder.addView(root)
                 bandSeekBars.add(equalizerBandSeekBar)
                 equalizerBandLabel.text = formatted
-                equalizerBandLabel.setTextColor(getProperTextColor())
+                equalizerBandLabel.setTextColor(getTintedTextColor())
                 equalizerBandSeekBar.max = maxValue - minValue
 
                 equalizerBandSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {

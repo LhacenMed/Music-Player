@@ -35,7 +35,7 @@ class CurrentTrackBar(context: Context, attributeSet: AttributeSet) : Constraint
 
         binding.currentTrackNext.backgroundTintList =
             ColorStateList.valueOf(context.getPlaybackSurfaceColor())
-        binding.currentTrackTitle.setTextColor(context.getProperTextColor())
+        binding.currentTrackTitle.setTextColor(context.getTintedTextColor())
         binding.currentTrackProgress.setIndicatorColor(context.getProperPrimaryColor())
         binding.currentTrackProgress.trackColor = context.getProperPrimaryColor().adjustAlpha(LOWER_ALPHA)
     }

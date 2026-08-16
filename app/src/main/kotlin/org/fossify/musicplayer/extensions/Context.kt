@@ -23,6 +23,7 @@ import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.Target
 import com.google.android.material.color.MaterialColors
+import com.google.android.material.color.utilities.Hct
 import org.fossify.commons.extensions.*
 import org.fossify.commons.helpers.ensureBackgroundThread
 import org.fossify.commons.helpers.isQPlus
@@ -337,3 +338,28 @@ fun Context.getLiftedQueueSurfaceColor() = ColorUtils.compositeColors(
     MaterialColors.getColor(this, android.R.attr.colorControlHighlight, Color.TRANSPARENT),
     getQueueSurfaceColor()
 )
+
+/**
+ * How far the accent's hue and chroma bleed into text and icon colour. Kept low enough that the
+ * shift reads as warmth rather than a colour change.
+ */
+private const val TEXT_TINT_CHROMA = 6.0
+
+/**
+ * HCT tone is only in-gamut as pure white/black at the very extremes, so a colour sitting at tone
+ * 100 or 0 has no room left for [TEXT_TINT_CHROMA] to show. Clamping away from those extremes
+ * keeps the tint visible even when the configured text colour is a flat white or black.
+ */
+private const val MIN_TINTED_TONE = 4.0
+private const val MAX_TINTED_TONE = 96.0
+
+/**
+ * [getProperTextColor] leaned towards the current accent's hue, the way none of Auxio's generated
+ * Material You palettes ever leave "white" perfectly neutral. Used for text and icons alike, since
+ * this app colours both from the same value.
+ */
+fun Context.getTintedTextColor(): Int {
+    val tone = Hct.fromInt(getProperTextColor()).tone.coerceIn(MIN_TINTED_TONE, MAX_TINTED_TONE)
+    val accentHue = Hct.fromInt(getProperPrimaryColor()).hue
+    return Hct.from(accentHue, TEXT_TINT_CHROMA, tone).toInt()
+}

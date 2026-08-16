@@ -34,6 +34,7 @@ import org.fossify.musicplayer.extensions.audioHelper
 import org.fossify.musicplayer.extensions.config
 import org.fossify.musicplayer.extensions.getFolderTracks
 import org.fossify.musicplayer.extensions.getMediaStoreIdFromPath
+import org.fossify.musicplayer.extensions.getTintedTextColor
 import org.fossify.musicplayer.helpers.*
 import org.fossify.musicplayer.helpers.M3uExporter.ExportResult
 import org.fossify.musicplayer.models.*
@@ -68,7 +69,7 @@ class TracksActivity : SimpleMusicActivity() {
 
         val properPrimaryColor = getProperPrimaryColor()
         binding.tracksFastscroller.updateColors(properPrimaryColor)
-        binding.tracksPlaceholder.setTextColor(getProperTextColor())
+        binding.tracksPlaceholder.setTextColor(getTintedTextColor())
         binding.tracksPlaceholder2.setTextColor(properPrimaryColor)
         binding.tracksPlaceholder2.underlineText()
         binding.tracksPlaceholder2.setOnClickListener {

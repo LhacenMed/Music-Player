@@ -80,7 +80,7 @@ class MainActivity : SimpleMusicActivity() {
         updateTextColors(binding.mainHolder)
         setupTabColors()
         setupLibraryShortcutColors()
-        val properTextColor = getProperTextColor()
+        val properTextColor = getTintedTextColor()
         val properPrimaryColor = getProperPrimaryColor()
         sheetContent.setBackgroundColor(getContentSurfaceColor())
         binding.sleepTimerHolder.background = ColorDrawable(getContentSurfaceColor())
@@ -306,7 +306,7 @@ class MainActivity : SimpleMusicActivity() {
     private fun setupLibraryShortcutColors() = binding.libraryShortcuts.apply {
         val cardColor = getProperBackgroundColor()
         val iconTint = getProperPrimaryColor()
-        val labelColor = getProperTextColor()
+        val labelColor = getTintedTextColor()
         val outlineColor = labelColor.adjustAlpha(LOWER_ALPHA)
 
         listOf(shortcutFavorites, shortcutPlaylists, shortcutRecent).forEach {
@@ -320,7 +320,7 @@ class MainActivity : SimpleMusicActivity() {
     }
 
     private fun setupTabColors() {
-        val properTextColor = getProperTextColor()
+        val properTextColor = getTintedTextColor()
         val properPrimaryColor = getProperPrimaryColor()
         binding.mainTabsHolder.setTabTextColors(properTextColor.adjustAlpha(MEDIUM_ALPHA), properPrimaryColor)
         binding.mainTabsHolder.setSelectedTabIndicatorColor(properPrimaryColor)

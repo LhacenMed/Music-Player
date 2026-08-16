@@ -13,6 +13,7 @@ import org.fossify.commons.views.MyTextView
 import org.fossify.musicplayer.R
 import org.fossify.musicplayer.databinding.FragmentPlaybackSpeedBinding
 import org.fossify.musicplayer.extensions.config
+import org.fossify.musicplayer.extensions.getTintedTextColor
 import org.fossify.musicplayer.helpers.Config
 import org.fossify.musicplayer.interfaces.PlaybackSpeedListener
 
@@ -42,8 +43,8 @@ class PlaybackSpeedFragment : BottomSheetDialogFragment() {
             seekBar = playbackSpeedSeekbar
             root.setBackgroundDrawable(background)
             requireContext().updateTextColors(playbackSpeedHolder)
-            playbackSpeedSlow.applyColorFilter(requireContext().getProperTextColor())
-            playbackSpeedFast.applyColorFilter(requireContext().getProperTextColor())
+            playbackSpeedSlow.applyColorFilter(requireContext().getTintedTextColor())
+            playbackSpeedFast.applyColorFilter(requireContext().getTintedTextColor())
             playbackSpeedSlow.setOnClickListener { reduceSpeed() }
             playbackSpeedFast.setOnClickListener { increaseSpeed() }
             initSeekbar(playbackSpeedSeekbar, playbackSpeedLabel, config)
