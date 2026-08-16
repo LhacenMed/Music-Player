@@ -83,7 +83,6 @@ class MainActivity : SimpleMusicActivity() {
         setupLibraryShortcutColors()
         val properTextColor = getTintedTextColor()
         val properPrimaryColor = getProperPrimaryColor()
-        sheetContent.setBackgroundColor(getContentSurfaceColor())
         binding.sleepTimerHolder.background = ColorDrawable(getContentSurfaceColor())
         binding.sleepTimerStop.applyColorFilter(properTextColor)
         binding.loadingProgressBar.setIndicatorColor(properPrimaryColor)

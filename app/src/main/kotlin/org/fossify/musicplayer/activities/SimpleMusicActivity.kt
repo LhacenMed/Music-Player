@@ -28,6 +28,7 @@ import org.fossify.musicplayer.R
 import org.fossify.musicplayer.adapters.BaseMusicAdapter
 import org.fossify.musicplayer.dialogs.TrackMenuDialog
 import org.fossify.musicplayer.extensions.coordinatorLayoutBehavior
+import org.fossify.musicplayer.extensions.getContentSurfaceColor
 import org.fossify.musicplayer.extensions.getPlaybackSetting
 import org.fossify.musicplayer.extensions.getPlaybackSurfaceColor
 import org.fossify.musicplayer.extensions.isReallyPlaying
@@ -92,6 +93,10 @@ abstract class SimpleMusicActivity : SimpleControllerActivity(), Player.Listener
 
     override fun onResume() {
         super.onResume()
+        // A surface step below the bar and the sheet resting on it, so the player never blends into
+        // the screen it is sitting over. Every screen that hosts the sheet needs it, not just the
+        // library, and it is repainted here because the theme may have changed while it was away.
+        sheetContent.setBackgroundColor(getContentSurfaceColor())
         updateCurrentTrackBar()
         panel.updateColors()
         // The track may well have moved on while this screen was stopped, and no callback for that
