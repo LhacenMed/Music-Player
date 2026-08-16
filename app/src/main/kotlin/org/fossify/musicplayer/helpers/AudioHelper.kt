@@ -86,6 +86,10 @@ class AudioHelper(private val context: Context) {
         return artists
     }
 
+    fun getArtist(artistId: Long): Artist? {
+        return context.artistDAO.getArtistWithId(artistId)
+    }
+
     fun getArtistAlbums(artistId: Long): ArrayList<Album> {
         return context.albumsDAO.getArtistAlbums(artistId) as ArrayList<Album>
     }

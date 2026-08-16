@@ -167,8 +167,7 @@ class AlbumsTracksAdapter(
             trackInfo.setTextColor(textColor)
 
             trackImage.beVisible()
-            trackDuration.text = track.duration.getFormattedDuration()
-            trackDuration.setTextColor(textColor)
+            trackMenu.setupTrackMenu(track, trackQueue())
 
             context.getTrackCoverArt(track) { coverArt ->
                 trackImage.bind(coverArt)

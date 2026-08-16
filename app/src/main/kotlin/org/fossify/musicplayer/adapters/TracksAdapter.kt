@@ -208,11 +208,9 @@ class TracksAdapter(
                 false
             }
 
-            arrayOf(trackInfo, trackDuration).forEach {
-                it.setTextColor(textColor)
-            }
+            trackInfo.setTextColor(textColor)
+            trackMenu.setupTrackMenu(track, items)
 
-            trackDuration.text = track.duration.getFormattedDuration()
             activity.getTrackCoverArt(track) { coverArt ->
                 trackImage.bind(coverArt)
             }

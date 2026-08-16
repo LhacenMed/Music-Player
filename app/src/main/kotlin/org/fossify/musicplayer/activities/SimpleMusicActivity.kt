@@ -244,7 +244,7 @@ abstract class SimpleMusicActivity : SimpleControllerActivity(), Player.Listener
 
     private fun showTrackMenu() {
         val track = PlaybackService.currentMediaItem?.toTrack() ?: return
-        TrackMenuDialog.show(this, track)
+        TrackMenuDialog.showForPlayingTrack(this, track)
     }
 
     override fun showPlayer() {

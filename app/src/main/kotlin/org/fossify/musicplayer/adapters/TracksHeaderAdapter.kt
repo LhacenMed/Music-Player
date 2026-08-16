@@ -146,11 +146,11 @@ class TracksHeaderAdapter(activity: SimpleActivity, items: ArrayList<ListItem>, 
             }
             trackInfo.beVisibleIf(track.trackId != null)
 
-            arrayOf(trackTitle, trackInfo, trackDuration).forEach {
+            arrayOf(trackTitle, trackInfo).forEach {
                 it.setTextColor(textColor)
             }
 
-            trackDuration.text = track.duration.getFormattedDuration()
+            trackMenu.setupTrackMenu(track, trackQueue())
             trackImage.beVisible()
             context.getTrackCoverArt(track) { coverArt ->
                 trackImage.bind(coverArt)

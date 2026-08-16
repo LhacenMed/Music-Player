@@ -1,5 +1,6 @@
 package org.fossify.musicplayer.dialogs
 
+import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -9,20 +10,27 @@ import android.view.ViewGroup
 import androidx.appcompat.view.menu.MenuBuilder
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.google.gson.Gson
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestOptions
 import com.google.android.material.bottomsheet.BackportBottomSheetBehavior
 import com.google.android.material.bottomsheet.BackportBottomSheetDialogFragment
+import org.fossify.commons.helpers.ensureBackgroundThread
 import org.fossify.musicplayer.R
+import org.fossify.musicplayer.activities.AlbumsActivity
 import org.fossify.musicplayer.activities.SimpleControllerActivity
+import org.fossify.musicplayer.activities.TracksActivity
 import org.fossify.musicplayer.databinding.DialogTrackMenuBinding
 import org.fossify.musicplayer.databinding.ItemMenuOptionBinding
 import org.fossify.musicplayer.extensions.addTracksToPlaylist
+import org.fossify.musicplayer.extensions.audioHelper
 import org.fossify.musicplayer.extensions.getPlaybackSurfaceColor
 import org.fossify.musicplayer.extensions.getTrackCoverArt
 import org.fossify.musicplayer.extensions.shareFiles
 import org.fossify.musicplayer.extensions.showTrackProperties
+import org.fossify.musicplayer.helpers.ALBUM
+import org.fossify.musicplayer.helpers.ARTIST
 import org.fossify.musicplayer.models.Track
 import org.fossify.musicplayer.views.CoverFallbackDrawable
 import com.google.android.material.R as MR
@@ -37,6 +45,12 @@ class TrackMenuDialog : BackportBottomSheetDialogFragment() {
 
     /** The track the sheet was opened for, captured up front so it survives a track change. */
     private lateinit var track: Track
+
+    /** Which options to offer, since a playing track cannot be started again. */
+    private var optionsRes = 0
+
+    /** The tracks [track] sits among, which is what Play and Shuffle act on. */
+    private var queue = emptyList<Track>()
 
     // BackportBottomSheetDialog builds its dialog from getTheme(), which is where the edge-to-edge
     // sheet styling has to come from so this behaves like the queue sheet rather than sitting above
@@ -89,16 +103,26 @@ class TrackMenuDialog : BackportBottomSheetDialogFragment() {
     @Suppress("RestrictedApi")
     private fun inflateOptions(): List<MenuItem> {
         val menu = MenuBuilder(requireContext())
-        requireActivity().menuInflater.inflate(R.menu.menu_playback_track, menu)
+        requireActivity().menuInflater.inflate(optionsRes, menu)
         return menu.visibleItems
     }
 
     private fun onOptionSelected(item: MenuItem) {
         val activity = requireActivity() as SimpleControllerActivity
         when (item.itemId) {
+            R.id.action_play -> activity.prepareAndPlay(queue, queue.indexOfTrack())
+            R.id.action_shuffle -> {
+                // Shuffle is set first so the order the player deals already accounts for it, and
+                // the picked track still leads it. The listener writes the mode back to settings.
+                activity.withPlayer { shuffleModeEnabled = true }
+                activity.prepareAndPlay(queue, queue.indexOfTrack())
+            }
+
             R.id.action_add_to_playlist -> activity.addTracksToPlaylist(listOf(track)) {}
             R.id.action_play_next -> activity.playNextInQueue(track) {}
             R.id.action_add_to_queue -> activity.addTracksToQueue(listOf(track)) {}
+            R.id.action_go_to_artist -> activity.goToArtist()
+            R.id.action_go_to_album -> activity.goToAlbum()
             R.id.action_properties -> activity.showTrackProperties(listOf(track))
             R.id.action_share -> activity.shareFiles(listOf(track))
         }
@@ -106,11 +130,56 @@ class TrackMenuDialog : BackportBottomSheetDialogFragment() {
         dismiss()
     }
 
+    /** Where [track] sits in [queue], so playing it keeps the rest of the list around it. */
+    private fun List<Track>.indexOfTrack() =
+        indexOfFirst { it.mediaStoreId == track.mediaStoreId }.coerceAtLeast(0)
+
+    /** Open the artist behind this track, on the screen that lists their albums. */
+    private fun SimpleControllerActivity.goToArtist() {
+        ensureBackgroundThread {
+            val artist = audioHelper.getArtist(track.artistId) ?: return@ensureBackgroundThread
+            runOnUiThread {
+                startActivity(
+                    Intent(this, AlbumsActivity::class.java)
+                        .putExtra(ARTIST, Gson().toJson(artist))
+                )
+            }
+        }
+    }
+
+    /** Open the album this track belongs to, on the screen that lists its tracks. */
+    private fun SimpleControllerActivity.goToAlbum() {
+        ensureBackgroundThread {
+            val album = audioHelper.getAlbum(track.albumId) ?: return@ensureBackgroundThread
+            runOnUiThread {
+                startActivity(
+                    Intent(this, TracksActivity::class.java)
+                        .putExtra(ALBUM, Gson().toJson(album))
+                )
+            }
+        }
+    }
+
     companion object {
-        /** Show the overflow sheet for [track]. */
-        fun show(activity: SimpleControllerActivity, track: Track) {
-            TrackMenuDialog().apply { this.track = track }
-                .show(activity.supportFragmentManager, TrackMenuDialog::class.java.simpleName)
+        /** Show the overflow sheet for a [track] listed among [queue], which Play acts on. */
+        fun showForTrack(activity: SimpleControllerActivity, track: Track, queue: List<Track>) =
+            show(activity, track, R.menu.menu_track, queue)
+
+        /** Show the overflow sheet for the playing track, which cannot be started again. */
+        fun showForPlayingTrack(activity: SimpleControllerActivity, track: Track) =
+            show(activity, track, R.menu.menu_playback_track, queue = emptyList())
+
+        private fun show(
+            activity: SimpleControllerActivity,
+            track: Track,
+            optionsRes: Int,
+            queue: List<Track>
+        ) {
+            TrackMenuDialog().apply {
+                this.track = track
+                this.optionsRes = optionsRes
+                this.queue = queue
+            }.show(activity.supportFragmentManager, TrackMenuDialog::class.java.simpleName)
         }
     }
 }

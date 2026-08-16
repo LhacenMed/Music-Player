@@ -1,20 +1,24 @@
 package org.fossify.musicplayer.adapters
 
 import android.annotation.SuppressLint
+import android.content.res.ColorStateList
 import android.graphics.drawable.Drawable
 import android.view.Menu
 import android.widget.ImageView
 import com.bumptech.glide.Glide
+import com.google.android.material.button.MaterialButton
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestOptions
 import org.fossify.commons.activities.BaseSimpleActivity
 import org.fossify.commons.adapters.MyRecyclerViewAdapter
+import org.fossify.commons.extensions.beInvisibleIf
 import org.fossify.commons.extensions.getProperPrimaryColor
 import org.fossify.commons.helpers.ensureBackgroundThread
 import org.fossify.commons.views.MyRecyclerView
 import org.fossify.musicplayer.R
 import org.fossify.musicplayer.activities.SimpleControllerActivity
+import org.fossify.musicplayer.dialogs.TrackMenuDialog
 import org.fossify.musicplayer.extensions.*
 import org.fossify.musicplayer.helpers.TagHelper
 import org.fossify.musicplayer.models.Track
@@ -77,6 +81,25 @@ abstract class BaseMusicAdapter<Type>(
 
     /** True if [item] is the track the player is currently on. */
     fun isPlayingTrack(item: Type) = item is Track && item.mediaStoreId == playingTrackId
+
+    /**
+     * Hand a row's overflow button the track it stands for, and the tracks around it that Play and
+     * Shuffle act on.
+     *
+     * The button steps aside once rows are being selected, leaving the trailing edge to the drag
+     * handle, so the row never carries two controls at once. It keeps its space rather than
+     * collapsing, since the title is measured against it and must stay clear of whatever is there.
+     */
+    protected fun MaterialButton.setupTrackMenu(track: Track, queue: List<Track>) {
+        val activity = this@BaseMusicAdapter.context
+        beInvisibleIf(selectedKeys.isNotEmpty())
+        iconTint = ColorStateList.valueOf(textColor)
+        contentDescription = activity.getString(R.string.more_options_for, track.title)
+        setOnClickListener { TrackMenuDialog.showForTrack(activity, track, queue) }
+    }
+
+    /** The tracks in this list, which is what a row's Play and Shuffle options traverse. */
+    protected fun trackQueue() = items.filterIsInstance<Track>()
 
     /**
      * Point the playing indicator at the track with [trackId], or clear it with [NO_PLAYING_TRACK].
