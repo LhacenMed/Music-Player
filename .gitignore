@@ -6,10 +6,9 @@
 .DS_Store
 /build
 /captures
+*.jks
 keystore.jks
 keystore.properties
 fastlane/fastlane.json
 fastlane/report.xml
 .kotlin/
-*.jks
-keystore.properties
