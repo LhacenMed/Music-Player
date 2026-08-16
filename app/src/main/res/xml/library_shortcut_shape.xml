@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The shortcut cards' corners, on the app's own scale rather than the fully rounded expressive
+     default. Carried by both the button group and the buttons themselves, because the group only
+     hands its own shape to the first and last child and each child keeps the rest. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:state_pressed="true"
+        app:shapeAppearance="@style/ShapeAppearance.App.Tiny" />
+    <item app:shapeAppearance="@style/ShapeAppearance.App.Small" />
+</selector>

@@ -13,6 +13,7 @@
          sheet dwarfing everything next to it. These are the single source of truth: the theme maps
          the Material corner attributes onto them, so every Material component picks them up, and
          the few views drawn by hand read the same dimens. -->
+    <dimen name="corner_radius_tiny">8dp</dimen>
     <dimen name="corner_radius_small">12dp</dimen>
     <dimen name="corner_radius_medium">16dp</dimen>
     <dimen name="corner_radius_large">20dp</dimen>
@@ -31,7 +32,6 @@
 
     <!-- Library shortcuts -->
     <dimen name="size_library_shortcut">72dp</dimen>
-    <dimen name="size_library_shortcut_icon">20dp</dimen>
 
     <!-- Lyrics -->
     <dimen name="size_lyric_line">36dp</dimen>

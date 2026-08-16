@@ -77,6 +77,10 @@
         <item name="android:fontFamily">@font/inter_regular</item>
     </style>
 
+    <style name="ShapeAppearance.App.Tiny" parent="ShapeAppearance.Material3.Corner.Medium">
+        <item name="cornerSize">@dimen/corner_radius_tiny</item>
+    </style>
+
     <style name="ShapeAppearance.App.Small" parent="ShapeAppearance.Material3.Corner.Medium">
         <item name="cornerSize">@dimen/corner_radius_small</item>
     </style>
@@ -304,40 +308,24 @@
         <item name="thumbHeight">@dimen/slider_thumb_height</item>
     </style>
 
-    <!-- Library shortcut cards. The card colours are themed at runtime, so only the metrics live
-         here; the fixed height is what keeps the tabs below from ever shifting. -->
-    <style name="Widget.LibraryShortcut" parent="Widget.Material3.CardView.Filled">
+    <!-- Library shortcuts. The outlined role is the one the playback panel's repeat and shuffle
+         toggles wear, so the row still reads as cards rather than as filled targets. The weight
+         divides the row evenly and the height is fixed, so the tabs below never shift; the insets
+         are dropped so that height is what actually gets painted. -->
+    <style name="Widget.LibraryShortcut" parent="Widget.Material3Expressive.Button.OutlinedButton">
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">@dimen/size_library_shortcut</item>
         <item name="android:layout_weight">1</item>
-        <item name="cardElevation">0dp</item>
-        <item name="shapeAppearance">@style/ShapeAppearance.App.Small</item>
-        <!-- Themes that paint the app bar pure black leave the fill with nothing to stand out
-             against, so the outline is what always gives the cards an edge. -->
-        <item name="strokeWidth">1dp</item>
-    </style>
-
-    <style name="Widget.LibraryShortcut.Content" parent="">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">match_parent</item>
-        <item name="android:orientation">vertical</item>
-        <item name="android:gravity">center_vertical</item>
-        <item name="android:padding">@dimen/spacing_mid_medium</item>
-    </style>
-
-    <style name="Widget.LibraryShortcut.Icon" parent="">
-        <item name="android:layout_width">@dimen/size_library_shortcut_icon</item>
-        <item name="android:layout_height">@dimen/size_library_shortcut_icon</item>
-    </style>
-
-    <style name="Widget.LibraryShortcut.Label" parent="Widget.AppCompat.TextView">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_marginTop">@dimen/spacing_small</item>
-        <item name="android:ellipsize">end</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="iconGravity">top</item>
         <item name="android:maxLines">1</item>
-        <item name="android:textSize">@dimen/normal_text_size</item>
-        <item name="android:textStyle">bold</item>
+        <item name="android:ellipsize">end</item>
+        <!-- Set outright rather than through the size class, whose corners come from the fully
+             rounded expressive default. The group carries the same shape, since it is the group
+             that shapes the outer corners of the first and last card. -->
+        <item name="shapeAppearance">@xml/library_shortcut_shape</item>
+        <item name="iconPadding">@dimen/spacing_tiny</item>
     </style>
 
 </resources>

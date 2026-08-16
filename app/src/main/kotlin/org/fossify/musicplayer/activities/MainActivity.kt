@@ -1,6 +1,7 @@
 package org.fossify.musicplayer.activities
 
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.graphics.drawable.ColorDrawable
 import android.media.AudioManager
 import android.os.Bundle
@@ -302,21 +303,27 @@ class MainActivity : SimpleMusicActivity() {
         )
     }
 
-    /** The cards sit one surface step above the app bar behind them, so they read as raised. */
+    /**
+     * Tint the shortcut row the way PlaybackPanel.updateColors() tints the outlined toggles it
+     * shares its widgets with: the fill is the surface behind them, so only the outline gives the
+     * cards an edge on themes that paint the app bar pure black.
+     *
+     * The outlined style asks for M3 container roles, but Fossify only ever supplies a single
+     * accent and leaves the rest of the palette at the framework defaults, so the roles have to be
+     * filled in here or the cards resolve to unrelated colours.
+     */
     private fun setupLibraryShortcutColors() = binding.libraryShortcuts.apply {
-        val cardColor = getProperBackgroundColor()
-        val iconTint = getProperPrimaryColor()
+        val container = ColorStateList.valueOf(getProperBackgroundColor())
+        val iconTint = ColorStateList.valueOf(getProperPrimaryColor())
         val labelColor = getTintedTextColor()
-        val outlineColor = labelColor.adjustAlpha(LOWER_ALPHA)
+        val outline = ColorStateList.valueOf(labelColor.adjustAlpha(LOWER_ALPHA))
 
         listOf(shortcutFavorites, shortcutPlaylists, shortcutRecent).forEach {
-            it.setCardBackgroundColor(cardColor)
-            it.strokeColor = outlineColor
+            it.backgroundTintList = container
+            it.strokeColor = outline
+            it.iconTint = iconTint
+            it.setTextColor(labelColor)
         }
-        listOf(shortcutFavoritesIcon, shortcutPlaylistsIcon, shortcutRecentIcon)
-            .forEach { it.applyColorFilter(iconTint) }
-        listOf(shortcutFavoritesLabel, shortcutPlaylistsLabel, shortcutRecentLabel)
-            .forEach { it.setTextColor(labelColor) }
     }
 
     private fun setupTabColors() {
