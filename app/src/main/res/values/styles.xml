@@ -312,24 +312,23 @@
         <item name="thumbHeight">@dimen/slider_thumb_height</item>
     </style>
 
-    <!-- Library shortcuts. The outlined role is the one the playback panel's repeat and shuffle
-         toggles wear, so the row still reads as cards rather than as filled targets. The weight
-         divides the row evenly and the height is fixed, so the tabs below never shift; the insets
-         are dropped so that height is what actually gets painted. -->
-    <style name="Widget.LibraryShortcut" parent="Widget.Material3Expressive.Button.OutlinedButton">
+    <!-- Library shortcuts. The tonal role fills the tile, which is what artwork needs to sit in;
+         the weight divides the row evenly and the height is fixed, so the tabs below never shift,
+         and the insets are dropped so that height is what actually gets painted. The label is held
+         to the bottom of the content box, leaving the top of it to the tile's own icon. -->
+    <style name="Widget.LibraryShortcut" parent="Widget.Material3Expressive.Button.TonalButton">
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">@dimen/size_library_shortcut</item>
         <item name="android:layout_weight">1</item>
         <item name="android:insetTop">0dp</item>
         <item name="android:insetBottom">0dp</item>
-        <item name="iconGravity">top</item>
+        <item name="android:gravity">start|bottom</item>
         <item name="android:maxLines">1</item>
         <item name="android:ellipsize">end</item>
         <!-- Set outright rather than through the size class, whose corners come from the fully
              rounded expressive default. The group carries the same shape, since it is the group
              that shapes the outer corners of the first and last card. -->
         <item name="shapeAppearance">@xml/library_shortcut_shape</item>
-        <item name="iconPadding">@dimen/spacing_tiny</item>
     </style>
 
 </resources>

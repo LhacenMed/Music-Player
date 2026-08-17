@@ -20,6 +20,11 @@ interface SongsDao {
     @Query("SELECT * FROM tracks WHERE playlist_id = :playlistId")
     fun getTracksFromPlaylist(playlistId: Int): List<Track>
 
+    // Rows are stamped as they join the playlist, so the newest stamp is the latest addition. The
+    // id breaks ties between tracks added within the same second.
+    @Query("SELECT * FROM tracks WHERE playlist_id = :playlistId ORDER BY date_added_to_playlist DESC, id DESC LIMIT 1")
+    fun getLatestTrackAddedToPlaylist(playlistId: Int): Track?
+
     @Query("SELECT * FROM tracks WHERE artist_id = :artistId")
     fun getTracksFromArtist(artistId: Long): List<Track>
 

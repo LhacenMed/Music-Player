@@ -81,6 +81,7 @@ class MainActivity : SimpleMusicActivity() {
         updateTextColors(binding.mainHolder)
         setupTabColors()
         setupLibraryShortcutColors()
+        updateFavoritesShortcutCover()
         val properTextColor = getTintedTextColor()
         val properPrimaryColor = getProperPrimaryColor()
         binding.sleepTimerHolder.background = ColorDrawable(getContentSurfaceColor())
@@ -303,25 +304,32 @@ class MainActivity : SimpleMusicActivity() {
     }
 
     /**
-     * Tint the shortcut row the way PlaybackPanel.updateColors() tints the outlined toggles it
-     * shares its widgets with: the fill is the surface behind them, so only the outline gives the
-     * cards an edge on themes that paint the app bar pure black.
+     * Tint the shortcut row from the app's accent.
      *
-     * The outlined style asks for M3 container roles, but Fossify only ever supplies a single
-     * accent and leaves the rest of the palette at the framework defaults, so the roles have to be
-     * filled in here or the cards resolve to unrelated colours.
+     * The tonal style asks for M3 container roles, but Fossify only ever supplies a single accent
+     * and leaves the rest of the palette at the framework defaults, so the roles have to be filled
+     * in here or the cards resolve to unrelated colours. The container is handed over as a colour
+     * rather than a flat tint, since a card backed by artwork dims its own to a scrim.
      */
     private fun setupLibraryShortcutColors() = binding.libraryShortcuts.apply {
-        val container = ColorStateList.valueOf(getProperBackgroundColor())
+        val containerColor = getProperBackgroundColor()
         val iconTint = ColorStateList.valueOf(getProperPrimaryColor())
         val labelColor = getTintedTextColor()
-        val outline = ColorStateList.valueOf(labelColor.adjustAlpha(LOWER_ALPHA))
 
         listOf(shortcutFavorites, shortcutPlaylists, shortcutRecent).forEach {
-            it.backgroundTintList = container
-            it.strokeColor = outline
+            it.setContainerColor(containerColor)
             it.iconTint = iconTint
             it.setTextColor(labelColor)
+        }
+    }
+
+    /** Back the favorites card with the cover of the track added to it most recently. */
+    private fun updateFavoritesShortcutCover() {
+        ensureBackgroundThread {
+            val latestFavorite = audioHelper.getLatestTrackAddedToPlaylist(FAVORITES_PLAYLIST_ID)
+            getTrackCoverArt(latestFavorite) { coverArt ->
+                binding.libraryShortcuts.shortcutFavorites.bind(coverArt)
+            }
         }
     }
 
@@ -420,6 +428,12 @@ class MainActivity : SimpleMusicActivity() {
         if (event.seconds == 0) {
             finish()
         }
+    }
+
+    /** Favoriting from anywhere — the playback panel included — repaints the card as it happens. */
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    fun playlistsUpdated(event: Events.PlaylistsUpdated) {
+        updateFavoritesShortcutCover()
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

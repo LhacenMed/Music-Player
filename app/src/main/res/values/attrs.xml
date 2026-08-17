@@ -9,6 +9,10 @@
         <attr name="waveAmplitudeRampProgressMin" format="float" />
     </declare-styleable>
 
+    <declare-styleable name="LibraryShortcutButton">
+        <attr name="shortcutIcon" format="reference" />
+    </declare-styleable>
+
     <declare-styleable name="LyricsView">
         <attr name="lyricsDensity" format="enum">
             <enum name="compact" value="0" />

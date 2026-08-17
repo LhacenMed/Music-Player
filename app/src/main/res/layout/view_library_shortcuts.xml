@@ -21,26 +21,26 @@
         android:spacing="@dimen/spacing_small"
         app:shapeAppearance="@xml/library_shortcut_shape">
 
-        <org.fossify.musicplayer.views.RippleFixMaterialButton
+        <org.fossify.musicplayer.views.LibraryShortcutButton
             android:id="@+id/shortcut_favorites"
             style="@style/Widget.LibraryShortcut"
             android:text="@string/favorites"
-            app:icon="@drawable/ic_favorite_on_24"
-            app:materialSizeOverlay="@style/SizeOverlay.Material3Expressive.Button.Small" />
+            app:materialSizeOverlay="@style/SizeOverlay.Material3Expressive.Button.Small"
+            app:shortcutIcon="@drawable/ic_favorite_on_24" />
 
-        <org.fossify.musicplayer.views.RippleFixMaterialButton
+        <org.fossify.musicplayer.views.LibraryShortcutButton
             android:id="@+id/shortcut_playlists"
             style="@style/Widget.LibraryShortcut"
             android:text="@string/playlists"
-            app:icon="@drawable/ic_playlist_vector"
-            app:materialSizeOverlay="@style/SizeOverlay.Material3Expressive.Button.Small" />
+            app:materialSizeOverlay="@style/SizeOverlay.Material3Expressive.Button.Small"
+            app:shortcutIcon="@drawable/ic_playlist_vector" />
 
-        <org.fossify.musicplayer.views.RippleFixMaterialButton
+        <org.fossify.musicplayer.views.LibraryShortcutButton
             android:id="@+id/shortcut_recent"
             style="@style/Widget.LibraryShortcut"
             android:text="@string/recent"
-            app:icon="@drawable/ic_recent_24"
-            app:materialSizeOverlay="@style/SizeOverlay.Material3Expressive.Button.Small" />
+            app:materialSizeOverlay="@style/SizeOverlay.Material3Expressive.Button.Small"
+            app:shortcutIcon="@drawable/ic_recent_24" />
 
     </com.google.android.material.button.MaterialButtonGroup>
 

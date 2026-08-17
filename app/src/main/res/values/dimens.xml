@@ -32,6 +32,7 @@
 
     <!-- Library shortcuts -->
     <dimen name="size_library_shortcut">72dp</dimen>
+    <dimen name="size_library_shortcut_icon">20dp</dimen>
 
     <!-- Lyrics -->
     <dimen name="size_lyric_line">36dp</dimen>

@@ -84,6 +84,11 @@ class AudioHelper(private val context: Context) {
         insertTracks(tracks.map { it.copy(id = 0, playListId = playlistId, dateAddedToPlaylist = addedAt) })
     }
 
+    /** The track that joined [playlistId] most recently, whose cover stands for the playlist. */
+    fun getLatestTrackAddedToPlaylist(playlistId: Int): Track? {
+        return context.tracksDAO.getLatestTrackAddedToPlaylist(playlistId)
+    }
+
     fun isFavorite(mediaStoreId: Long): Boolean {
         return context.tracksDAO.isTrackInPlaylist(mediaStoreId, FAVORITES_PLAYLIST_ID)
     }
