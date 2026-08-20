@@ -63,7 +63,7 @@ class PlayHistoryRecorder(private val context: Context) {
 
     private fun countPlay(track: Track) {
         isPlayCounted = true
-        ensureBackgroundThread { context.audioHelper.recordPlayCounted(track.mediaStoreId) }
+        ensureBackgroundThread { context.audioHelper.recordPlayCounted(track) }
     }
 
     private fun cancelPendingCount() = handler.removeCallbacksAndMessages(null)

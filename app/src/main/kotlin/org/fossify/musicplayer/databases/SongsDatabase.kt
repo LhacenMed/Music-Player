@@ -9,13 +9,14 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import org.fossify.musicplayer.R
 import org.fossify.musicplayer.helpers.FAVORITES_PLAYLIST_ID
 import org.fossify.musicplayer.helpers.HISTORY_PLAYLIST_ID
+import org.fossify.musicplayer.helpers.MOST_PLAYED_PLAYLIST_ID
 import org.fossify.musicplayer.interfaces.*
 import org.fossify.musicplayer.models.*
 import org.fossify.musicplayer.objects.MyExecutor
 
 @Database(
     entities = [Track::class, Playlist::class, QueueItem::class, Artist::class, Album::class, Genre::class, PlayStats::class],
-    version = 17
+    version = 18
 )
 abstract class SongsDatabase : RoomDatabase() {
 
@@ -42,6 +43,7 @@ abstract class SongsDatabase : RoomDatabase() {
                     if (db == null) {
                         val favoritesTitle = context.getString(org.fossify.commons.R.string.favorites)
                         val historyTitle = context.getString(R.string.recent)
+                        val mostPlayedTitle = context.getString(R.string.most_played)
                         db = Room.databaseBuilder(context.applicationContext, SongsDatabase::class.java, "songs.db")
                             .setQueryExecutor(MyExecutor.myExecutor)
                             .addMigrations(MIGRATION_1_2)
@@ -60,7 +62,8 @@ abstract class SongsDatabase : RoomDatabase() {
                             .addMigrations(MIGRATION_14_15)
                             .addMigrations(migration15To16(favoritesTitle))
                             .addMigrations(migration16To17(historyTitle))
-                            .addCallback(ManagedPlaylistsCallback(favoritesTitle, historyTitle))
+                            .addMigrations(migration17To18(mostPlayedTitle))
+                            .addCallback(ManagedPlaylistsCallback(favoritesTitle, historyTitle, mostPlayedTitle))
                             .build()
                     }
                 }
@@ -272,14 +275,23 @@ abstract class SongsDatabase : RoomDatabase() {
             }
         }
 
+        /** Claims the id the most played playlist reads from, alongside favorites and the history. */
+        private fun migration17To18(mostPlayedTitle: String) = object : Migration(17, 18) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.reserveManagedPlaylist(MOST_PLAYED_PLAYLIST_ID, mostPlayedTitle)
+            }
+        }
+
         /** Seeds the playlists the app maintains into a database being created from scratch. */
         private class ManagedPlaylistsCallback(
             private val favoritesTitle: String,
-            private val historyTitle: String
+            private val historyTitle: String,
+            private val mostPlayedTitle: String
         ) : RoomDatabase.Callback() {
             override fun onCreate(db: SupportSQLiteDatabase) {
                 db.reserveManagedPlaylist(FAVORITES_PLAYLIST_ID, favoritesTitle)
                 db.reserveManagedPlaylist(HISTORY_PLAYLIST_ID, historyTitle)
+                db.reserveManagedPlaylist(MOST_PLAYED_PLAYLIST_ID, mostPlayedTitle)
             }
         }
 

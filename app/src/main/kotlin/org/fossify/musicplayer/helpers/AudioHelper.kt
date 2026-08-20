@@ -114,9 +114,17 @@ class AudioHelper(private val context: Context) {
         addTracksToPlaylist(HISTORY_PLAYLIST_ID, listOf(track))
     }
 
-    /** Count a listen that lasted long enough to be worth counting. */
-    fun recordPlayCounted(mediaStoreId: Long) {
-        context.playStatsDAO.incrementPlayCount(mediaStoreId)
+    /**
+     * Count a listen that lasted long enough to be worth counting, and take [track] into the most
+     * played playlist on the strength of it.
+     *
+     * A counted listen is what earns a track its place there, so a track skipped straight past never
+     * appears. The row is only its membership: the order comes from the tally, so re-adding it on
+     * every listen leaves the playlist one row per track, as the history is.
+     */
+    fun recordPlayCounted(track: Track) {
+        context.playStatsDAO.incrementPlayCount(track.mediaStoreId)
+        addTracksToPlaylist(MOST_PLAYED_PLAYLIST_ID, listOf(track))
     }
 
     /**

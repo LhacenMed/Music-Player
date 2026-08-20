@@ -56,11 +56,13 @@ class Config(context: Context) : BaseConfig(context) {
 
     fun hasCustomPlaylistSorting(playlistId: Int) = prefs.contains(SORT_PLAYLIST_PREFIX + playlistId)
 
+    // The playlists the app orders itself are answered before any stored sorting, since their order
+    // is what they are: a history that is not newest first is not a history, and neither is a most
+    // played that is not most played first. They offer no sorting for the same reason.
     fun getProperPlaylistSorting(playlistId: Int) = when {
-        hasCustomPlaylistSorting(playlistId) -> getCustomPlaylistSorting(playlistId)
-        // A history reads newest first or it is not a history. The user can still sort it
-        // otherwise, which stores a custom sorting and takes over from here.
         playlistId == HISTORY_PLAYLIST_ID -> HISTORY_SORTING
+        playlistId == MOST_PLAYED_PLAYLIST_ID -> MOST_PLAYED_SORTING
+        hasCustomPlaylistSorting(playlistId) -> getCustomPlaylistSorting(playlistId)
         else -> playlistTracksSorting
     }
 

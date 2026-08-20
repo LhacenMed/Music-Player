@@ -100,7 +100,8 @@ class TracksActivity : SimpleMusicActivity() {
     private fun refreshMenuItems() {
         binding.tracksToolbar.menu.apply {
             findItem(R.id.search).isVisible = sourceType != TYPE_ALBUM
-            findItem(R.id.sort).isVisible = sourceType != TYPE_ALBUM
+            // A playlist the app orders itself has nothing to offer a sorting dialog.
+            findItem(R.id.sort).isVisible = sourceType != TYPE_ALBUM && playlist?.hasFixedOrder != true
             findItem(R.id.add_file_to_playlist).isVisible = sourceType == TYPE_PLAYLIST
             findItem(R.id.add_folder_to_playlist).isVisible = sourceType == TYPE_PLAYLIST
             findItem(R.id.export_playlist).isVisible = sourceType == TYPE_PLAYLIST
