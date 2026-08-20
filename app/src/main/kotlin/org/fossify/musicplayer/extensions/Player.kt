@@ -140,6 +140,14 @@ fun Player.maybeForcePrevious(): Boolean {
     }
 }
 
+/**
+ * The track about to play is built in full, real URI and metadata included, so the session never
+ * has to resolve it asynchronously before playback can start - the "now playing" indicator and the
+ * cover art read it straight off [Player.getCurrentMediaItem] the moment this returns. The rest of
+ * [tracks] is still built lazily via [toMediaItemsFast] and spliced in afterwards through
+ * [addRemainingMediaItems], since resolving an entire queue up front is exactly the delay
+ * [maybePreparePlayer] already exists to avoid.
+ */
 fun Player.prepareUsingTracks(
     tracks: List<Track>,
     startIndex: Int = 0,
@@ -154,12 +162,15 @@ fun Player.prepareUsingTracks(
         return
     }
 
-    val mediaItems = tracks.toMediaItemsFast()
     runOnPlayerThread {
-        setMediaItems(mediaItems, startIndex, startPositionMs)
+        setMediaItem(tracks[startIndex].toMediaItem(), startPositionMs)
         playWhenReady = play
         prepare()
         callback?.invoke(true)
+    }
+
+    if (tracks.size > 1) {
+        addRemainingMediaItems(tracks.toMediaItemsFast(), startIndex)
     }
 }
 
