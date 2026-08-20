@@ -168,9 +168,23 @@ class AudioHelper(private val context: Context) {
         return artists.flatMap { getArtistAlbums(it.id) } as ArrayList<Album>
     }
 
+    /**
+     * A performer's own tracks, plus any track crediting them alongside another performer, e.g.
+     * "Billie Eilish & Justin Bieber" showing up on both of their pages rather than only under
+     * that combined credit as its own separate artist.
+     *
+     * @see splitArtistCredits
+     */
     fun getArtistTracks(artistId: Long): ArrayList<Track> {
-        return context.tracksDAO.getTracksFromArtist(artistId)
-            .applyProperFilenames(config.showFilename)
+        val ownTracks = context.tracksDAO.getTracksFromArtist(artistId)
+        val artistTitle = getArtist(artistId)?.title
+        val creditedElsewhere = if (artistTitle != null) {
+            getAllTracks().filter { it.artistId != artistId && artistTitle in it.artist.splitArtistCredits() }
+        } else {
+            emptyList()
+        }
+
+        return (ownTracks + creditedElsewhere).applyProperFilenames(config.showFilename)
     }
 
     fun getArtistTracks(artists: List<Artist>): ArrayList<Track> {
