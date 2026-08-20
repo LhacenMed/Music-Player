@@ -26,7 +26,7 @@ import org.fossify.musicplayer.helpers.EXTRA_PLAYLIST_ID
 import org.fossify.musicplayer.helpers.EXTRA_TITLE
 import org.fossify.musicplayer.helpers.EXTRA_TRACK_ID
 import org.fossify.musicplayer.helpers.EXTRA_YEAR
-import org.fossify.musicplayer.inlines.indexOfFirstOrNull
+import org.fossify.musicplayer.extensions.indexOfFirstOrNull
 import org.fossify.musicplayer.models.*
 
 fun buildMediaItem(

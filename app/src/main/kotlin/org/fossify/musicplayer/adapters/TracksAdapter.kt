@@ -24,7 +24,7 @@ import org.fossify.musicplayer.extensions.config
 import org.fossify.musicplayer.extensions.getTrackCoverArt
 import org.fossify.musicplayer.helpers.ALL_TRACKS_PLAYLIST_ID
 import org.fossify.musicplayer.helpers.PLAYER_SORT_BY_CUSTOM
-import org.fossify.musicplayer.inlines.indexOfFirstOrNull
+import org.fossify.musicplayer.extensions.indexOfFirstOrNull
 import org.fossify.musicplayer.models.Events
 import org.fossify.musicplayer.models.Playlist
 import org.fossify.musicplayer.models.Track

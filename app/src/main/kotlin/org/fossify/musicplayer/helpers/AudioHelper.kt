@@ -5,7 +5,7 @@ import org.fossify.commons.extensions.addBit
 import org.fossify.commons.extensions.getParentPath
 import org.fossify.commons.helpers.ensureBackgroundThread
 import org.fossify.musicplayer.extensions.*
-import org.fossify.musicplayer.inlines.indexOfFirstOrNull
+import org.fossify.musicplayer.extensions.indexOfFirstOrNull
 import org.fossify.musicplayer.models.*
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds

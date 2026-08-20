@@ -18,14 +18,14 @@ import org.fossify.commons.helpers.PERMISSION_READ_STORAGE
 import org.fossify.commons.helpers.ensureBackgroundThread
 import org.fossify.commons.helpers.isQPlus
 import org.fossify.musicplayer.R
+import org.fossify.musicplayer.data.M3uImporter
+import org.fossify.musicplayer.data.M3uImporter.ImportResult
 import org.fossify.musicplayer.databinding.ActivityPlaylistsBinding
 import org.fossify.musicplayer.dialogs.NewPlaylistDialog
 import org.fossify.musicplayer.dialogs.SelectPlaylistDialog
 import org.fossify.musicplayer.extensions.audioHelper
 import org.fossify.musicplayer.extensions.getFolderTracks
 import org.fossify.musicplayer.extensions.getTintedTextColor
-import org.fossify.musicplayer.helpers.M3uImporter
-import org.fossify.musicplayer.helpers.M3uImporter.ImportResult
 import org.fossify.musicplayer.helpers.MIME_TYPE_M3U
 import org.fossify.musicplayer.models.Events
 import org.greenrobot.eventbus.EventBus

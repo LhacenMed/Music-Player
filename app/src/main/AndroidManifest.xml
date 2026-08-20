@@ -152,14 +152,6 @@
             android:label="@string/artist"
             android:parentActivityName="org.fossify.musicplayer.activities.AlbumsActivity" />
 
-
-        <activity
-            android:name=".activities.QueueActivity"
-            android:configChanges="orientation"
-            android:exported="false"
-            android:label="@string/track_queue"
-            android:parentActivityName=".activities.MainActivity" />
-
         <service
             android:name=".playback.PlaybackService"
             android:exported="true"

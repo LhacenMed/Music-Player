@@ -27,6 +27,8 @@ import org.fossify.musicplayer.adapters.TracksAdapter.Companion.TYPE_FOLDER
 import org.fossify.musicplayer.adapters.TracksAdapter.Companion.TYPE_PLAYLIST
 import org.fossify.musicplayer.adapters.TracksAdapter.Companion.TYPE_TRACKS
 import org.fossify.musicplayer.adapters.TracksHeaderAdapter
+import org.fossify.musicplayer.data.M3uExporter
+import org.fossify.musicplayer.data.M3uExporter.ExportResult
 import org.fossify.musicplayer.databinding.ActivityTracksBinding
 import org.fossify.musicplayer.dialogs.ChangeSortingDialog
 import org.fossify.musicplayer.dialogs.ExportPlaylistDialog
@@ -36,7 +38,6 @@ import org.fossify.musicplayer.extensions.getFolderTracks
 import org.fossify.musicplayer.extensions.getMediaStoreIdFromPath
 import org.fossify.musicplayer.extensions.getTintedTextColor
 import org.fossify.musicplayer.helpers.*
-import org.fossify.musicplayer.helpers.M3uExporter.ExportResult
 import org.fossify.musicplayer.models.*
 import org.greenrobot.eventbus.EventBus
 import java.io.OutputStream

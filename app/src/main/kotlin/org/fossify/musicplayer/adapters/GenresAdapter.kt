@@ -14,7 +14,7 @@ import org.fossify.musicplayer.databinding.ItemGenreBinding
 import org.fossify.musicplayer.extensions.audioHelper
 import org.fossify.musicplayer.extensions.config
 import org.fossify.musicplayer.extensions.getGenreCoverArt
-import org.fossify.musicplayer.inlines.indexOfFirstOrNull
+import org.fossify.musicplayer.extensions.indexOfFirstOrNull
 import org.fossify.musicplayer.models.Genre
 import org.fossify.musicplayer.models.Track
 

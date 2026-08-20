@@ -15,7 +15,7 @@ import org.fossify.musicplayer.databinding.ItemArtistBinding
 import org.fossify.musicplayer.extensions.audioHelper
 import org.fossify.musicplayer.extensions.config
 import org.fossify.musicplayer.extensions.getArtistCoverArt
-import org.fossify.musicplayer.inlines.indexOfFirstOrNull
+import org.fossify.musicplayer.extensions.indexOfFirstOrNull
 import org.fossify.musicplayer.models.Artist
 import org.fossify.musicplayer.models.Track
 

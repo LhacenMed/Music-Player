@@ -11,7 +11,7 @@ import org.fossify.musicplayer.extensions.maybeForceNext
 import org.fossify.musicplayer.extensions.maybeForcePrevious
 import org.fossify.musicplayer.extensions.move
 import org.fossify.musicplayer.extensions.shuffledMediaItemsIndices
-import org.fossify.musicplayer.inlines.indexOfFirstOrNull
+import org.fossify.musicplayer.extensions.indexOfFirstOrNull
 
 private const val DEFAULT_SHUFFLE_ORDER_SEED = 42L
 

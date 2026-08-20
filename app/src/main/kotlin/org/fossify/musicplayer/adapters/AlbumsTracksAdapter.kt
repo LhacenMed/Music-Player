@@ -20,7 +20,7 @@ import org.fossify.musicplayer.dialogs.EditDialog
 import org.fossify.musicplayer.extensions.audioHelper
 import org.fossify.musicplayer.extensions.getAlbumCoverArt
 import org.fossify.musicplayer.extensions.getTrackCoverArt
-import org.fossify.musicplayer.inlines.indexOfFirstOrNull
+import org.fossify.musicplayer.extensions.indexOfFirstOrNull
 import org.fossify.musicplayer.models.Album
 import org.fossify.musicplayer.models.AlbumSection
 import org.fossify.musicplayer.models.ListItem

@@ -15,7 +15,7 @@ import org.fossify.musicplayer.dialogs.NewPlaylistDialog
 import org.fossify.musicplayer.dialogs.RemovePlaylistDialog
 import org.fossify.musicplayer.extensions.audioHelper
 import org.fossify.musicplayer.extensions.config
-import org.fossify.musicplayer.inlines.indexOfFirstOrNull
+import org.fossify.musicplayer.extensions.indexOfFirstOrNull
 import org.fossify.musicplayer.models.Events
 import org.fossify.musicplayer.models.Playlist
 import org.greenrobot.eventbus.EventBus
