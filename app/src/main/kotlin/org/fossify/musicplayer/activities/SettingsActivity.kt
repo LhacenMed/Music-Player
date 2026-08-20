@@ -158,7 +158,7 @@ class SettingsActivity : SimpleControllerActivity() {
      */
     private fun setupUpdates() = binding.apply {
         val isUpdatable = BuildConfig.FLAVOR == "core"
-        arrayOf(settingsUpdatesDivider.root, settingsUpdatesLabel, settingsCheckForUpdatesHolder, settingsAutoCheckForUpdatesHolder)
+        arrayOf(settingsUpdatesDivider, settingsUpdatesLabel, settingsCheckForUpdatesHolder, settingsAutoCheckForUpdatesHolder)
             .forEach { it.beVisibleIf(isUpdatable) }
 
         if (!isUpdatable) {

@@ -63,39 +63,41 @@ class AppUpdateDialog(private val activity: BaseSimpleActivity, private val upda
         dialog?.dismiss()
     }
 
-    private fun render(state: UpdateState) = binding.apply {
+    private fun render(state: UpdateState) {
         val button = dialog?.getButton(AlertDialog.BUTTON_POSITIVE) ?: return
 
-        when (state) {
-            is UpdateState.Downloading -> {
-                button.isEnabled = false
-                appUpdateProgress.beVisible()
-                appUpdateProgress.progress = state.percent
-                appUpdateStatus.beVisible()
-                appUpdateStatus.text = activity.getString(R.string.downloading_update_percent, state.percent)
-            }
+        binding.apply {
+            when (state) {
+                is UpdateState.Downloading -> {
+                    button.isEnabled = false
+                    appUpdateProgress.beVisible()
+                    appUpdateProgress.progress = state.percent
+                    appUpdateStatus.beVisible()
+                    appUpdateStatus.text = activity.getString(R.string.downloading_update_percent, state.percent)
+                }
 
-            is UpdateState.Downloaded -> {
-                button.isEnabled = true
-                button.setText(R.string.install)
-                appUpdateProgress.beVisible()
-                appUpdateProgress.progress = 100
-                appUpdateStatus.beGone()
-            }
+                is UpdateState.Downloaded -> {
+                    button.isEnabled = true
+                    button.setText(R.string.install)
+                    appUpdateProgress.beVisible()
+                    appUpdateProgress.progress = 100
+                    appUpdateStatus.beGone()
+                }
 
-            is UpdateState.Error -> {
-                button.isEnabled = true
-                button.setText(R.string.retry)
-                appUpdateProgress.beGone()
-                appUpdateStatus.beVisible()
-                appUpdateStatus.text = state.message
-            }
+                is UpdateState.Error -> {
+                    button.isEnabled = true
+                    button.setText(R.string.retry)
+                    appUpdateProgress.beGone()
+                    appUpdateStatus.beVisible()
+                    appUpdateStatus.text = state.message
+                }
 
-            else -> {
-                button.isEnabled = true
-                button.setText(org.fossify.commons.R.string.download)
-                appUpdateProgress.beGone()
-                appUpdateStatus.beGone()
+                else -> {
+                    button.isEnabled = true
+                    button.setText(org.fossify.commons.R.string.download)
+                    appUpdateProgress.beGone()
+                    appUpdateStatus.beGone()
+                }
             }
         }
     }
