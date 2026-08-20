@@ -8,7 +8,7 @@ import org.fossify.commons.helpers.isRPlus
 import org.fossify.musicplayer.R
 import org.fossify.musicplayer.databinding.DialogRenameSongBinding
 import org.fossify.musicplayer.extensions.audioHelper
-import org.fossify.musicplayer.helpers.TagHelper
+import org.fossify.musicplayer.data.TagHelper
 import org.fossify.musicplayer.models.Track
 
 class EditDialog(val activity: BaseSimpleActivity, val track: Track, val callback: (track: Track) -> Unit) {

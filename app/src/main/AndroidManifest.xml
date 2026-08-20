@@ -163,7 +163,7 @@
         </service>
 
         <receiver
-            android:name=".helpers.MyWidgetProvider"
+            android:name=".widget.MyWidgetProvider"
             android:exported="true"
             android:icon="@drawable/img_widget_preview">
             <intent-filter>

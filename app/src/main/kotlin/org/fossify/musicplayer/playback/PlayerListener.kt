@@ -1,4 +1,4 @@
-package org.fossify.musicplayer.playback.player
+package org.fossify.musicplayer.playback
 
 import android.widget.Toast
 import androidx.media3.common.MediaItem

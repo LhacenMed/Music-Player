@@ -1,4 +1,4 @@
-package org.fossify.musicplayer.helpers
+package org.fossify.musicplayer.data
 
 import android.app.Application
 import android.content.ContentUris
@@ -15,7 +15,9 @@ import org.fossify.commons.helpers.isRPlus
 import org.fossify.musicplayer.R
 import org.fossify.musicplayer.extensions.audioHelper
 import org.fossify.musicplayer.extensions.config
+import org.fossify.musicplayer.helpers.*
 import org.fossify.musicplayer.models.*
+import org.fossify.musicplayer.playback.NotificationHelper
 import java.io.File
 import java.io.FileInputStream
 import androidx.core.net.toUri
@@ -25,7 +27,7 @@ import org.fossify.musicplayer.extensions.getFriendlyFolder
  * This singleton class manages the process of querying [MediaStore] for new audio files, manually scanning storage for missing audio files, and removing outdated
  * files from the local cache. It ensures that only one scan is running at a time to avoid unnecessary expenses and conflicts.
  */
-class SimpleMediaScanner(private val context: Application) {
+class MediaScanner(private val context: Application) {
 
     private val config = context.config
     private var scanning = false
@@ -669,13 +671,13 @@ class SimpleMediaScanner(private val context: Application) {
         private const val SCANNER_NOTIFICATION_DELAY = 1500L
         private const val GENRE_CONTENT_URI = "content://media/external/audio/genres/all/members"
 
-        private var instance: SimpleMediaScanner? = null
+        private var instance: MediaScanner? = null
 
-        fun getInstance(app: Application): SimpleMediaScanner {
+        fun getInstance(app: Application): MediaScanner {
             return if (instance != null) {
                 instance!!
             } else {
-                instance = SimpleMediaScanner(app)
+                instance = MediaScanner(app)
                 instance!!
             }
         }

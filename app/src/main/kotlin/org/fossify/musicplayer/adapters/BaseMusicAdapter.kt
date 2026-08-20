@@ -19,7 +19,7 @@ import org.fossify.musicplayer.R
 import org.fossify.musicplayer.activities.SimpleControllerActivity
 import org.fossify.musicplayer.dialogs.TrackMenuDialog
 import org.fossify.musicplayer.extensions.*
-import org.fossify.musicplayer.helpers.TagHelper
+import org.fossify.musicplayer.data.TagHelper
 import org.fossify.musicplayer.models.Track
 import org.fossify.musicplayer.playback.PlaybackService
 import org.fossify.musicplayer.views.CoverFallbackDrawable

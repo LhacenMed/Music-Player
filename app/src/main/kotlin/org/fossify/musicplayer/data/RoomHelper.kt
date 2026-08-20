@@ -1,4 +1,4 @@
-package org.fossify.musicplayer.helpers
+package org.fossify.musicplayer.data
 
 import android.content.ContentUris
 import android.content.Context
@@ -9,6 +9,7 @@ import org.fossify.commons.helpers.isQPlus
 import org.fossify.commons.helpers.isRPlus
 import org.fossify.musicplayer.extensions.audioHelper
 import org.fossify.musicplayer.extensions.config
+import org.fossify.musicplayer.helpers.artworkUri
 import org.fossify.musicplayer.models.Events
 import org.fossify.musicplayer.models.Track
 import org.greenrobot.eventbus.EventBus

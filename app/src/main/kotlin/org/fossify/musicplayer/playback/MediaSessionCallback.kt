@@ -18,7 +18,6 @@ import com.google.common.util.concurrent.SettableFuture
 import org.fossify.musicplayer.extensions.addRemainingMediaItems
 import org.fossify.musicplayer.helpers.EXTRA_NEXT_MEDIA_ID
 import org.fossify.musicplayer.helpers.EXTRA_SHUFFLE_INDICES
-import org.fossify.musicplayer.playback.player.updatePlaybackState
 import java.util.concurrent.Executors
 
 @UnstableApi

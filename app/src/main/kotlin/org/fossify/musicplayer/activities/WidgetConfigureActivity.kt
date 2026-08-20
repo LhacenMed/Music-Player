@@ -21,7 +21,7 @@ import org.fossify.commons.helpers.IS_CUSTOMIZING_COLORS
 import org.fossify.musicplayer.R
 import org.fossify.musicplayer.databinding.WidgetConfigBinding
 import org.fossify.musicplayer.extensions.config
-import org.fossify.musicplayer.helpers.MyWidgetProvider
+import org.fossify.musicplayer.widget.MyWidgetProvider
 import org.fossify.musicplayer.playback.PlaybackService
 
 class WidgetConfigureActivity : SimpleActivity() {

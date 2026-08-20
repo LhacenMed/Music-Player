@@ -12,12 +12,12 @@ import org.fossify.commons.helpers.isRPlus
 import org.fossify.musicplayer.R
 import org.fossify.musicplayer.extensions.*
 import org.fossify.musicplayer.helpers.EXTRA_NEXT_MEDIA_ID
-import org.fossify.musicplayer.helpers.SimpleMediaController
 import org.fossify.musicplayer.models.Events
 import org.fossify.musicplayer.models.Track
 import org.fossify.musicplayer.models.toMediaItems
 import org.fossify.musicplayer.playback.CustomCommands
 import org.fossify.musicplayer.playback.PlaybackService.Companion.updatePlaybackInfo
+import org.fossify.musicplayer.playback.SimpleMediaController
 import org.greenrobot.eventbus.EventBus
 import java.io.File
 

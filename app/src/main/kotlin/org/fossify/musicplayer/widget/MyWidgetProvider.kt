@@ -1,4 +1,4 @@
-package org.fossify.musicplayer.helpers
+package org.fossify.musicplayer.widget
 
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
@@ -19,7 +19,9 @@ import org.fossify.musicplayer.activities.SplashActivity
 import org.fossify.musicplayer.extensions.config
 import org.fossify.musicplayer.extensions.maybePreparePlayer
 import org.fossify.musicplayer.extensions.togglePlayback
+import org.fossify.musicplayer.helpers.*
 import org.fossify.musicplayer.playback.PlaybackService
+import org.fossify.musicplayer.playback.SimpleMediaController
 
 class MyWidgetProvider : AppWidgetProvider() {
 

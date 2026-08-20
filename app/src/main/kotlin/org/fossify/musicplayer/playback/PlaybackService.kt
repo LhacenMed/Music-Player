@@ -15,11 +15,7 @@ import org.fossify.commons.extensions.showErrorToast
 import org.fossify.musicplayer.extensions.isReallyPlaying
 import org.fossify.musicplayer.extensions.nextMediaItem
 import org.fossify.musicplayer.extensions.runOnPlayerThread
-import org.fossify.musicplayer.helpers.NotificationHelper
 import org.fossify.musicplayer.helpers.getPermissionToRequest
-import org.fossify.musicplayer.playback.library.MediaItemProvider
-import org.fossify.musicplayer.playback.player.SimpleMusicPlayer
-import org.fossify.musicplayer.playback.player.initializeSessionAndPlayer
 
 @OptIn(UnstableApi::class)
 class PlaybackService : MediaLibraryService(), MediaSessionService.Listener {

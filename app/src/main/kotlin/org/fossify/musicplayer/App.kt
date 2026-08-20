@@ -5,7 +5,7 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import org.fossify.commons.extensions.checkUseEnglish
-import org.fossify.musicplayer.helpers.SimpleMediaController
+import org.fossify.musicplayer.playback.SimpleMediaController
 
 class App : Application() {
     override fun onCreate() {

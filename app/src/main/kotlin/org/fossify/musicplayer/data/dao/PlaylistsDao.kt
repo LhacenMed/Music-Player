@@ -1,4 +1,4 @@
-package org.fossify.musicplayer.interfaces
+package org.fossify.musicplayer.data.dao
 
 import androidx.room.*
 import org.fossify.musicplayer.models.Playlist

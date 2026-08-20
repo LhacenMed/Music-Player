@@ -27,13 +27,17 @@ import com.google.android.material.color.utilities.Hct
 import org.fossify.commons.extensions.*
 import org.fossify.commons.helpers.ensureBackgroundThread
 import org.fossify.commons.helpers.isQPlus
-import org.fossify.musicplayer.databases.SongsDatabase
+import org.fossify.musicplayer.data.AudioHelper
+import org.fossify.musicplayer.data.MediaScanner
+import org.fossify.musicplayer.data.MusicDatabase
+import org.fossify.musicplayer.data.RoomHelper
+import org.fossify.musicplayer.data.dao.*
 import org.fossify.musicplayer.helpers.*
-import org.fossify.musicplayer.interfaces.*
 import org.fossify.musicplayer.models.Album
 import org.fossify.musicplayer.models.Artist
 import org.fossify.musicplayer.models.Genre
 import org.fossify.musicplayer.models.Track
+import org.fossify.musicplayer.widget.MyWidgetProvider
 import java.io.File
 
 val Context.config: Config get() = Config.newInstance(applicationContext)
@@ -54,9 +58,9 @@ val Context.playStatsDAO: PlayStatsDao get() = getTracksDB().PlayStatsDao()
 
 val Context.audioHelper: AudioHelper get() = AudioHelper(this)
 
-val Context.mediaScanner: SimpleMediaScanner get() = SimpleMediaScanner.getInstance(applicationContext as Application)
+val Context.mediaScanner: MediaScanner get() = MediaScanner.getInstance(applicationContext as Application)
 
-fun Context.getTracksDB() = SongsDatabase.getInstance(this)
+fun Context.getTracksDB() = MusicDatabase.getInstance(this)
 
 fun Context.getPlaylistIdWithTitle(title: String) = playlistDAO.getPlaylistWithTitle(title)?.id ?: -1
 

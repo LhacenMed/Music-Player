@@ -1,4 +1,4 @@
-package org.fossify.musicplayer.helpers
+package org.fossify.musicplayer.playback
 
 import android.app.Application
 import android.content.ComponentName

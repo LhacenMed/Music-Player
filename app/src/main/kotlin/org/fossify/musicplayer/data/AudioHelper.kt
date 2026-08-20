@@ -1,11 +1,11 @@
-package org.fossify.musicplayer.helpers
+package org.fossify.musicplayer.data
 
 import android.content.Context
 import org.fossify.commons.extensions.addBit
 import org.fossify.commons.extensions.getParentPath
 import org.fossify.commons.helpers.ensureBackgroundThread
 import org.fossify.musicplayer.extensions.*
-import org.fossify.musicplayer.extensions.indexOfFirstOrNull
+import org.fossify.musicplayer.helpers.*
 import org.fossify.musicplayer.models.*
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds

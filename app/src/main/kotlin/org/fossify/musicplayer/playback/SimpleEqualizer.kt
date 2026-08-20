@@ -8,7 +8,6 @@ import com.google.gson.reflect.TypeToken
 import org.fossify.commons.extensions.toast
 import org.fossify.musicplayer.extensions.config
 import org.fossify.musicplayer.helpers.EQUALIZER_PRESET_CUSTOM
-import org.fossify.musicplayer.playback.player.SimpleMusicPlayer
 
 @UnstableApi
 object SimpleEqualizer {

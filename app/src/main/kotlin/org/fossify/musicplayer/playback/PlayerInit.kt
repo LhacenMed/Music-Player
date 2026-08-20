@@ -1,6 +1,6 @@
 @file:UnstableApi
 
-package org.fossify.musicplayer.playback.player
+package org.fossify.musicplayer.playback
 
 import android.app.PendingIntent
 import android.content.Context

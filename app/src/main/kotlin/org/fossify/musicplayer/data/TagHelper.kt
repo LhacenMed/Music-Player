@@ -1,4 +1,4 @@
-package org.fossify.musicplayer.helpers
+package org.fossify.musicplayer.data
 
 import android.content.ContentUris
 import android.content.ContentValues
