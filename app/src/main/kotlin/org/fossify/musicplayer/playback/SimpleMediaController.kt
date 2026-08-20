@@ -12,6 +12,7 @@ import com.google.common.util.concurrent.MoreExecutors
 import org.fossify.musicplayer.extensions.getOrNull
 import org.fossify.musicplayer.extensions.runOnPlayerThread
 import org.fossify.musicplayer.playback.PlaybackService
+import java.util.concurrent.CopyOnWriteArraySet
 import java.util.concurrent.Executors
 
 class SimpleMediaController(val context: Application) {
@@ -22,6 +23,20 @@ class SimpleMediaController(val context: Application) {
     private lateinit var controllerFuture: ListenableFuture<MediaController>
     private var controller: MediaController? = null
 
+    /**
+     * Every listener currently meant to be attached, replayed onto whatever [MediaController]
+     * [controller] points at.
+     *
+     * A rebuild - the playback service having been stopped and the old controller left
+     * disconnected - swaps in a whole new [MediaController] instance. Without this, whichever
+     * screen was already listening (added back in its own onStart, long before the rebuild) would
+     * stay attached to the disconnected one and never hear from the session again.
+     *
+     * Added to and removed from on the main thread by activity lifecycle callbacks, but replayed
+     * from whatever thread completes the connection future - hence a set safe for that.
+     */
+    private val listeners = CopyOnWriteArraySet<Listener>()
+
     @Synchronized
     fun createControllerAsync() {
         controllerFuture = MediaController
@@ -31,6 +46,7 @@ class SimpleMediaController(val context: Application) {
 
         controllerFuture.addListener({
             controller = getControllerSync()
+            controller?.let { newController -> listeners.forEach(newController::addListener) }
         }, MoreExecutors.directExecutor())
     }
 
@@ -72,12 +88,14 @@ class SimpleMediaController(val context: Application) {
     }
 
     fun addListener(listener: Listener) {
+        listeners.add(listener)
         withController {
             addListener(listener)
         }
     }
 
     fun removeListener(listener: Listener) {
+        listeners.remove(listener)
         withController {
             removeListener(listener)
         }
