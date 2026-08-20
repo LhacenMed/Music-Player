@@ -1,5 +1,6 @@
 package org.fossify.musicplayer.views
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -40,12 +41,16 @@ class CoverPagerAdapter(private val onCoverClick: () -> Unit) :
      * A diff would have to be computed off the main thread and applied whenever it finished, which
      * leaves the carousel briefly holding one queue while being told to scroll into another. Being
      * synchronous is what makes it safe to scroll in the same breath.
+     *
+     * One notification, not a remove-all followed by an insert-all: a transient empty adapter
+     * between those two steps gives the pager's layout manager a moment with nothing to anchor its
+     * scroll position on, right before the caller tells it where to land - which is how a reorder
+     * could leave it seated on the wrong page instead.
      */
+    @SuppressLint("NotifyDataSetChanged")
     fun replace(newTracks: List<Track>) {
-        val removed = tracks.size
-        notifyItemRangeRemoved(0, removed)
         tracks = newTracks
-        notifyItemRangeInserted(0, newTracks.size)
+        notifyDataSetChanged()
     }
 }
 
