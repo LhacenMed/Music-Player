@@ -5,7 +5,10 @@ import android.content.res.ColorStateList
 import android.graphics.drawable.ColorDrawable
 import android.media.AudioManager
 import android.os.Bundle
+import android.view.View
+import androidx.core.view.updateLayoutParams
 import androidx.viewpager.widget.ViewPager
+import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.tabs.TabLayout
 import com.google.gson.Gson
 import org.fossify.musicplayer.BuildConfig
@@ -24,9 +27,11 @@ import org.fossify.musicplayer.helpers.*
 import org.fossify.musicplayer.models.Events
 import org.fossify.musicplayer.models.Playlist
 import org.fossify.musicplayer.playback.CustomCommands
+import org.fossify.musicplayer.views.FadingAppBarOffsetListener
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
+
 
 class MainActivity : SimpleMusicActivity() {
     private var bus: EventBus? = null
@@ -51,6 +56,7 @@ class MainActivity : SimpleMusicActivity() {
         setupEdgeToEdge(moveBottomSystem = listOf(binding.sleepTimerHolder))
         storeStateVariables()
         setupTabs()
+        setupCollapsingAppBar()
         setupLibraryShortcuts()
         setupPlaybackSheet()
 
@@ -173,9 +179,13 @@ class MainActivity : SimpleMusicActivity() {
 
     private fun updateMenuColors() {
         binding.mainMenu.updateColors()
-        // Commons paints the app bar from the plain background, so re-apply the content surface
-        // afterwards to keep the bar, the tabs and the list behind them on one continuous colour.
-        binding.mainMenu.setBackgroundColor(getContentSurfaceColor())
+        // Commons paints the app bar from the plain background, so hand the bar the surface it
+        // rests on afterwards to keep it, the tabs and the list behind them on one continuous
+        // colour, along with the step it lifts to while the list underneath is off its top.
+        binding.mainMenu.setSurfaceColors(
+            resting = getContentSurfaceColor(),
+            lifted = getLiftedSurfaceColor()
+        )
     }
 
     private fun storeStateVariables() {
@@ -232,32 +242,75 @@ class MainActivity : SimpleMusicActivity() {
             override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {}
 
             override fun onPageSelected(position: Int) {
-                // Only follow the pager when the pager led, which means a swipe. A tab tap has
-                // already moved the selection, and selecting it again would come back as a
-                // reselection and send the list it just opened to the top.
-                if (binding.mainTabsHolder.selectedTabPosition != position) {
-                    binding.mainTabsHolder.getTabAt(position)?.select()
-                }
+                // Aiming the bar at the arriving list is all Auxio does here: the bar keeps the
+                // position it was left at rather than reopening over the tab being moved to.
+                updateAppBarScrollTarget(position)
 
                 getAllFragments().forEach {
                     it.finishActMode()
                 }
             }
         })
+
+        // Auxio hands the tabs to its pager with a TabLayoutMediator; this is that mapping for the
+        // pager this app uses. It owns the selection both ways and slides the indicator with the
+        // swipe, which is why none of that is done by hand alongside it. It labels the tabs from
+        // the adapter, so it can only be attached once the adapter is set.
+        binding.mainTabsHolder.setupWithViewPager(binding.viewPager)
+        binding.mainTabsHolder.beGoneIf(binding.mainTabsHolder.tabCount == 1)
+
+        // No page change announces the one the pager opens on, so the first tab is aimed at once
+        // the pager has built it.
+        binding.viewPager.post { updateAppBarScrollTarget() }
     }
 
-    private fun setupTabs() {
-        binding.mainTabsHolder.removeAllTabs()
-        getVisibleTabs().forEach { value ->
-            binding.mainTabsHolder.newTab().apply {
-                text = getTabLabel(value)
-                binding.mainTabsHolder.addTab(this)
+    /**
+     * Let the search bar and the shortcuts scroll away, leaving the tabs at the top.
+     *
+     * The search bar is inflated by MySearchMenu itself, so its flags cannot be set in the layout
+     * the way the rest of the app bar's children could be. Stating both here keeps what scrolls
+     * away in one place, and says by omission that the tabs stay put.
+     */
+    private fun setupCollapsingAppBar() {
+        val collapsing = listOf(binding.mainMenu.binding.searchBarContainer, binding.libraryShortcuts.root)
+        collapsing.forEach {
+            it.updateLayoutParams<AppBarLayout.LayoutParams> {
+                scrollFlags = AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL or
+                    AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS
             }
         }
 
+        binding.mainMenu.addOnOffsetChangedListener(FadingAppBarOffsetListener(collapsing))
+        // The tab on screen never announces itself, so the first one is aimed at up front.
+        updateAppBarScrollTarget()
+    }
+
+    /**
+     * Update the scrolling view in the app bar to align with the current tab's scrolling state.
+     * This prevents the lift state from being confused as one goes between different tabs.
+     *
+     * Read from the tab rather than from its fragment, the way Auxio reads it from the tab's music
+     * type: the pager builds its pages on the first layout, so a fragment cannot be asked for its
+     * list before then, and the bar would spend that time aimed at nothing and never lift.
+     */
+    private fun updateAppBarScrollTarget(position: Int = binding.viewPager.currentItem) {
+        binding.mainMenu.liftOnScrollTargetViewId = when (getVisibleTabs().getOrNull(position)) {
+            TAB_TRACKS -> R.id.tracks_list
+            TAB_FOLDERS -> R.id.folders_list
+            TAB_ARTISTS -> R.id.artists_list
+            TAB_ALBUMS -> R.id.albums_list
+            TAB_GENRES -> R.id.genres_list
+            else -> View.NO_ID
+        }
+    }
+
+    /**
+     * The tab layout is set up with the pager in [initFragments], which is what moves the selection
+     * and slides the indicator with a swipe. Only what that mapping does not cover is wired here.
+     */
+    private fun setupTabs() {
         binding.mainTabsHolder.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab) {
-                binding.viewPager.currentItem = tab.position
                 binding.viewPager.post {
                     getAdapter()?.getFragmentAt(tab.position)?.onSearchQueryChanged(
                         text = binding.mainMenu.getCurrentQuery()
@@ -271,10 +324,9 @@ class MainActivity : SimpleMusicActivity() {
             // other tabbed app.
             override fun onTabReselected(tab: TabLayout.Tab) {
                 getAdapter()?.getFragmentAt(tab.position)?.scrollToTop()
+                binding.mainMenu.expandWithScrollingRecycler()
             }
         })
-
-        binding.mainTabsHolder.beGoneIf(binding.mainTabsHolder.tabCount == 1)
     }
 
     /** The fixed entry points above the tabs. */
@@ -338,18 +390,6 @@ class MainActivity : SimpleMusicActivity() {
         val properPrimaryColor = getProperPrimaryColor()
         binding.mainTabsHolder.setTabTextColors(properTextColor.adjustAlpha(MEDIUM_ALPHA), properPrimaryColor)
         binding.mainTabsHolder.setSelectedTabIndicatorColor(properPrimaryColor)
-    }
-
-    private fun getTabLabel(position: Int): String {
-        val stringId = when (position) {
-            TAB_FOLDERS -> R.string.folders
-            TAB_ARTISTS -> R.string.artists
-            TAB_ALBUMS -> R.string.albums
-            TAB_GENRES -> R.string.genres
-            else -> R.string.tracks
-        }
-
-        return resources.getString(stringId)
     }
 
     private fun showSortingDialog() {

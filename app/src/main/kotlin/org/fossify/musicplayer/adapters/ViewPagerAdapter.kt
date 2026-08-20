@@ -7,6 +7,7 @@ import androidx.viewpager.widget.PagerAdapter
 import org.fossify.commons.extensions.getProperPrimaryColor
 import org.fossify.musicplayer.activities.SimpleActivity
 import org.fossify.musicplayer.databinding.*
+import org.fossify.musicplayer.extensions.getTabLabel
 import org.fossify.musicplayer.extensions.getTintedTextColor
 import org.fossify.musicplayer.extensions.getVisibleTabs
 import org.fossify.musicplayer.fragments.MyViewPagerFragment
@@ -50,6 +51,9 @@ class ViewPagerAdapter(val activity: SimpleActivity) : PagerAdapter() {
     }
 
     override fun getCount() = activity.getVisibleTabs().size
+
+    /** What the tab layout labels its tabs with once it is set up with the pager. */
+    override fun getPageTitle(position: Int) = activity.getTabLabel(activity.getVisibleTabs()[position])
 
     override fun isViewFromObject(view: View, item: Any) = view == item
 

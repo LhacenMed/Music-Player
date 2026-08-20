@@ -17,10 +17,14 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <org.fossify.commons.views.MySearchMenu
+            <!-- The search bar and the shortcuts scroll away with the list; the tabs carry no
+                 scroll flags, which is what keeps them at the top. The bar recolours itself while
+                 the list it is aimed at sits off its top. -->
+            <org.fossify.musicplayer.views.CoordinatorSearchMenu
                 android:id="@+id/main_menu"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:stateListAnimator="@null">
 
                 <include
                     android:id="@+id/library_shortcuts"
@@ -34,7 +38,7 @@
                     app:tabGravity="start"
                     app:tabMode="scrollable" />
 
-            </org.fossify.commons.views.MySearchMenu>
+            </org.fossify.musicplayer.views.CoordinatorSearchMenu>
 
             <RelativeLayout
                 android:id="@+id/main_nested_scrollview"

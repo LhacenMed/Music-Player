@@ -295,6 +295,17 @@ fun Context.isTabVisible(flag: Int) = config.showTabs and flag != 0
 
 fun Context.getVisibleTabs() = tabsList.filter { isTabVisible(it) }
 
+/** The name a tab carries, read by the pager adapter so the tab layout can label itself. */
+fun Context.getTabLabel(tab: Int): String = getString(
+    when (tab) {
+        TAB_FOLDERS -> org.fossify.musicplayer.R.string.folders
+        TAB_ARTISTS -> org.fossify.musicplayer.R.string.artists
+        TAB_ALBUMS -> org.fossify.musicplayer.R.string.albums
+        TAB_GENRES -> org.fossify.musicplayer.R.string.genres
+        else -> org.fossify.musicplayer.R.string.tracks
+    }
+)
+
 fun Context.getPlaybackSetting(repeatMode: @Player.RepeatMode Int): PlaybackSetting {
     return when (repeatMode) {
         Player.REPEAT_MODE_OFF -> PlaybackSetting.REPEAT_OFF
@@ -318,6 +329,9 @@ private const val CONTENT_SURFACE_DARKEN_PERCENT = 4
 /** How far the queue sheet sits above the playback sheet it is stacked on, in percent. */
 private const val QUEUE_SURFACE_LIGHTEN_PERCENT = 4
 
+/** How far the app bar lifts towards the foreground once the surface under it is scrolled. */
+private const val LIFTED_SURFACE_BLEND = 0.08f
+
 /**
  * The surface hierarchy the playback UI is built on, mirroring Auxio's: browsing content sits at
  * the bottom, and each sheet stacked over it steps one level lighter so the layers stay legible
@@ -328,6 +342,18 @@ fun Context.getContentSurfaceColor() = getProperBackgroundColor().darkenColor(CO
 fun Context.getPlaybackSurfaceColor() = getProperBackgroundColor()
 
 fun Context.getQueueSurfaceColor() = getProperBackgroundColor().lightenColor(QUEUE_SURFACE_LIGHTEN_PERCENT)
+
+/**
+ * The colour the app bar lifts to once the list running beneath it has been scrolled.
+ *
+ * Blended towards the text colour rather than stepped in lightness, because lightenColor and
+ * darkenColor both hand pure black and pure white straight back, and a step of the size the sheets
+ * use is barely visible at the dark end of the scale anyway. Moving towards the foreground lifts the
+ * bar on every theme, and in the direction Material does it: lighter on a dark palette, darker on a
+ * light one.
+ */
+fun Context.getLiftedSurfaceColor() =
+    ColorUtils.blendARGB(getContentSurfaceColor(), getProperTextColor(), LIFTED_SURFACE_BLEND)
 
 /**
  * The colour a queue entry lifts to while it is being dragged. This is the entry's own pressed
