@@ -61,6 +61,11 @@ class AudioHelper(private val context: Context) {
         context.tracksDAO.updateSongInfo(newPath, artist, title, oldPath)
     }
 
+    /** @see SongsDao.syncMetadataFromCanonicalTracks */
+    fun syncPlaylistTrackMetadata() {
+        context.tracksDAO.syncMetadataFromCanonicalTracks()
+    }
+
     fun deleteTrack(mediaStoreId: Long) {
         context.tracksDAO.removeTrack(mediaStoreId)
         context.playStatsDAO.deletePlayStats(mediaStoreId)

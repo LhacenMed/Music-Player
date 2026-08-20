@@ -183,6 +183,9 @@ class MediaScanner(private val context: Application) {
             insertAlbums(newAlbums)
             insertArtists(newArtists)
             insertGenres(newGenres)
+            // The insert above only refreshed each track's canonical row; carry the same fields
+            // into its copies in every other playlist before cleanupDatabase() reads them back.
+            syncPlaylistTrackMetadata()
         }
         updateAllTracksPlaylist()
     }

@@ -14,6 +14,10 @@ object SimpleEqualizer {
     lateinit var instance: Equalizer
         internal set
 
+    /** Whether [instance] has been set up yet. False for the brief window before the playback
+     *  service finishes creating its player, e.g. right after a process-death restore. */
+    val isReady: Boolean get() = ::instance.isInitialized
+
     fun setupEqualizer(context: Context, player: SimpleMusicPlayer) {
         try {
             val preset = context.config.equalizerPreset

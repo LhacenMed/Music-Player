@@ -3,6 +3,8 @@ package org.fossify.musicplayer.activities
 import android.annotation.SuppressLint
 import android.media.audiofx.Equalizer
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.widget.SeekBar
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -44,7 +46,21 @@ class EqualizerActivity : SimpleActivity() {
     }
 
     @SuppressLint("SetTextI18n")
-    private fun initMediaPlayer() {
+    private fun initMediaPlayer(retriesLeft: Int = EQUALIZER_READY_MAX_RETRIES) {
+        if (!SimpleEqualizer.isReady) {
+            // The playback service hasn't finished creating its equalizer yet, most often right
+            // after a process-death restore lands straight back on this screen. Its setup runs
+            // within the next couple of main-thread loop turns, so a short retry clears it without
+            // a visible delay in the common case.
+            if (retriesLeft > 0) {
+                Handler(Looper.getMainLooper()).postDelayed({ initMediaPlayer(retriesLeft - 1) }, EQUALIZER_READY_RETRY_DELAY_MS)
+            } else {
+                toast(org.fossify.commons.R.string.unknown_error_occurred)
+                finish()
+            }
+            return
+        }
+
         val equalizer = SimpleEqualizer.instance
         try {
             if (!equalizer.enabled) {
@@ -200,5 +216,10 @@ class EqualizerActivity : SimpleActivity() {
         val units = arrayOf("Hz", "kHz", "gHz")
         val digitGroups = (log10(value) / log10(1000.0)).toInt()
         return "${DecimalFormat("#,##0.#").format(value / 1000.0.pow(digitGroups.toDouble()))} ${units[digitGroups]}"
+    }
+
+    companion object {
+        private const val EQUALIZER_READY_MAX_RETRIES = 5
+        private const val EQUALIZER_READY_RETRY_DELAY_MS = 100L
     }
 }
