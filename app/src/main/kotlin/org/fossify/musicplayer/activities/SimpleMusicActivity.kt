@@ -104,6 +104,11 @@ abstract class SimpleMusicActivity : SimpleControllerActivity(), Player.Listener
         // from the screen the user is coming back from.
         refreshPlayingTrackIndicator()
         panel.updateFavorite()
+        // Sheet visibility otherwise only reacts to onMediaItemTransition, a listener callback that
+        // fires on a change - not on this screen simply coming back into view. A screen recreated
+        // while playback was already going (or briefly racing the controller's reconnect) would
+        // otherwise leave the sheet hidden with no further event to correct it.
+        updateSheetVisibility()
     }
 
     override fun onPause() {
