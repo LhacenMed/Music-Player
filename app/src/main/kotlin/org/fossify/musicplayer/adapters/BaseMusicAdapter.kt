@@ -12,7 +12,6 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestOptions
 import org.fossify.commons.activities.BaseSimpleActivity
 import org.fossify.commons.adapters.MyRecyclerViewAdapter
-import org.fossify.commons.extensions.beInvisibleIf
 import org.fossify.commons.extensions.getProperPrimaryColor
 import org.fossify.commons.helpers.ensureBackgroundThread
 import org.fossify.commons.views.MyRecyclerView
@@ -86,13 +85,12 @@ abstract class BaseMusicAdapter<Type>(
      * Hand a row's overflow button the track it stands for, and the tracks around it that Play and
      * Shuffle act on.
      *
-     * The button steps aside once rows are being selected, leaving the trailing edge to the drag
-     * handle, so the row never carries two controls at once. It keeps its space rather than
-     * collapsing, since the title is measured against it and must stay clear of whatever is there.
+     * The button stays put for the whole life of the row, selection or not: a reorderable playlist
+     * shows its drag handle beside it rather than in its place, so there is nothing for it to step
+     * aside for, and every list keeps the same trailing control wherever the row is shown.
      */
     protected fun MaterialButton.setupTrackMenu(track: Track, queue: List<Track>) {
         val activity = this@BaseMusicAdapter.context
-        beInvisibleIf(selectedKeys.isNotEmpty())
         iconTint = ColorStateList.valueOf(textColor)
         contentDescription = activity.getString(R.string.more_options_for, track.title)
         setOnClickListener { TrackMenuDialog.showForTrack(activity, track, queue) }

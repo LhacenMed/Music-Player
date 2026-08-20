@@ -14,7 +14,6 @@ import org.fossify.commons.extensions.*
 import org.fossify.commons.helpers.ensureBackgroundThread
 import org.fossify.commons.interfaces.ItemMoveCallback
 import org.fossify.commons.interfaces.ItemTouchHelperContract
-import org.fossify.commons.interfaces.StartReorderDragListener
 import org.fossify.commons.views.MyRecyclerView
 import org.fossify.musicplayer.extensions.setupActivatableBackground
 import org.fossify.musicplayer.R
@@ -41,18 +40,21 @@ class TracksAdapter(
     itemClick: (Any) -> Unit
 ) : BaseMusicAdapter<Track>(items, activity, recyclerView, itemClick), RecyclerViewFastScroller.OnPopupTextUpdate, ItemTouchHelperContract {
 
-    private var touchHelper: ItemTouchHelper? = null
-    private var startReorderDragListener: StartReorderDragListener
+    /**
+     * Whether these tracks can be dragged into an order of the user's own.
+     *
+     * Only playlist content can be, and only a playlist whose order the app does not decide itself.
+     * Asked once from the list's own source rather than inferred per row, so every row in a list
+     * agrees on it and no list is left half draggable.
+     */
+    private val isReorderable = sourceType == TYPE_PLAYLIST && playlist?.isReorderable == true
+
+    // A list that cannot be reordered is never attached to a touch helper, so there is nothing for a
+    // stray drag to start.
+    private val touchHelper = if (isReorderable) ItemTouchHelper(ItemMoveCallback(this)) else null
 
     init {
-        touchHelper = ItemTouchHelper(ItemMoveCallback(this))
-        touchHelper!!.attachToRecyclerView(recyclerView)
-
-        startReorderDragListener = object : StartReorderDragListener {
-            override fun requestDrag(viewHolder: RecyclerView.ViewHolder) {
-                touchHelper?.startDrag(viewHolder)
-            }
-        }
+        touchHelper?.attachToRecyclerView(recyclerView)
     }
 
     override fun getActionMenuId() = R.menu.cab_tracks
@@ -105,14 +107,16 @@ class TracksAdapter(
         }
     }
 
+    // Entering and leaving the selection is what brings the drag handle in and out, so only a list
+    // that has a handle to show has anything to repaint.
     override fun onActionModeCreated() {
-        if (isPlaylistContent()) {
+        if (isReorderable) {
             notifyItemRangeChanged(0, itemCount)
         }
     }
 
     override fun onActionModeDestroyed() {
-        if (isPlaylistContent()) {
+        if (isReorderable) {
             notifyItemRangeChanged(0, itemCount)
         }
     }
@@ -199,11 +203,14 @@ class TracksAdapter(
             } else {
                 ("${track.artist} - ${track.album}").highlightTextPart(textToHighlight, properPrimaryColor)
             }
-            trackDragHandle.beVisibleIf(isPlaylistContent() && selectedKeys.isNotEmpty())
+            // The menu stays where it is for the whole life of the row. The handle used to be laid
+            // over it, which is what made it look like the menu vanished on a long press; it now
+            // joins the menu beside it, and only on a list that can actually be reordered.
+            trackDragHandle.beVisibleIf(isReorderable && selectedKeys.isNotEmpty())
             trackDragHandle.applyColorFilter(textColor)
             trackDragHandle.setOnTouchListener { _, event ->
                 if (event.action == MotionEvent.ACTION_DOWN) {
-                    startReorderDragListener.requestDrag(holder)
+                    touchHelper?.startDrag(holder)
                 }
                 false
             }

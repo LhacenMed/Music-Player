@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Ported from Auxio's item_song. The drag handle is this app's own addition, taking the menu
-     button's place while a playlist is being reordered so the row keeps one trailing control. -->
+<!-- Ported from Auxio's item_song. The drag handle is this app's own addition, sitting beside the
+     menu button rather than over it while a reorderable playlist is being rearranged: the menu is
+     always there to be reached for, and the handle joins it only while there is something to drag.
+     Gone by default, and collapsing onto the menu's edge when gone, so a row that never reorders is
+     laid out exactly as it would be without it. -->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -29,7 +32,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/spacing_mid_medium"
         app:layout_constraintBottom_toTopOf="@+id/track_info"
-        app:layout_constraintEnd_toStartOf="@+id/track_menu"
+        app:layout_constraintEnd_toStartOf="@+id/track_drag_handle"
         app:layout_constraintStart_toEndOf="@+id/track_image"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed"
@@ -42,7 +45,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/spacing_mid_medium"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/track_menu"
+        app:layout_constraintEnd_toStartOf="@+id/track_drag_handle"
         app:layout_constraintStart_toEndOf="@+id/track_image"
         app:layout_constraintTop_toBottomOf="@+id/track_title"
         tools:text="Track artist" />
@@ -65,7 +68,7 @@
         android:src="@drawable/ic_drag_handle_vector"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/track_menu"
         app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
