@@ -16,6 +16,7 @@ import org.fossify.commons.models.RadioItem
 import org.fossify.commons.views.MySeekBar
 import org.fossify.musicplayer.databinding.ActivityEqualizerBinding
 import org.fossify.musicplayer.databinding.EqualizerBandBinding
+import org.fossify.musicplayer.extensions.accentColor
 import org.fossify.musicplayer.extensions.config
 import org.fossify.musicplayer.extensions.getTintedTextColor
 import org.fossify.musicplayer.helpers.EQUALIZER_PRESET_CUSTOM
@@ -76,7 +77,7 @@ class EqualizerActivity : SimpleActivity() {
         val presetTextColor = if (isWhiteTheme()) {
             DARK_GREY
         } else {
-            getProperPrimaryColor().getContrastColor()
+            accentColor.getContrastColor()
         }
         binding.equalizerPreset.setTextColor(presetTextColor)
     }

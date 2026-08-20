@@ -147,6 +147,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.eventbus)
     implementation(libs.androidx.media)
+    implementation(libs.androidx.palette)
     implementation(libs.androidx.swiperefreshlayout)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.lifecycle.process)

@@ -76,6 +76,7 @@ internal fun PlaybackService.getMediaSessionCallback() = object : MediaLibrarySe
             CustomCommands.TOGGLE_SLEEP_TIMER -> toggleSleepTimer()
             CustomCommands.SET_SHUFFLE_ORDER -> setShuffleOrder(args)
             CustomCommands.SET_NEXT_ITEM -> setNextItem(args)
+            CustomCommands.REFRESH_ACCENT_COLOR -> adaptiveAccentController.refresh()
         }
 
         return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))

@@ -24,6 +24,7 @@ class PlaybackService : MediaLibraryService(), MediaSessionService.Listener {
     internal lateinit var mediaSession: MediaLibrarySession
     internal lateinit var mediaItemProvider: MediaItemProvider
     internal lateinit var playHistoryRecorder: PlayHistoryRecorder
+    internal lateinit var adaptiveAccentController: AdaptiveAccentController
 
     internal var currentRoot = ""
 
@@ -31,6 +32,7 @@ class PlaybackService : MediaLibraryService(), MediaSessionService.Listener {
         super.onCreate()
         setListener(this)
         playHistoryRecorder = PlayHistoryRecorder(this)
+        adaptiveAccentController = AdaptiveAccentController(this)
         initializeSessionAndPlayer(handleAudioFocus = true, handleAudioBecomingNoisy = true)
         initializeLibrary()
     }
@@ -113,10 +115,18 @@ class PlaybackService : MediaLibraryService(), MediaSessionService.Listener {
         var nextMediaItem: MediaItem? = null
             private set
 
+        /** The playing track's own accent color, when [AdaptiveAccentController] has one for it. */
+        var currentAccentColor: Int? = null
+            private set
+
         fun updatePlaybackInfo(player: Player) {
             currentMediaItem = player.currentMediaItem
             nextMediaItem = player.nextMediaItem
             isPlaying = player.isReallyPlaying
+        }
+
+        fun setAccentColor(color: Int?) {
+            currentAccentColor = color
         }
     }
 }

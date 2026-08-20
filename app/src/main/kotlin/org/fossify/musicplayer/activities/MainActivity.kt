@@ -89,7 +89,7 @@ class MainActivity : SimpleMusicActivity() {
         setupLibraryShortcutColors()
         updateFavoritesShortcutCover()
         val properTextColor = getTintedTextColor()
-        val properPrimaryColor = getProperPrimaryColor()
+        val properPrimaryColor = accentColor
         binding.sleepTimerHolder.background = ColorDrawable(getContentSurfaceColor())
         binding.sleepTimerStop.applyColorFilter(properTextColor)
         binding.loadingProgressBar.setIndicatorColor(properPrimaryColor)
@@ -365,7 +365,7 @@ class MainActivity : SimpleMusicActivity() {
      */
     private fun setupLibraryShortcutColors() = binding.libraryShortcuts.apply {
         val containerColor = getProperBackgroundColor()
-        val iconTint = ColorStateList.valueOf(getProperPrimaryColor())
+        val iconTint = ColorStateList.valueOf(accentColor)
         val labelColor = getTintedTextColor()
 
         listOf(shortcutFavorites, shortcutPlaylists, shortcutRecent).forEach {
@@ -387,7 +387,7 @@ class MainActivity : SimpleMusicActivity() {
 
     private fun setupTabColors() {
         val properTextColor = getTintedTextColor()
-        val properPrimaryColor = getProperPrimaryColor()
+        val properPrimaryColor = accentColor
         binding.mainTabsHolder.setTabTextColors(properTextColor.adjustAlpha(MEDIUM_ALPHA), properPrimaryColor)
         binding.mainTabsHolder.setSelectedTabIndicatorColor(properPrimaryColor)
     }
@@ -484,6 +484,13 @@ class MainActivity : SimpleMusicActivity() {
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun shouldRefreshFragments(event: Events.RefreshFragments) {
         refreshAllFragments()
+    }
+
+    /** @see SimpleMusicActivity.accentColorChanged */
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    fun mainAccentColorChanged(event: Events.AccentColorChanged) {
+        setupTabColors()
+        setupLibraryShortcutColors()
     }
 
     private fun launchEqualizer() {

@@ -28,6 +28,12 @@ class Config(context: Context) : BaseConfig(context) {
         get() = prefs.getBoolean(SWAP_PREV_NEXT, false)
         set(swapPrevNext) = prefs.edit().putBoolean(SWAP_PREV_NEXT, swapPrevNext).apply()
 
+    /** Whether the app's accent color follows the playing track's cover art instead of staying
+     *  on the color chosen in Customize Colors. */
+    var adaptiveTrackTheme: Boolean
+        get() = prefs.getBoolean(ADAPTIVE_TRACK_THEME, false)
+        set(adaptiveTrackTheme) = prefs.edit().putBoolean(ADAPTIVE_TRACK_THEME, adaptiveTrackTheme).apply()
+
     var lastSleepTimerSeconds: Int
         get() = prefs.getInt(LAST_SLEEP_TIMER_SECONDS, 30 * 60)
         set(lastSleepTimerSeconds) = prefs.edit().putInt(LAST_SLEEP_TIMER_SECONDS, lastSleepTimerSeconds).apply()

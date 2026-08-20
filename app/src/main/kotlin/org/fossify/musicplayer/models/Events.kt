@@ -5,4 +5,5 @@ class Events {
     class PlaylistsUpdated
     class RefreshFragments
     class RefreshTracks
+    class AccentColorChanged
 }

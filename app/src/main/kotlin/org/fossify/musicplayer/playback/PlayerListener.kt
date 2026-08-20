@@ -39,6 +39,7 @@ internal fun PlaybackService.getPlayerListener() = object : Player.Listener {
 
     override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
         playHistoryRecorder.onTrackStarted(mediaItem)
+        adaptiveAccentController.onTrackStarted(mediaItem)
 
         // customize repeat mode behaviour as the default behaviour doesn't align with our requirements.
         withPlayer {

@@ -11,6 +11,7 @@ import org.fossify.commons.models.RadioItem
 import org.fossify.musicplayer.R
 import org.fossify.musicplayer.databinding.ActivitySettingsBinding
 import org.fossify.musicplayer.dialogs.ManageVisibleTabsDialog
+import org.fossify.musicplayer.extensions.accentColor
 import org.fossify.musicplayer.extensions.config
 import org.fossify.musicplayer.extensions.sendCommand
 import org.fossify.musicplayer.helpers.SHOW_FILENAME_ALWAYS
@@ -43,11 +44,12 @@ class SettingsActivity : SimpleControllerActivity() {
         setupManageExcludedFolders()
         setupManageShownTabs()
         setupSwapPrevNext()
+        setupAdaptiveTrackTheme()
         setupReplaceTitle()
         updateTextColors(binding.settingsNestedScrollview)
 
         arrayOf(binding.settingsColorCustomizationSectionLabel, binding.settingsGeneralSettingsLabel).forEach {
-            it.setTextColor(getProperPrimaryColor())
+            it.setTextColor(accentColor)
         }
     }
 
@@ -89,6 +91,15 @@ class SettingsActivity : SimpleControllerActivity() {
         settingsSwapPrevNextHolder.setOnClickListener {
             settingsSwapPrevNext.toggle()
             config.swapPrevNext = settingsSwapPrevNext.isChecked
+        }
+    }
+
+    private fun setupAdaptiveTrackTheme() = binding.apply {
+        settingsAdaptiveTrackTheme.isChecked = config.adaptiveTrackTheme
+        settingsAdaptiveTrackThemeHolder.setOnClickListener {
+            settingsAdaptiveTrackTheme.toggle()
+            config.adaptiveTrackTheme = settingsAdaptiveTrackTheme.isChecked
+            withPlayer { sendCommand(CustomCommands.REFRESH_ACCENT_COLOR) }
         }
     }
 

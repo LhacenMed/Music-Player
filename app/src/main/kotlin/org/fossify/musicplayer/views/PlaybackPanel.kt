@@ -30,6 +30,7 @@ import org.fossify.commons.helpers.ensureBackgroundThread
 import org.fossify.musicplayer.R
 import org.fossify.musicplayer.activities.SimpleControllerActivity
 import org.fossify.musicplayer.databinding.ViewPlaybackPanelBinding
+import org.fossify.musicplayer.extensions.accentColor
 import org.fossify.musicplayer.extensions.audioHelper
 import org.fossify.musicplayer.extensions.config
 import org.fossify.musicplayer.extensions.currentMediaItems
@@ -190,7 +191,7 @@ class PlaybackPanel(context: Context, attributeSet: AttributeSet) : ConstraintLa
      * over the skips and, crucially, holds the icon colour steady across play and pause.
      */
     fun updateColors() {
-        val primary = context.getProperPrimaryColor()
+        val primary = context.accentColor
         binding.playbackPlayPause.apply {
             backgroundTintList = ColorStateList.valueOf(primary)
             iconTint = ColorStateList.valueOf(primary.getContrastColor())

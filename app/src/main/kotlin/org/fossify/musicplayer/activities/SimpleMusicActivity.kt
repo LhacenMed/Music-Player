@@ -38,6 +38,7 @@ import org.fossify.musicplayer.extensions.shuffledMediaItemsIndices
 import org.fossify.musicplayer.extensions.toTrack
 import org.fossify.musicplayer.extensions.toTracks
 import org.fossify.musicplayer.helpers.EXTRA_SHUFFLE_INDICES
+import org.fossify.musicplayer.models.Events
 import org.fossify.musicplayer.playback.CustomCommands
 import org.fossify.musicplayer.playback.PlaybackService
 import org.fossify.musicplayer.views.CurrentTrackBar
@@ -46,6 +47,8 @@ import org.fossify.musicplayer.views.PlaybackPanel
 import org.fossify.musicplayer.views.QueueAdapter
 import org.fossify.musicplayer.views.QueueBottomSheetBehavior
 import org.fossify.musicplayer.views.QueueDragCallback
+import org.greenrobot.eventbus.Subscribe
+import org.greenrobot.eventbus.ThreadMode
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -109,6 +112,22 @@ abstract class SimpleMusicActivity : SimpleControllerActivity(), Player.Listener
         // while playback was already going (or briefly racing the controller's reconnect) would
         // otherwise leave the sheet hidden with no further event to correct it.
         updateSheetVisibility()
+    }
+
+    /**
+     * Repaint the bar and panel the moment the accent changes, on top of whatever picks it up on
+     * the next [onResume]. Adaptive theming can otherwise change the accent several times a minute
+     * as tracks go by, and screens like this one - already open, showing the very thing driving the
+     * change - are exactly where that ought to be seen right away rather than waiting on a revisit.
+     *
+     * Only fires for a screen that already registers with [org.greenrobot.eventbus.EventBus] for
+     * some other event of its own; a screen that never does simply catches up on its next resume,
+     * same as it would if the user had changed the accent from Customize Colors instead.
+     */
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    fun accentColorChanged(event: Events.AccentColorChanged) {
+        updateCurrentTrackBar()
+        panel.updateColors()
     }
 
     override fun onPause() {

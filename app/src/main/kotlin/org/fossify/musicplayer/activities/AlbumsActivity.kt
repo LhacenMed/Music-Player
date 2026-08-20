@@ -12,6 +12,7 @@ import org.fossify.musicplayer.R
 import org.fossify.musicplayer.adapters.AlbumsTracksAdapter
 import org.fossify.musicplayer.adapters.BaseMusicAdapter
 import org.fossify.musicplayer.databinding.ActivityAlbumsBinding
+import org.fossify.musicplayer.extensions.accentColor
 import org.fossify.musicplayer.extensions.audioHelper
 import org.fossify.musicplayer.helpers.ALBUM
 import org.fossify.musicplayer.helpers.ARTIST
@@ -31,7 +32,7 @@ class AlbumsActivity : SimpleMusicActivity() {
         setupEdgeToEdge()
         setupMaterialScrollListener(binding.albumsList, binding.albumsAppbar)
 
-        binding.albumsFastscroller.updateColors(getProperPrimaryColor())
+        binding.albumsFastscroller.updateColors(accentColor)
 
         val artistType = object : TypeToken<Artist>() {}.type
         val artist = Gson().fromJson<Artist>(intent.getStringExtra(ARTIST), artistType)

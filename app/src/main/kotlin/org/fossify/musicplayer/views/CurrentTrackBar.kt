@@ -27,7 +27,7 @@ class CurrentTrackBar(context: Context, attributeSet: AttributeSet) : Constraint
     }
 
     fun updateColors() {
-        val primary = context.getProperPrimaryColor()
+        val primary = context.accentColor
         binding.currentTrackPlayPause.apply {
             backgroundTintList = ColorStateList.valueOf(primary)
             iconTint = ColorStateList.valueOf(primary.getContrastColor())
@@ -36,8 +36,8 @@ class CurrentTrackBar(context: Context, attributeSet: AttributeSet) : Constraint
         binding.currentTrackNext.backgroundTintList =
             ColorStateList.valueOf(context.getPlaybackSurfaceColor())
         binding.currentTrackTitle.setTextColor(context.getTintedTextColor())
-        binding.currentTrackProgress.setIndicatorColor(context.getProperPrimaryColor())
-        binding.currentTrackProgress.trackColor = context.getProperPrimaryColor().adjustAlpha(LOWER_ALPHA)
+        binding.currentTrackProgress.setIndicatorColor(primary)
+        binding.currentTrackProgress.trackColor = primary.adjustAlpha(LOWER_ALPHA)
     }
 
     fun updateCurrentTrack(mediaItem: MediaItem?) {

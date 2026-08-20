@@ -37,6 +37,7 @@ import org.fossify.musicplayer.models.Album
 import org.fossify.musicplayer.models.Artist
 import org.fossify.musicplayer.models.Genre
 import org.fossify.musicplayer.models.Track
+import org.fossify.musicplayer.playback.PlaybackService
 import org.fossify.musicplayer.widget.MyWidgetProvider
 import java.io.File
 
@@ -333,6 +334,21 @@ private const val CONTENT_SURFACE_DARKEN_PERCENT = 4
 /** How far the queue sheet sits above the playback sheet it is stacked on, in percent. */
 private const val QUEUE_SURFACE_LIGHTEN_PERCENT = 4
 
+/**
+ * The app's accent color: the playing track's own cover color when
+ * [org.fossify.musicplayer.helpers.Config.adaptiveTrackTheme] is on and one has been read for it,
+ * otherwise the color chosen in Customize Colors.
+ *
+ * Everywhere in this app that would reach for [getProperPrimaryColor] to color something the user
+ * looks at while browsing or playing music - buttons, tinted text and icons, selection state -
+ * reads it through here instead, which is the one place that decides whether it is adaptive right
+ * now. [getProperPrimaryColor] itself is still what this falls back to, and is still the right call
+ * for anything Fossify Commons colors on its own (e.g. a switch's thumb): that stays tied to the
+ * configured accent regardless, since Commons has no notion of an adaptive one.
+ */
+val Context.accentColor: Int
+    get() = PlaybackService.currentAccentColor ?: getProperPrimaryColor()
+
 /** How far the app bar lifts towards the foreground once the surface under it is scrolled. */
 private const val LIFTED_SURFACE_BLEND = 0.08f
 
@@ -390,6 +406,6 @@ private const val MAX_TINTED_TONE = 96.0
  */
 fun Context.getTintedTextColor(): Int {
     val tone = Hct.fromInt(getProperTextColor()).tone.coerceIn(MIN_TINTED_TONE, MAX_TINTED_TONE)
-    val accentHue = Hct.fromInt(getProperPrimaryColor()).hue
+    val accentHue = Hct.fromInt(accentColor).hue
     return Hct.from(accentHue, TEXT_TINT_CHROMA, tone).toInt()
 }

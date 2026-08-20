@@ -235,7 +235,7 @@ abstract class BaseMusicAdapter<Type>(
     }
 
     fun updateColors(newTextColor: Int) {
-        if (textColor != newTextColor || properPrimaryColor != context.getProperPrimaryColor()) {
+        if (textColor != newTextColor || properPrimaryColor != context.accentColor) {
             updateTextColor(newTextColor)
             updatePrimaryColor()
             placeholder = resources.getSmallPlaceholder(textColor)

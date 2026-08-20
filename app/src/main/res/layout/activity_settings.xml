@@ -176,6 +176,21 @@
             </RelativeLayout>
 
             <RelativeLayout
+                android:id="@+id/settings_adaptive_track_theme_holder"
+                style="@style/SettingsHolderSwitchStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <org.fossify.commons.views.MyMaterialSwitch
+                    android:id="@+id/settings_adaptive_track_theme"
+                    style="@style/SettingsSwitchStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/adaptive_track_theme" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
                 android:id="@+id/settings_show_filename_holder"
                 style="@style/SettingsHolderTextViewStyle"
                 android:layout_width="match_parent"

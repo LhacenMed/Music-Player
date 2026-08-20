@@ -85,6 +85,7 @@
     <!-- Settings -->
     <string name="equalizer">Equalizer</string>
     <string name="swap_prev_next">Swap previous/next headphone buttons</string>
+    <string name="adaptive_track_theme">Color the app from the playing track\'s cover</string>
     <string name="exclude_folder_description">Excluding a folder will prevent the displaying of all audio files within. Files manually added to playlists will not be affected.</string>
     <string name="rescan_media">Rescan media</string>
     <!-- FAQ -->

@@ -33,6 +33,7 @@ import org.fossify.musicplayer.data.RoomHelper
 import org.fossify.musicplayer.databinding.ActivityTracksBinding
 import org.fossify.musicplayer.dialogs.ChangeSortingDialog
 import org.fossify.musicplayer.dialogs.ExportPlaylistDialog
+import org.fossify.musicplayer.extensions.accentColor
 import org.fossify.musicplayer.extensions.audioHelper
 import org.fossify.musicplayer.extensions.config
 import org.fossify.musicplayer.extensions.getFolderTracks
@@ -69,7 +70,7 @@ class TracksActivity : SimpleMusicActivity() {
         setupEdgeToEdge()
         setupMaterialScrollListener(binding.tracksList, binding.tracksAppbar)
 
-        val properPrimaryColor = getProperPrimaryColor()
+        val properPrimaryColor = accentColor
         binding.tracksFastscroller.updateColors(properPrimaryColor)
         binding.tracksPlaceholder.setTextColor(getTintedTextColor())
         binding.tracksPlaceholder2.setTextColor(properPrimaryColor)

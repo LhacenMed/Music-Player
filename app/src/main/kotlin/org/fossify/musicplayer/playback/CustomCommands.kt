@@ -14,7 +14,8 @@ enum class CustomCommands(val customAction: String) {
     RELOAD_CONTENT(customAction = PATH + "RELOAD_CONTENT"),
     TOGGLE_SLEEP_TIMER(customAction = PATH + "TOGGLE_SLEEP_TIMER"),
     SET_NEXT_ITEM(customAction = PATH + "SET_NEXT_ITEM"),
-    SET_SHUFFLE_ORDER(customAction = PATH + "SET_SHUFFLE_ORDER");
+    SET_SHUFFLE_ORDER(customAction = PATH + "SET_SHUFFLE_ORDER"),
+    REFRESH_ACCENT_COLOR(customAction = PATH + "REFRESH_ACCENT_COLOR");
 
     val sessionCommand = SessionCommand(customAction, Bundle.EMPTY)
 
