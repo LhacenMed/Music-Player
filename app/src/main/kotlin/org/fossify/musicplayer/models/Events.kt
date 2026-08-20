@@ -6,4 +6,5 @@ class Events {
     class RefreshFragments
     class RefreshTracks
     class AccentColorChanged
+    class UpdateStateChanged
 }

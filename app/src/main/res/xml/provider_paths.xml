@@ -2,4 +2,6 @@
 <paths>
     <external-path name="external_files" path="."/>
     <root-path name="external_files" path="/storage/" />
+    <!-- Where UpdateDownloader stages a downloaded release APK for UpdateInstaller to hand off. -->
+    <cache-path name="updates" path="updates/" />
 </paths>

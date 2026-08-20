@@ -50,6 +50,25 @@ class NotificationHelper(private val context: Context) {
             }.build()
     }
 
+    fun createUpdateNotification(contentText: String, progress: Int, isDone: Boolean, contentIntent: PendingIntent): Notification {
+        return NotificationCompat.Builder(context, NOTIFICATION_CHANNEL)
+            .setContentTitle(context.getString(R.string.downloading_update))
+            .setContentText(contentText)
+            .setSmallIcon(R.drawable.ic_headset_small)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setContentIntent(contentIntent)
+            .setChannelId(NOTIFICATION_CHANNEL)
+            .setCategory(Notification.CATEGORY_PROGRESS)
+            .setOngoing(!isDone)
+            .setAutoCancel(isDone)
+            .apply {
+                if (!isDone) {
+                    setProgress(100, progress, progress == 0)
+                }
+            }.build()
+    }
+
     fun notify(id: Int, notification: Notification) = notificationManager.notify(id, notification)
 
     fun cancel(id: Int) = notificationManager.cancel(id)

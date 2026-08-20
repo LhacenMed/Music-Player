@@ -34,6 +34,11 @@ class Config(context: Context) : BaseConfig(context) {
         get() = prefs.getBoolean(ADAPTIVE_TRACK_THEME, false)
         set(adaptiveTrackTheme) = prefs.edit().putBoolean(ADAPTIVE_TRACK_THEME, adaptiveTrackTheme).apply()
 
+    /** Whether the app checks GitHub for a newer release on launch. Core builds only. */
+    var checkForUpdates: Boolean
+        get() = prefs.getBoolean(CHECK_FOR_UPDATES, true)
+        set(checkForUpdates) = prefs.edit().putBoolean(CHECK_FOR_UPDATES, checkForUpdates).apply()
+
     var lastSleepTimerSeconds: Int
         get() = prefs.getInt(LAST_SLEEP_TIMER_SECONDS, 30 * 60)
         set(lastSleepTimerSeconds) = prefs.edit().putInt(LAST_SLEEP_TIMER_SECONDS, lastSleepTimerSeconds).apply()

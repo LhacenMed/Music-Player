@@ -86,6 +86,18 @@
     <string name="equalizer">Equalizer</string>
     <string name="swap_prev_next">Swap previous/next headphone buttons</string>
     <string name="adaptive_track_theme">Color the app from the playing track\'s cover</string>
+    <string name="check_for_updates">Check for updates</string>
+    <string name="auto_check_for_updates">Check for updates automatically</string>
+    <string name="checking_for_updates">Checking for updates…</string>
+    <string name="no_updates_available">You\'re up to date</string>
+    <string name="new_update_available">Update available</string>
+    <string name="new_update_available_version">Version %1$s</string>
+    <string name="downloading_update">Downloading update</string>
+    <string name="downloading_update_percent">Downloading… %1$d%%</string>
+    <string name="tap_to_install">Tap to install</string>
+    <string name="install">Install</string>
+    <string name="retry">Retry</string>
+    <string name="grant_install_permission">Allow this app to install updates, then try again</string>
     <string name="exclude_folder_description">Excluding a folder will prevent the displaying of all audio files within. Files manually added to playlists will not be affected.</string>
     <string name="rescan_media">Rescan media</string>
     <!-- FAQ -->

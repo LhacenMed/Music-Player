@@ -21,12 +21,14 @@ import org.fossify.commons.models.Release
 import org.fossify.musicplayer.R
 import org.fossify.musicplayer.adapters.ViewPagerAdapter
 import org.fossify.musicplayer.databinding.ActivityMainBinding
+import org.fossify.musicplayer.dialogs.AppUpdateDialog
 import org.fossify.musicplayer.dialogs.SleepTimerCustomDialog
 import org.fossify.musicplayer.extensions.*
 import org.fossify.musicplayer.helpers.*
 import org.fossify.musicplayer.models.Events
 import org.fossify.musicplayer.models.Playlist
 import org.fossify.musicplayer.playback.CustomCommands
+import org.fossify.musicplayer.update.UpdateChecker
 import org.fossify.musicplayer.views.FadingAppBarOffsetListener
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
@@ -72,6 +74,24 @@ class MainActivity : SimpleMusicActivity() {
         volumeControlStream = AudioManager.STREAM_MUSIC
         checkWhatsNewDialog()
         checkAppOnSDCard()
+        checkForAppUpdate()
+    }
+
+    /**
+     * Only the `core` build ships this: `gplay` updates through Play, `foss` through F-Droid,
+     * both of which expect to be the only thing offering one, and a debug build isn't what
+     * anyone's `version.json` would ever point at.
+     */
+    private fun checkForAppUpdate() {
+        if (BuildConfig.FLAVOR != "core" || BuildConfig.DEBUG || !config.checkForUpdates) {
+            return
+        }
+
+        UpdateChecker.checkAsync { update ->
+            if (update != null && !isDestroyed && !isFinishing) {
+                AppUpdateDialog(this, update)
+            }
+        }
     }
 
     override fun onResume() {
