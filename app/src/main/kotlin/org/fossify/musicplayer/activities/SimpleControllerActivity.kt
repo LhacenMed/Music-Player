@@ -59,9 +59,10 @@ abstract class SimpleControllerActivity : SimpleActivity(), Player.Listener {
      * Play the track the user tapped, among the [tracks] it was listed with.
      *
      * The row of the track already loaded is the one the user reaches for to stop the music, so a
-     * tap on it plays or pauses instead of starting it over, and leaves the panel as they left it.
-     * Which list the tap came from is beside the point: any row standing for the loaded track
-     * behaves as play/pause, so the gesture means the same thing everywhere.
+     * tap on it plays or pauses instead of starting it over. Either way the panel is left exactly as
+     * the user left it: tapping a row asks for the track, not for the player, and it is the bar and
+     * the notification that are there to ask for the player. Which list the tap came from is beside
+     * the point, so the gesture means the same thing everywhere.
      */
     fun playTrack(tracks: List<Track>, startIndex: Int, source: String? = null) {
         val track = tracks.getOrNull(startIndex) ?: return
@@ -69,7 +70,7 @@ abstract class SimpleControllerActivity : SimpleActivity(), Player.Listener {
             if (currentMediaItem.isSameMedia(track)) {
                 togglePlayback()
             } else {
-                prepareAndPlay(tracks, startIndex, source = source)
+                prepareAndPlay(tracks, startIndex, startActivity = false, source = source)
             }
         }
     }
