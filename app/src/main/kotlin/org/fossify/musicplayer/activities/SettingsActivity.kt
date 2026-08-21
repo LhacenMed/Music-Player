@@ -8,8 +8,10 @@ import org.fossify.commons.helpers.IS_CUSTOMIZING_COLORS
 import org.fossify.commons.helpers.NavigationIcon
 import org.fossify.commons.helpers.isTiramisuPlus
 import org.fossify.commons.models.RadioItem
+import org.fossify.musicplayer.BuildConfig
 import org.fossify.musicplayer.R
 import org.fossify.musicplayer.databinding.ActivitySettingsBinding
+import org.fossify.musicplayer.dialogs.AppUpdateDialog
 import org.fossify.musicplayer.dialogs.ManageVisibleTabsDialog
 import org.fossify.musicplayer.extensions.accentColor
 import org.fossify.musicplayer.extensions.config
@@ -18,6 +20,7 @@ import org.fossify.musicplayer.helpers.SHOW_FILENAME_ALWAYS
 import org.fossify.musicplayer.helpers.SHOW_FILENAME_IF_UNAVAILABLE
 import org.fossify.musicplayer.helpers.SHOW_FILENAME_NEVER
 import org.fossify.musicplayer.playback.CustomCommands
+import org.fossify.musicplayer.update.UpdateChecker
 import java.util.Locale
 import kotlin.system.exitProcess
 
@@ -46,9 +49,10 @@ class SettingsActivity : SimpleControllerActivity() {
         setupSwapPrevNext()
         setupAdaptiveTrackTheme()
         setupReplaceTitle()
+        setupUpdates()
         updateTextColors(binding.settingsNestedScrollview)
 
-        arrayOf(binding.settingsColorCustomizationSectionLabel, binding.settingsGeneralSettingsLabel).forEach {
+        arrayOf(binding.settingsColorCustomizationSectionLabel, binding.settingsGeneralSettingsLabel, binding.settingsUpdatesLabel).forEach {
             it.setTextColor(accentColor)
         }
     }
@@ -145,6 +149,38 @@ class SettingsActivity : SimpleControllerActivity() {
     private fun setupManageExcludedFolders() {
         binding.settingsManageExcludedFoldersHolder.setOnClickListener {
             startActivity(Intent(this, ExcludedFoldersActivity::class.java))
+        }
+    }
+
+    /**
+     * Only the `core` build checks GitHub for updates: `gplay` updates through Play, `foss`
+     * through F-Droid, both of which expect to be the only thing offering one.
+     */
+    private fun setupUpdates() = binding.apply {
+        val isUpdatable = BuildConfig.FLAVOR == "core"
+        arrayOf(settingsUpdatesDivider, settingsUpdatesLabel, settingsCheckForUpdatesHolder, settingsAutoCheckForUpdatesHolder)
+            .forEach { it.beVisibleIf(isUpdatable) }
+
+        if (!isUpdatable) {
+            return@apply
+        }
+
+        settingsAutoCheckForUpdates.isChecked = config.checkForUpdates
+        settingsAutoCheckForUpdatesHolder.setOnClickListener {
+            settingsAutoCheckForUpdates.toggle()
+            config.checkForUpdates = settingsAutoCheckForUpdates.isChecked
+        }
+
+        settingsCheckForUpdatesHolder.setOnClickListener {
+            settingsCheckForUpdatesStatus.text = getString(R.string.checking_for_updates)
+            UpdateChecker.checkAsync { update ->
+                if (update != null) {
+                    settingsCheckForUpdatesStatus.text = ""
+                    AppUpdateDialog(this@SettingsActivity, update)
+                } else {
+                    settingsCheckForUpdatesStatus.text = getString(R.string.no_updates_available)
+                }
+            }
         }
     }
 }
