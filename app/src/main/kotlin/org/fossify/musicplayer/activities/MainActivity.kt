@@ -78,7 +78,7 @@ class MainActivity : SimpleMusicActivity() {
     }
 
     private fun checkForAppUpdate() {
-        if (!config.checkForUpdates) {
+        if (BuildConfig.DEBUG || !config.checkForUpdates) {
             return
         }
 
