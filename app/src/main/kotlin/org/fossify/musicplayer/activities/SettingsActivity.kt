@@ -8,7 +8,6 @@ import org.fossify.commons.helpers.IS_CUSTOMIZING_COLORS
 import org.fossify.commons.helpers.NavigationIcon
 import org.fossify.commons.helpers.isTiramisuPlus
 import org.fossify.commons.models.RadioItem
-import org.fossify.musicplayer.BuildConfig
 import org.fossify.musicplayer.R
 import org.fossify.musicplayer.databinding.ActivitySettingsBinding
 import org.fossify.musicplayer.dialogs.AppUpdateDialog
@@ -152,19 +151,7 @@ class SettingsActivity : SimpleControllerActivity() {
         }
     }
 
-    /**
-     * Only the `core` build checks GitHub for updates: `gplay` updates through Play, `foss`
-     * through F-Droid, both of which expect to be the only thing offering one.
-     */
     private fun setupUpdates() = binding.apply {
-        val isUpdatable = BuildConfig.FLAVOR == "core"
-        arrayOf(settingsUpdatesDivider, settingsUpdatesLabel, settingsCheckForUpdatesHolder, settingsAutoCheckForUpdatesHolder)
-            .forEach { it.beVisibleIf(isUpdatable) }
-
-        if (!isUpdatable) {
-            return@apply
-        }
-
         settingsAutoCheckForUpdates.isChecked = config.checkForUpdates
         settingsAutoCheckForUpdatesHolder.setOnClickListener {
             settingsAutoCheckForUpdates.toggle()

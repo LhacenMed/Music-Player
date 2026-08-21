@@ -1,7 +1,6 @@
 name: release-github
 
-# Cloud release pipeline for the GitHub-Releases distribution (the `core` flavor,
-# the one the in-app updater ships in). Dispatched by scripts/release.sh, or
+# Cloud release pipeline for the GitHub-Releases distribution. Dispatched by scripts/release.sh, or
 # manually from the Actions tab. Adapted from Khatmah's release.yml: same
 # ordering and the same reasoning behind it, simplified to this project's
 # plainer version storage and single distribution channel.
@@ -36,7 +35,7 @@ concurrency:
 env:
   MAIN_BRANCH: main
   GRADLE_PROPERTIES: gradle.properties
-  RELEASE_DIR: app/build/outputs/apk/core/release
+  RELEASE_DIR: app/build/outputs/apk/release
 
 jobs:
   build:
@@ -135,7 +134,7 @@ jobs:
           } > keystore.properties
 
       - name: Build signed release APK
-        run: ./gradlew :app:assembleCoreRelease -Dorg.gradle.jvmargs="-Xmx5g -Dfile.encoding=UTF-8"
+        run: ./gradlew :app:assembleRelease -Dorg.gradle.jvmargs="-Xmx5g -Dfile.encoding=UTF-8"
 
       - name: Collect APK
         id: apk

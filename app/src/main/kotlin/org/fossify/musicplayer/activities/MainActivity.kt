@@ -77,13 +77,8 @@ class MainActivity : SimpleMusicActivity() {
         checkForAppUpdate()
     }
 
-    /**
-     * Only the `core` build ships this: `gplay` updates through Play, `foss` through F-Droid,
-     * both of which expect to be the only thing offering one, and a debug build isn't what
-     * anyone's `version.json` would ever point at.
-     */
     private fun checkForAppUpdate() {
-        if (BuildConfig.FLAVOR != "core" || BuildConfig.DEBUG || !config.checkForUpdates) {
+        if (!config.checkForUpdates) {
             return
         }
 
