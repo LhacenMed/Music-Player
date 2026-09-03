@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Music.V31" parent="Theme.Music.V29" />
+
+    <!-- On API 31+ the un-overridden base theme IS the Material You theme, because Theme.Music
+         inherits DynamicColors. So "dynamic" is simply the accent that overrides nothing, and it
+         becomes the default here. -->
+    <style name="Theme.Music.App" parent="Theme.Music.Base" />
+</resources>

@@ -4,6 +4,7 @@ import android.app.Activity
 import androidx.appcompat.app.AlertDialog
 import org.fossify.commons.extensions.*
 import org.fossify.musicplayer.databinding.DialogCustomSleepTimerPickerBinding
+import org.fossify.commons.extensions.setupDialogStuff
 
 class SleepTimerCustomDialog(val activity: Activity, val callback: (seconds: Int) -> Unit) {
     private var dialog: AlertDialog? = null

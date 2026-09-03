@@ -176,17 +176,63 @@
             </RelativeLayout>
 
             <RelativeLayout
-                android:id="@+id/settings_adaptive_track_theme_holder"
+                android:id="@+id/settings_accent_holder"
+                style="@style/SettingsHolderTextViewStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <org.fossify.commons.views.MyTextView
+                    android:id="@+id/settings_accent_label"
+                    style="@style/SettingsTextLabelStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/accent" />
+
+                <org.fossify.commons.views.MyTextView
+                    android:id="@+id/settings_accent"
+                    style="@style/SettingsTextValueStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/settings_accent_label"
+                    tools:text="Blue" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/settings_theme_mode_holder"
+                style="@style/SettingsHolderTextViewStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <org.fossify.commons.views.MyTextView
+                    android:id="@+id/settings_theme_mode_label"
+                    style="@style/SettingsTextLabelStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/theme" />
+
+                <org.fossify.commons.views.MyTextView
+                    android:id="@+id/settings_theme_mode"
+                    style="@style/SettingsTextValueStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/settings_theme_mode_label"
+                    tools:text="Follow system" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/settings_black_theme_holder"
                 style="@style/SettingsHolderSwitchStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
                 <org.fossify.commons.views.MyMaterialSwitch
-                    android:id="@+id/settings_adaptive_track_theme"
+                    android:id="@+id/settings_black_theme"
                     style="@style/SettingsSwitchStyle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/adaptive_track_theme" />
+                    android:text="@string/black_theme" />
 
             </RelativeLayout>
 

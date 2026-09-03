@@ -31,6 +31,7 @@ import org.fossify.musicplayer.extensions.coordinatorLayoutBehavior
 import org.fossify.musicplayer.extensions.getContentSurfaceColor
 import org.fossify.musicplayer.extensions.getPlaybackSetting
 import org.fossify.musicplayer.extensions.getPlaybackSurfaceColor
+import org.fossify.musicplayer.extensions.getQueueSurfaceColor
 import org.fossify.musicplayer.extensions.isReallyPlaying
 import org.fossify.musicplayer.extensions.playOrTogglePlayback
 import org.fossify.musicplayer.extensions.sendCommand
@@ -38,7 +39,6 @@ import org.fossify.musicplayer.extensions.shuffledMediaItemsIndices
 import org.fossify.musicplayer.extensions.toTrack
 import org.fossify.musicplayer.extensions.toTracks
 import org.fossify.musicplayer.helpers.EXTRA_SHUFFLE_INDICES
-import org.fossify.musicplayer.models.Events
 import org.fossify.musicplayer.playback.CustomCommands
 import org.fossify.musicplayer.playback.PlaybackService
 import org.fossify.musicplayer.views.CurrentTrackBar
@@ -47,8 +47,6 @@ import org.fossify.musicplayer.views.PlaybackPanel
 import org.fossify.musicplayer.views.QueueAdapter
 import org.fossify.musicplayer.views.QueueBottomSheetBehavior
 import org.fossify.musicplayer.views.QueueDragCallback
-import org.greenrobot.eventbus.Subscribe
-import org.greenrobot.eventbus.ThreadMode
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -94,12 +92,20 @@ abstract class SimpleMusicActivity : SimpleControllerActivity(), Player.Listener
     private val queueSheetBehavior
         get() = queueSheet.coordinatorLayoutBehavior as QueueBottomSheetBehavior
 
+    /**
+     * Paint the surfaces that draw themselves rather than resolving a theme attribute: both sheets
+     * carry a MaterialShapeDrawable held by their behavior, which no layout attribute can reach.
+     */
+    private fun updateSheetColors() {
+        sheetContent.setBackgroundColor(getContentSurfaceColor())
+        playbackSheetBehavior.setSurfaceColor(getPlaybackSurfaceColor())
+        queueSheetBehavior.setSurfaceColor(getQueueSurfaceColor())
+        sheetScrim.setBackgroundColor(getPlaybackSurfaceColor())
+    }
+
     override fun onResume() {
         super.onResume()
-        // A surface step below the bar and the sheet resting on it, so the player never blends into
-        // the screen it is sitting over. Every screen that hosts the sheet needs it, not just the
-        // library, and it is repainted here because the theme may have changed while it was away.
-        sheetContent.setBackgroundColor(getContentSurfaceColor())
+        updateSheetColors()
         updateCurrentTrackBar()
         panel.updateColors()
         // The track may well have moved on while this screen was stopped, and no callback for that
@@ -112,22 +118,6 @@ abstract class SimpleMusicActivity : SimpleControllerActivity(), Player.Listener
         // while playback was already going (or briefly racing the controller's reconnect) would
         // otherwise leave the sheet hidden with no further event to correct it.
         updateSheetVisibility()
-    }
-
-    /**
-     * Repaint the bar and panel the moment the accent changes, on top of whatever picks it up on
-     * the next [onResume]. Adaptive theming can otherwise change the accent several times a minute
-     * as tracks go by, and screens like this one - already open, showing the very thing driving the
-     * change - are exactly where that ought to be seen right away rather than waiting on a revisit.
-     *
-     * Only fires for a screen that already registers with [org.greenrobot.eventbus.EventBus] for
-     * some other event of its own; a screen that never does simply catches up on its next resume,
-     * same as it would if the user had changed the accent from Customize Colors instead.
-     */
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    fun accentColorChanged(event: Events.AccentColorChanged) {
-        updateCurrentTrackBar()
-        panel.updateColors()
     }
 
     override fun onPause() {
@@ -157,11 +147,6 @@ abstract class SimpleMusicActivity : SimpleControllerActivity(), Player.Listener
         elevationNormal = resources.getDimension(MR.dimen.m3_sys_elevation_level1)
         maxScaleXDistance = resources.getDimension(MR.dimen.m3_back_progress_bottom_container_max_scale_x_distance)
         playbackSheet.elevation = 0f
-        // The scrim is painted in the sheet's own colour, not the content's. Fading it in over the
-        // last stretch of the slide turns everything around the sheet — the strip left under the
-        // status bar included — the same colour as the sheet, exactly as its corners square off,
-        // so the panel arrives reading as the whole screen rather than as a card on top of one.
-        sheetScrim.setBackgroundColor(getPlaybackSurfaceColor())
 
         setupCurrentTrackBar(trackBar)
         // Tapping the bar expands the sheet rather than opening a separate player screen.

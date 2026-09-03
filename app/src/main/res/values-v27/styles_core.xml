@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- From API 27 the bar icon colour can be set, so the bars go near-transparent instead of
+         scrimmed. Not fully transparent: on 27/28 the OS forces its own scrim behind a truly
+         transparent bar, which a 1/255 alpha avoids. -->
+    <style name="Theme.Music.V27" parent="Theme.Music.V23">
+        <item name="android:navigationBarColor">@color/chrome_transparent_ish</item>
+        <item name="android:statusBarColor">@color/chrome_transparent_ish</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+    </style>
+</resources>

@@ -18,27 +18,24 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.fossify.commons.extensions.adjustAlpha
 import org.fossify.commons.extensions.copyToClipboard
-import org.fossify.commons.extensions.getContrastColor
-import org.fossify.commons.extensions.getProperPrimaryColor
 import org.fossify.commons.extensions.toast
 import org.fossify.commons.extensions.value
-import org.fossify.commons.helpers.LOWER_ALPHA
-import org.fossify.commons.helpers.MEDIUM_ALPHA
 import org.fossify.commons.helpers.ensureBackgroundThread
 import org.fossify.musicplayer.R
 import org.fossify.musicplayer.activities.SimpleControllerActivity
 import org.fossify.musicplayer.databinding.ViewPlaybackPanelBinding
 import org.fossify.musicplayer.extensions.accentColor
+import org.fossify.musicplayer.extensions.getAttrColor
+import com.google.android.material.R as MR
 import org.fossify.musicplayer.extensions.audioHelper
 import org.fossify.musicplayer.extensions.config
 import org.fossify.musicplayer.extensions.currentMediaItems
 import org.fossify.musicplayer.extensions.currentMediaItemsShuffled
 import org.fossify.musicplayer.extensions.dampen
 import org.fossify.musicplayer.extensions.getPlaybackSetting
+import org.fossify.musicplayer.extensions.getLiftedQueueSurfaceColor
 import org.fossify.musicplayer.extensions.getPlaybackSurfaceColor
-import org.fossify.musicplayer.extensions.getTintedTextColor
 import org.fossify.musicplayer.extensions.isReallyPlaying
 import org.fossify.musicplayer.extensions.recycler
 import org.fossify.musicplayer.extensions.setRepeatMode
@@ -183,23 +180,24 @@ class PlaybackPanel(context: Context, attributeSet: AttributeSet) : ConstraintLa
     }
 
     /**
-     * Tint the transport row from the app's accent.
+     * Tint the transport row from the scheme.
      *
-     * Auxio gets its play/skip hierarchy from the M3 container roles, but Fossify only ever supplies
-     * a single accent and leaves the rest of the palette at the framework defaults, which is why the
-     * roles resolve to unrelated colours. Deriving the tints here keeps the play button dominant
-     * over the skips and, crucially, holds the icon colour steady across play and pause.
+     * The hierarchy is expressed in roles rather than derived: play is the one primary action on
+     * this sheet, the skips beside it are secondary containers, and the toggles are outlined
+     * against the sheet's own surface. Previously each of these was computed from the accent by
+     * hand - a contrast colour for the icon, a half-alpha accent for the skips - because the theme
+     * carried no container roles to name. The generated scheme carries all of them, with
+     * on-colours the algorithm has already checked for contrast, so the alpha tricks are gone.
      */
     fun updateColors() {
-        val primary = context.accentColor
         binding.playbackPlayPause.apply {
-            backgroundTintList = ColorStateList.valueOf(primary)
-            iconTint = ColorStateList.valueOf(primary.getContrastColor())
+            backgroundTintList = ColorStateList.valueOf(context.accentColor)
+            iconTint = ColorStateList.valueOf(context.getAttrColor(MR.attr.colorOnPrimary))
         }
 
         binding.playbackSeekBar?.setTrackColors(
-            playedColor = primary,
-            remainingColor = primary.adjustAlpha(LOWER_ALPHA)
+            playedColor = context.accentColor,
+            remainingColor = context.getLiftedQueueSurfaceColor()
         )
 
         // The toggles read as outlines on the sheet, so their fill is the sheet's own colour.
@@ -208,8 +206,8 @@ class PlaybackPanel(context: Context, attributeSet: AttributeSet) : ConstraintLa
             it.backgroundTintList = sheetContainer
         }
 
-        val skipContainer = ColorStateList.valueOf(primary.adjustAlpha(MEDIUM_ALPHA))
-        val skipIcon = ColorStateList.valueOf(context.getTintedTextColor())
+        val skipContainer = ColorStateList.valueOf(context.getAttrColor(MR.attr.colorSecondaryContainer))
+        val skipIcon = ColorStateList.valueOf(context.getAttrColor(MR.attr.colorOnSecondaryContainer))
         arrayOf(binding.playbackSkipPrev, binding.playbackSkipNext).forEach {
             it.backgroundTintList = skipContainer
             it.iconTint = skipIcon

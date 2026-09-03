@@ -90,7 +90,7 @@
                             android:id="@+id/sleep_timer_divider_top"
                             android:layout_width="0dp"
                             android:layout_height="1px"
-                            android:background="@color/divider_grey"
+                            android:background="?attr/colorOutlineVariant"
                             app:layout_constraintBottom_toTopOf="@+id/sleep_timer_stop"
                             app:layout_constraintEnd_toEndOf="@+id/sleep_timer_stop"
                             app:layout_constraintStart_toStartOf="@+id/sleep_timer_label" />
@@ -99,7 +99,7 @@
                             android:id="@+id/sleep_timer_divider_start"
                             android:layout_width="1px"
                             android:layout_height="0dp"
-                            android:background="@color/divider_grey"
+                            android:background="?attr/colorOutlineVariant"
                             app:layout_constraintBottom_toBottomOf="@+id/sleep_timer_stop"
                             app:layout_constraintStart_toStartOf="@+id/sleep_timer_label"
                             app:layout_constraintTop_toTopOf="@+id/sleep_timer_stop" />

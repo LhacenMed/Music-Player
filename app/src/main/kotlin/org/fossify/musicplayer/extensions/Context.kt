@@ -3,8 +3,12 @@ package org.fossify.musicplayer.extensions
 import android.app.Application
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
+import android.util.TypedValue
+import androidx.annotation.AttrRes
+import androidx.annotation.ColorInt
+import com.google.android.material.R as MR
 import android.graphics.Bitmap
-import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.media.ThumbnailUtils
 import android.net.Uri
@@ -13,7 +17,6 @@ import android.os.Looper
 import android.provider.MediaStore
 import android.provider.MediaStore.Audio
 import android.util.Size
-import androidx.core.graphics.ColorUtils
 import androidx.core.net.toUri
 import androidx.media3.common.Player
 import com.bumptech.glide.Glide
@@ -22,8 +25,6 @@ import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.Target
-import com.google.android.material.color.MaterialColors
-import com.google.android.material.color.utilities.Hct
 import org.fossify.commons.extensions.*
 import org.fossify.commons.helpers.ensureBackgroundThread
 import org.fossify.commons.helpers.isQPlus
@@ -37,7 +38,6 @@ import org.fossify.musicplayer.models.Album
 import org.fossify.musicplayer.models.Artist
 import org.fossify.musicplayer.models.Genre
 import org.fossify.musicplayer.models.Track
-import org.fossify.musicplayer.playback.PlaybackService
 import org.fossify.musicplayer.widget.MyWidgetProvider
 import java.io.File
 
@@ -328,84 +328,72 @@ fun Context.getFriendlyFolder(path: String): String {
     }
 }
 
-/** How far the browsing surface sits below the playback sheet, in percent. */
-private const val CONTENT_SURFACE_DARKEN_PERCENT = 4
-
-/** How far the queue sheet sits above the playback sheet it is stacked on, in percent. */
-private const val QUEUE_SURFACE_LIGHTEN_PERCENT = 4
+/**
+ * Resolve a theme colour attribute, ported from Auxio's getAttrColorCompat.
+ *
+ * The theme is the single source of colour in this app, so code that has to paint something the
+ * layout could not asks the theme for it rather than deriving one. Everything else should use
+ * ?attr/... directly in XML.
+ */
+@ColorInt
+fun Context.getAttrColor(@AttrRes attr: Int): Int {
+    val resolved = TypedValue()
+    theme.resolveAttribute(attr, resolved, true)
+    return if (resolved.resourceId != 0) getColor(resolved.resourceId) else resolved.data
+}
 
 /**
- * The app's accent color: the playing track's own cover color when
- * [org.fossify.musicplayer.helpers.Config.adaptiveTrackTheme] is on and one has been read for it,
- * otherwise the color chosen in Customize Colors.
+ * The accent: the one colour carrying the app's identity.
  *
- * Everywhere in this app that would reach for [getProperPrimaryColor] to color something the user
- * looks at while browsing or playing music - buttons, tinted text and icons, selection state -
- * reads it through here instead, which is the one place that decides whether it is adaptive right
- * now. [getProperPrimaryColor] itself is still what this falls back to, and is still the right call
- * for anything Fossify Commons colors on its own (e.g. a switch's thumb): that stays tied to the
- * configured accent regardless, since Commons has no notion of an adaptive one.
+ * colorPrimary is declared by AppCompat rather than by Material, which is why this one attribute
+ * is qualified differently from the surface roles below.
  */
 val Context.accentColor: Int
-    get() = PlaybackService.currentAccentColor ?: getProperPrimaryColor()
-
-/** How far the app bar lifts towards the foreground once the surface under it is scrolled. */
-private const val LIFTED_SURFACE_BLEND = 0.08f
+    get() = getAttrColor(androidx.appcompat.R.attr.colorPrimary)
 
 /**
- * The surface hierarchy the playback UI is built on, mirroring Auxio's: browsing content sits at
- * the bottom, and each sheet stacked over it steps one level lighter so the layers stay legible
- * against each other.
+ * The surface hierarchy the playback UI is built on: browsing content at the bottom, and each sheet
+ * stacked over it one step nearer the viewer. These are Material's own container ladder, so the
+ * steps hold their relationship on every accent and in both modes.
  */
-fun Context.getContentSurfaceColor() = getProperBackgroundColor().darkenColor(CONTENT_SURFACE_DARKEN_PERCENT)
+fun Context.getContentSurfaceColor() = getAttrColor(MR.attr.colorSurface)
 
-fun Context.getPlaybackSurfaceColor() = getProperBackgroundColor()
+fun Context.getPlaybackSurfaceColor() = getAttrColor(MR.attr.colorSurfaceContainer)
 
-fun Context.getQueueSurfaceColor() = getProperBackgroundColor().lightenColor(QUEUE_SURFACE_LIGHTEN_PERCENT)
+fun Context.getQueueSurfaceColor() = getAttrColor(MR.attr.colorSurfaceContainerHigh)
+
+/** What the app bar lifts to once the list beneath it has been scrolled. */
+fun Context.getLiftedSurfaceColor() = getAttrColor(MR.attr.colorSurfaceContainerLow)
+
+/** What a queue entry lifts to while it is being dragged. */
+fun Context.getLiftedQueueSurfaceColor() = getAttrColor(MR.attr.colorSurfaceContainerHighest)
 
 /**
- * The colour the app bar lifts to once the list running beneath it has been scrolled.
+ * Body text and icons.
  *
- * Blended towards the text colour rather than stepped in lightness, because lightenColor and
- * darkenColor both hand pure black and pure white straight back, and a step of the size the sheets
- * use is barely visible at the dark end of the scale anyway. Moving towards the foreground lifts the
- * bar on every theme, and in the direction Material does it: lighter on a dark palette, darker on a
- * light one.
+ * Auxio colours text from ?android:attr/textColorPrimary rather than an M3 role, because the
+ * Material 3 parent already maps that onto colorOnSurface - which is why its text follows a
+ * dynamic palette with no wiring at all.
  */
-fun Context.getLiftedSurfaceColor() =
-    ColorUtils.blendARGB(getContentSurfaceColor(), getProperTextColor(), LIFTED_SURFACE_BLEND)
+fun Context.getTintedTextColor(): Int = getAttrColor(android.R.attr.textColorPrimary)
 
 /**
- * The colour a queue entry lifts to while it is being dragged. This is the entry's own pressed
- * colour, so picking one up simply holds the shade that touching it already showed rather than
- * introducing a third one.
+ * Whether the device is one Android itself considers memory constrained.
+ *
+ * Used to decide whether theme changes animate by default: the transition repaints every themed
+ * view in the tree on each frame, which is exactly the kind of work these devices should not be
+ * doing for decoration.
  */
-fun Context.getLiftedQueueSurfaceColor() = ColorUtils.compositeColors(
-    MaterialColors.getColor(this, android.R.attr.colorControlHighlight, Color.TRANSPARENT),
-    getQueueSurfaceColor()
-)
+fun Context.isLowRamDevice(): Boolean =
+    (getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager).isLowRamDevice
 
 /**
- * How far the accent's hue and chroma bleed into text and icon colour. Kept low enough that the
- * shift reads as warmth rather than a colour change.
+ * Whether the app is currently being drawn dark.
+ *
+ * Read from the configuration the framework actually applied rather than from the stored
+ * preference, so it stays correct under "follow system" and cannot disagree with the resources
+ * already inflated around it. Ported from Auxio.
  */
-private const val TEXT_TINT_CHROMA = 6.0
-
-/**
- * HCT tone is only in-gamut as pure white/black at the very extremes, so a colour sitting at tone
- * 100 or 0 has no room left for [TEXT_TINT_CHROMA] to show. Clamping away from those extremes
- * keeps the tint visible even when the configured text colour is a flat white or black.
- */
-private const val MIN_TINTED_TONE = 4.0
-private const val MAX_TINTED_TONE = 96.0
-
-/**
- * [getProperTextColor] leaned towards the current accent's hue, the way none of Auxio's generated
- * Material You palettes ever leave "white" perfectly neutral. Used for text and icons alike, since
- * this app colours both from the same value.
- */
-fun Context.getTintedTextColor(): Int {
-    val tone = Hct.fromInt(getProperTextColor()).tone.coerceIn(MIN_TINTED_TONE, MAX_TINTED_TONE)
-    val accentHue = Hct.fromInt(accentColor).hue
-    return Hct.from(accentHue, TEXT_TINT_CHROMA, tone).toInt()
-}
+val Context.isNight: Boolean
+    get() = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK ==
+        Configuration.UI_MODE_NIGHT_YES

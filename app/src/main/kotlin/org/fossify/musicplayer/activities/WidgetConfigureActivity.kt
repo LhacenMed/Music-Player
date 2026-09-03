@@ -10,8 +10,6 @@ import org.fossify.commons.dialogs.ColorPickerDialog
 import org.fossify.commons.dialogs.FeatureLockedDialog
 import org.fossify.commons.extensions.adjustAlpha
 import org.fossify.commons.extensions.applyColorFilter
-import org.fossify.commons.extensions.getContrastColor
-import org.fossify.commons.extensions.getProperPrimaryColor
 import org.fossify.commons.extensions.isDynamicTheme
 import org.fossify.commons.extensions.isOrWasThankYouInstalled
 import org.fossify.commons.extensions.onSeekBarChangeListener
@@ -20,7 +18,10 @@ import org.fossify.commons.extensions.viewBinding
 import org.fossify.commons.helpers.IS_CUSTOMIZING_COLORS
 import org.fossify.musicplayer.R
 import org.fossify.musicplayer.databinding.WidgetConfigBinding
+import org.fossify.musicplayer.extensions.accentColor
 import org.fossify.musicplayer.extensions.config
+import org.fossify.musicplayer.extensions.getAttrColor
+import com.google.android.material.R as MR
 import org.fossify.musicplayer.widget.MyWidgetProvider
 import org.fossify.musicplayer.playback.PlaybackService
 
@@ -54,7 +55,7 @@ class WidgetConfigureActivity : SimpleActivity() {
         binding.configBgColor.setOnClickListener { pickBackgroundColor() }
         binding.configTextColor.setOnClickListener { pickTextColor() }
 
-        val primaryColor = getProperPrimaryColor()
+        val primaryColor = accentColor
         binding.configBgSeekbar.setColors(mTextColor, primaryColor, primaryColor)
         binding.configPlayer.apply {
             val currSong = PlaybackService.currentMediaItem?.mediaMetadata
@@ -152,7 +153,7 @@ class WidgetConfigureActivity : SimpleActivity() {
         mBgColor = mBgColorWithoutTransparency.adjustAlpha(mBgAlpha)
         configPlayer.widgetBackground.applyColorFilter(mBgColor)
         configBgColor.setFillWithStroke(mBgColor, mBgColor)
-        configSave.backgroundTintList = ColorStateList.valueOf(getProperPrimaryColor())
+        configSave.backgroundTintList = ColorStateList.valueOf(accentColor)
     }
 
     private fun updateTextColor() = binding.apply {
@@ -160,7 +161,7 @@ class WidgetConfigureActivity : SimpleActivity() {
 
         configPlayer.songInfoTitle.setTextColor(mTextColor)
         configPlayer.songInfoArtist.setTextColor(mTextColor)
-        configSave.setTextColor(getProperPrimaryColor().getContrastColor())
+        configSave.setTextColor(getAttrColor(MR.attr.colorOnPrimary))
 
         configPlayer.widgetControls.previousBtn.drawable.applyColorFilter(mTextColor)
         configPlayer.widgetControls.playPauseBtn.drawable.applyColorFilter(mTextColor)

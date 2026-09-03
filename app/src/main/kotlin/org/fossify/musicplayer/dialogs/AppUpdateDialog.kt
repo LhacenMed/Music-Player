@@ -15,6 +15,7 @@ import org.fossify.musicplayer.update.UpdateState
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
+import org.fossify.commons.extensions.setupDialogStuff
 
 /** Shows [update], and walks the user through downloading and installing it. */
 class AppUpdateDialog(private val activity: BaseSimpleActivity, private val update: AppUpdate) {

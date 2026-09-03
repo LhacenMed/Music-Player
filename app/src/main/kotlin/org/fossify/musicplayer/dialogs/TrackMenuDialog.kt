@@ -25,7 +25,7 @@ import org.fossify.musicplayer.databinding.DialogTrackMenuBinding
 import org.fossify.musicplayer.databinding.ItemMenuOptionBinding
 import org.fossify.musicplayer.extensions.addTracksToPlaylist
 import org.fossify.musicplayer.extensions.audioHelper
-import org.fossify.musicplayer.extensions.getPlaybackSurfaceColor
+import org.fossify.musicplayer.extensions.getQueueSurfaceColor
 import org.fossify.musicplayer.extensions.getTrackCoverArt
 import org.fossify.musicplayer.extensions.shareFiles
 import org.fossify.musicplayer.extensions.showTrackProperties
@@ -91,7 +91,7 @@ class TrackMenuDialog : BackportBottomSheetDialogFragment() {
         // the content inside it.
         val sheet = dialog?.findViewById<View>(MR.id.design_bottom_sheet) ?: return
         BackportBottomSheetBehavior.from(sheet)
-            .setSheetFillColor(ColorStateList.valueOf(requireContext().getPlaybackSurfaceColor()))
+            .setSheetFillColor(ColorStateList.valueOf(requireContext().getQueueSurfaceColor()))
     }
 
     override fun onDestroyView() {

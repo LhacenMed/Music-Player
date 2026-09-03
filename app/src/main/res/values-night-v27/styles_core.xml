@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Same as values-v27, with dark-mode bar icons. -->
+    <style name="Theme.Music.V27" parent="Theme.Music.V23">
+        <item name="android:navigationBarColor">@color/chrome_transparent_ish</item>
+        <item name="android:statusBarColor">@color/chrome_transparent_ish</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+    </style>
+</resources>

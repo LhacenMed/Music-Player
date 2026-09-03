@@ -9,6 +9,7 @@ import org.fossify.musicplayer.activities.SimpleActivity
 import org.fossify.musicplayer.databinding.DialogExportPlaylistBinding
 import org.fossify.musicplayer.extensions.config
 import java.io.File
+import org.fossify.commons.extensions.setupDialogStuff
 
 class ExportPlaylistDialog(
     val activity: SimpleActivity,

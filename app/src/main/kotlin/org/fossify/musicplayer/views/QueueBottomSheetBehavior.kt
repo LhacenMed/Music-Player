@@ -57,6 +57,8 @@ class QueueBottomSheetBehavior<V : View>(context: Context, attributeSet: Attribu
         return false
     }
 
+    private var backgroundDrawable: MaterialShapeDrawable? = null
+
     override fun createBackground(context: Context) =
         MaterialShapeDrawable.createWithElevationOverlay(context).apply {
             // The queue sheet's background is a static elevated background.
@@ -66,7 +68,12 @@ class QueueBottomSheetBehavior<V : View>(context: Context, attributeSet: Attribu
                 R.style.ShapeAppearance_PlaybackSheet,
                 MR.style.ShapeAppearanceOverlay_Material3_Corner_Top
             ).build()
-        }
+        }.also { backgroundDrawable = it }
+
+    /** @see PlaybackBottomSheetBehavior.setSurfaceColor */
+    fun setSurfaceColor(color: Int) {
+        backgroundDrawable?.fillColor = ColorStateList.valueOf(color)
+    }
 
     override fun applyWindowInsets(child: View, insets: WindowInsets): WindowInsets {
         super.applyWindowInsets(child, insets)

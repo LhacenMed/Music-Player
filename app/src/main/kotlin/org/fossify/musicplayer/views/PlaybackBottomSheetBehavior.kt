@@ -35,6 +35,18 @@ class PlaybackBottomSheetBehavior<V : View>(context: Context, attributeSet: Attr
         }
     }
 
+    /**
+     * Repaint the sheet's own background.
+     *
+     * The drawable is built once and handed to the view, so a scheme change has to reach in and
+     * change its fill - re-creating it would drop the shape and the elevation overlay with it.
+     */
+    fun setSurfaceColor(color: Int) {
+        if (::sheetBackgroundDrawable.isInitialized) {
+            sheetBackgroundDrawable.fillColor = ColorStateList.valueOf(color)
+        }
+    }
+
     init {
         isHideable = true
     }

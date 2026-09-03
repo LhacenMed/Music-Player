@@ -1,7 +1,9 @@
 package org.fossify.musicplayer.helpers
 
 import android.content.Context
+import androidx.appcompat.app.AppCompatDelegate
 import org.fossify.commons.helpers.BaseConfig
+import org.fossify.musicplayer.theme.Accent
 
 class Config(context: Context) : BaseConfig(context) {
     companion object {
@@ -28,11 +30,27 @@ class Config(context: Context) : BaseConfig(context) {
         get() = prefs.getBoolean(SWAP_PREV_NEXT, false)
         set(swapPrevNext) = prefs.edit().putBoolean(SWAP_PREV_NEXT, swapPrevNext).apply()
 
-    /** Whether the app's accent color follows the playing track's cover art instead of staying
-     *  on the color chosen in Customize Colors. */
-    var adaptiveTrackTheme: Boolean
-        get() = prefs.getBoolean(ADAPTIVE_TRACK_THEME, false)
-        set(adaptiveTrackTheme) = prefs.edit().putBoolean(ADAPTIVE_TRACK_THEME, adaptiveTrackTheme).apply()
+    /**
+     * Which colour scheme the app is themed with. See [Accent].
+     *
+     * Stored as an index rather than a colour: an accent is a whole theme, not a value.
+     */
+    var accent: Accent
+        get() = Accent.from(prefs.getInt(ACCENT, Accent.DEFAULT))
+        set(value) = prefs.edit().putInt(ACCENT, value.index).apply()
+
+    /**
+     * Light, dark, or follow the system - held as one of AppCompatDelegate's MODE_NIGHT_* values,
+     * so it can be handed straight to setDefaultNightMode.
+     */
+    var themeMode: Int
+        get() = prefs.getInt(THEME_MODE, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+        set(value) = prefs.edit().putInt(THEME_MODE, value).apply()
+
+    /** Use black surfaces while dark, for OLED screens. */
+    var useBlackTheme: Boolean
+        get() = prefs.getBoolean(BLACK_THEME, false)
+        set(value) = prefs.edit().putBoolean(BLACK_THEME, value).apply()
 
     /** Whether the app checks GitHub for a newer release on launch. Core builds only. */
     var checkForUpdates: Boolean

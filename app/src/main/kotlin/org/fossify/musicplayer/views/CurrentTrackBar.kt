@@ -12,11 +12,13 @@ import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestOptions
 import org.fossify.commons.extensions.*
-import org.fossify.commons.helpers.LOWER_ALPHA
+import com.google.android.material.R as MR
 import org.fossify.musicplayer.R
 import org.fossify.musicplayer.databinding.ViewCurrentTrackBarBinding
 import org.fossify.musicplayer.extensions.*
+import org.fossify.musicplayer.extensions.getLiftedQueueSurfaceColor
 import org.fossify.musicplayer.extensions.getPlaybackSurfaceColor
+import org.fossify.musicplayer.extensions.getTintedTextColor
 
 class CurrentTrackBar(context: Context, attributeSet: AttributeSet) : ConstraintLayout(context, attributeSet) {
     private val binding by viewBinding(ViewCurrentTrackBarBinding::bind)
@@ -27,17 +29,18 @@ class CurrentTrackBar(context: Context, attributeSet: AttributeSet) : Constraint
     }
 
     fun updateColors() {
-        val primary = context.accentColor
         binding.currentTrackPlayPause.apply {
-            backgroundTintList = ColorStateList.valueOf(primary)
-            iconTint = ColorStateList.valueOf(primary.getContrastColor())
+            backgroundTintList = ColorStateList.valueOf(context.accentColor)
+            iconTint = ColorStateList.valueOf(context.getAttrColor(MR.attr.colorOnPrimary))
         }
 
         binding.currentTrackNext.backgroundTintList =
             ColorStateList.valueOf(context.getPlaybackSurfaceColor())
         binding.currentTrackTitle.setTextColor(context.getTintedTextColor())
-        binding.currentTrackProgress.setIndicatorColor(primary)
-        binding.currentTrackProgress.trackColor = primary.adjustAlpha(LOWER_ALPHA)
+        binding.currentTrackProgress.setIndicatorColor(context.accentColor)
+        // The unplayed remainder is a surface step, not a faded accent: an alpha-reduced primary
+        // composites differently over each sheet it crosses, so it never matched the one below it.
+        binding.currentTrackProgress.trackColor = context.getLiftedQueueSurfaceColor()
     }
 
     fun updateCurrentTrack(mediaItem: MediaItem?) {

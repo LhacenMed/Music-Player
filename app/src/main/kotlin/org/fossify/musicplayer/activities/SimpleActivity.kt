@@ -1,23 +1,44 @@
 package org.fossify.musicplayer.activities
 
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatDelegate
 import org.fossify.commons.activities.BaseSimpleActivity
 import org.fossify.musicplayer.R
+import org.fossify.musicplayer.extensions.config
+import org.fossify.musicplayer.extensions.isNight
 import org.fossify.musicplayer.helpers.REPOSITORY_NAME
 
 open class SimpleActivity : BaseSimpleActivity() {
-    // BaseSimpleActivity swaps in one of Commons' own accent-coloured themes via
-    // setTheme(getThemeId()) in both onCreate() and onResume(), which replaces our AppTheme
-    // wholesale. Re-applying the typography overlay after each call is what makes Inter survive
-    // that swap instead of silently falling back to the platform default font.
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        theme.applyStyle(R.style.ThemeOverlay_App_Typography, true)
+    init {
+        // Fossify Commons reads this at the top of both onCreate and onResume, and only then calls
+        // setTheme(getThemeId()) - swapping in one of its own generated accent themes and
+        // repainting the window background from its own config. Turning it off before either runs
+        // is what leaves this app's themes as the only thing colouring it. Commons offers no other
+        // way out: getThemeId is a top-level extension, not an overridable method.
+        useDynamicTheme = false
     }
 
-    override fun onResume() {
-        super.onResume()
-        theme.applyStyle(R.style.ThemeOverlay_App_Typography, true)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        applyTheme()
+        super.onCreate(savedInstanceState)
+    }
+
+    /**
+     * Apply the configured theme, ported from Auxio's MainActivity.setupTheme.
+     *
+     * Order matters twice over. This runs before super.onCreate, and therefore before any layout is
+     * inflated, because a theme only reaches views that are created after it is set. And the night
+     * mode is handed to AppCompat first, because whether the black theme applies depends on the
+     * mode that lands.
+     *
+     * Black needs its own themes rather than a flag: a theme cannot be modified once applied, so
+     * "black" is a second set of themes overriding the surface roles, and the choice is made here.
+     */
+    private fun applyTheme() {
+        AppCompatDelegate.setDefaultNightMode(config.themeMode)
+
+        val accent = config.accent
+        setTheme(if (isNight && config.useBlackTheme) accent.blackTheme else accent.theme)
     }
 
     override fun getAppIconIDs() = arrayListOf(

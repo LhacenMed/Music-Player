@@ -9,6 +9,7 @@ import org.fossify.musicplayer.databinding.DialogNewPlaylistBinding
 import org.fossify.musicplayer.extensions.audioHelper
 import org.fossify.musicplayer.extensions.getPlaylistIdWithTitle
 import org.fossify.musicplayer.models.Playlist
+import org.fossify.commons.extensions.setupDialogStuff
 
 class NewPlaylistDialog(val activity: Activity, var playlist: Playlist? = null, val callback: (playlistId: Int) -> Unit) {
     private var isNewPlaylist = playlist == null

@@ -4,7 +4,6 @@ import android.content.Context
 import android.view.View
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.viewbinding.ViewBinding
-import org.fossify.commons.extensions.isDynamicTheme
 import org.fossify.musicplayer.R
 
 inline fun <T : ViewBinding> View.viewBinding(crossinline bind: (View) -> T) =
@@ -27,11 +26,5 @@ val View.coordinatorLayoutBehavior: CoordinatorLayout.Behavior<View>?
  * playing without either reading as the other.
  */
 fun View.setupActivatableBackground(context: Context) {
-    setBackgroundResource(
-        if (context.isDynamicTheme()) {
-            R.drawable.selector_activatable_you
-        } else {
-            R.drawable.selector_activatable
-        }
-    )
+    setBackgroundResource(R.drawable.selector_activatable)
 }

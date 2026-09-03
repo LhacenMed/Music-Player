@@ -85,7 +85,6 @@
     <!-- Settings -->
     <string name="equalizer">Equalizer</string>
     <string name="swap_prev_next">Swap previous/next headphone buttons</string>
-    <string name="adaptive_track_theme">Color the app from the playing track\'s cover</string>
     <string name="check_for_updates">Check for updates</string>
     <string name="auto_check_for_updates">Check for updates automatically</string>
     <string name="checking_for_updates">Checking for updates…</string>
@@ -128,4 +127,32 @@
     <string name="go_to_artist">Go to artist</string>
     <string name="go_to_album">Go to album</string>
     <string name="more_options_for">More options for %s</string>
+
+    <!-- Accents. One theme each; see Accent.kt -->
+    <string name="accent">Accent</string>
+    <string name="accent_red">Red</string>
+    <string name="accent_pink">Pink</string>
+    <string name="accent_purple">Purple</string>
+    <string name="accent_deep_purple">Deep purple</string>
+    <string name="accent_indigo">Indigo</string>
+    <string name="accent_blue">Blue</string>
+    <string name="accent_deep_blue">Deep blue</string>
+    <string name="accent_cyan">Cyan</string>
+    <string name="accent_teal">Teal</string>
+    <string name="accent_green">Green</string>
+    <string name="accent_deep_green">Deep green</string>
+    <string name="accent_lime">Lime</string>
+    <string name="accent_yellow">Yellow</string>
+    <string name="accent_orange">Orange</string>
+    <string name="accent_brown">Brown</string>
+    <string name="accent_grey">Grey</string>
+    <string name="accent_dynamic">Material You</string>
+
+    <!-- Appearance -->
+    <string name="theme">Theme</string>
+    <string name="theme_mode_auto">Follow system</string>
+    <string name="theme_mode_light">Light</string>
+    <string name="theme_mode_dark">Dark</string>
+    <string name="black_theme">Black theme</string>
+
 </resources>

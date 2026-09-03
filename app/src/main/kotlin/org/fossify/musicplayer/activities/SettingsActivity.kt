@@ -12,13 +12,16 @@ import org.fossify.musicplayer.R
 import org.fossify.musicplayer.databinding.ActivitySettingsBinding
 import org.fossify.musicplayer.dialogs.AppUpdateDialog
 import org.fossify.musicplayer.dialogs.ManageVisibleTabsDialog
+import androidx.appcompat.app.AppCompatDelegate
 import org.fossify.musicplayer.extensions.accentColor
+import org.fossify.musicplayer.extensions.isNight
 import org.fossify.musicplayer.extensions.config
 import org.fossify.musicplayer.extensions.sendCommand
 import org.fossify.musicplayer.helpers.SHOW_FILENAME_ALWAYS
 import org.fossify.musicplayer.helpers.SHOW_FILENAME_IF_UNAVAILABLE
 import org.fossify.musicplayer.helpers.SHOW_FILENAME_NEVER
 import org.fossify.musicplayer.playback.CustomCommands
+import org.fossify.musicplayer.theme.Accent
 import org.fossify.musicplayer.update.UpdateChecker
 import java.util.Locale
 import kotlin.system.exitProcess
@@ -46,7 +49,9 @@ class SettingsActivity : SimpleControllerActivity() {
         setupManageExcludedFolders()
         setupManageShownTabs()
         setupSwapPrevNext()
-        setupAdaptiveTrackTheme()
+        setupAccent()
+        setupThemeMode()
+        setupBlackTheme()
         setupReplaceTitle()
         setupUpdates()
         updateTextColors(binding.settingsNestedScrollview)
@@ -97,12 +102,58 @@ class SettingsActivity : SimpleControllerActivity() {
         }
     }
 
-    private fun setupAdaptiveTrackTheme() = binding.apply {
-        settingsAdaptiveTrackTheme.isChecked = config.adaptiveTrackTheme
-        settingsAdaptiveTrackThemeHolder.setOnClickListener {
-            settingsAdaptiveTrackTheme.toggle()
-            config.adaptiveTrackTheme = settingsAdaptiveTrackTheme.isChecked
-            withPlayer { sendCommand(CustomCommands.REFRESH_ACCENT_COLOR) }
+    private fun setupAccent() = binding.apply {
+        settingsAccent.text = getString(config.accent.name)
+        settingsAccentHolder.setOnClickListener {
+            val items = ArrayList((0 until Accent.MAX).map { index ->
+                RadioItem(index, getString(Accent.from(index).name))
+            })
+
+            RadioGroupDialog(this@SettingsActivity, items, config.accent.index) { chosen ->
+                config.accent = Accent.from(chosen as Int)
+                // An accent is a theme, and a theme is only read at inflation - so the screen has
+                // to be built again for it to take. This is what Auxio does, and it is the same
+                // thing AppCompat does for night mode.
+                recreate()
+            }
+        }
+    }
+
+    private fun setupThemeMode() = binding.apply {
+        settingsThemeMode.text = themeModeLabel(config.themeMode)
+        settingsThemeModeHolder.setOnClickListener {
+            val items = arrayListOf(
+                RadioItem(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM, themeModeLabel(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)),
+                RadioItem(AppCompatDelegate.MODE_NIGHT_NO, themeModeLabel(AppCompatDelegate.MODE_NIGHT_NO)),
+                RadioItem(AppCompatDelegate.MODE_NIGHT_YES, themeModeLabel(AppCompatDelegate.MODE_NIGHT_YES)),
+            )
+
+            RadioGroupDialog(this@SettingsActivity, items, config.themeMode) { chosen ->
+                config.themeMode = chosen as Int
+                // AppCompat re-creates every started activity itself in response, so the change
+                // lands across the app rather than only on this screen.
+                AppCompatDelegate.setDefaultNightMode(config.themeMode)
+            }
+        }
+    }
+
+    private fun themeModeLabel(mode: Int) = getString(
+        when (mode) {
+            AppCompatDelegate.MODE_NIGHT_NO -> R.string.theme_mode_light
+            AppCompatDelegate.MODE_NIGHT_YES -> R.string.theme_mode_dark
+            else -> R.string.theme_mode_auto
+        }
+    )
+
+    private fun setupBlackTheme() = binding.apply {
+        settingsBlackTheme.isChecked = config.useBlackTheme
+        settingsBlackThemeHolder.setOnClickListener {
+            settingsBlackTheme.toggle()
+            config.useBlackTheme = settingsBlackTheme.isChecked
+            // Only visible while dark, so only worth rebuilding then.
+            if (isNight) {
+                recreate()
+            }
         }
     }
 

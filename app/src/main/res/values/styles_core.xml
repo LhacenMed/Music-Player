@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+    The theme chain, ported from Auxio.
+
+    Two ideas carry the whole system, and both are worth stating outright:
+
+    1. Light and dark are NOT two sets of themes. They are one set of themes reading two sets of
+       colour resources that share every name - values/colors_ui.xml and values-night/colors_ui.xml.
+       The framework picks the file; the theme never knows which mode it is in. That is why there is
+       no values-night/themes.xml.
+    2. Each accent is a whole theme overriding all 46 Material colour roles, chosen with setTheme()
+       before anything inflates. Nothing is computed at runtime, so dialogs, popup menus, the
+       contextual action bar and ripples all follow the accent for free - they resolve the same
+       theme attributes as everything else.
+
+    The V* chain exists only to handle system bars per API level.
+    -->
+
+    <!-- Master parent. DynamicColors is a no-op below API 31 and supplies Material You above it. -->
+    <style name="Theme.Music" parent="Theme.Material3Expressive.DynamicColors.DayNight" />
+
+    <style name="Theme.Music.V23" parent="Theme.Music" />
+
+    <!-- Below API 27 the bar icon colour cannot be controlled, so the bars are scrimmed instead. -->
+    <style name="Theme.Music.V27" parent="Theme.Music.V23">
+        <item name="android:statusBarColor">@color/chrome_translucent</item>
+        <item name="android:navigationBarColor">@color/chrome_translucent</item>
+    </style>
+
+    <style name="Theme.Music.V29" parent="Theme.Music.V27" />
+
+    <style name="Theme.Music.V31" parent="Theme.Music.V29" />
+
+    <style name="Theme.Music.Base" parent="Theme.Music.V31">
+        <!-- Typography. Inter, with per-step letter spacing; see typography.xml. Bound here as
+             theme attributes so every widget resolves it, which is what makes the font apply
+             without any inflater factory. -->
+        <item name="textAppearanceDisplayLarge">@style/TextAppearance.App.DisplayLarge</item>
+        <item name="textAppearanceDisplayMedium">@style/TextAppearance.App.DisplayMedium</item>
+        <item name="textAppearanceDisplaySmall">@style/TextAppearance.App.DisplaySmall</item>
+        <item name="textAppearanceDisplayLargeEmphasized">@style/TextAppearance.App.DisplayLarge.Emphasized</item>
+        <item name="textAppearanceDisplayMediumEmphasized">@style/TextAppearance.App.DisplayMedium.Emphasized</item>
+        <item name="textAppearanceDisplaySmallEmphasized">@style/TextAppearance.App.DisplaySmall.Emphasized</item>
+
+        <item name="textAppearanceHeadlineLarge">@style/TextAppearance.App.HeadlineLarge</item>
+        <item name="textAppearanceHeadlineMedium">@style/TextAppearance.App.HeadlineMedium</item>
+        <item name="textAppearanceHeadlineSmall">@style/TextAppearance.App.HeadlineSmall</item>
+        <item name="textAppearanceHeadlineLargeEmphasized">@style/TextAppearance.App.HeadlineLarge.Emphasized</item>
+        <item name="textAppearanceHeadlineMediumEmphasized">@style/TextAppearance.App.HeadlineMedium.Emphasized</item>
+        <item name="textAppearanceHeadlineSmallEmphasized">@style/TextAppearance.App.HeadlineSmall.Emphasized</item>
+
+        <item name="textAppearanceTitleLarge">@style/TextAppearance.App.TitleLarge</item>
+        <item name="textAppearanceTitleMedium">@style/TextAppearance.App.TitleMedium</item>
+        <item name="textAppearanceTitleSmall">@style/TextAppearance.App.TitleSmall</item>
+        <item name="textAppearanceTitleLargeEmphasized">@style/TextAppearance.App.TitleLarge.Emphasized</item>
+        <item name="textAppearanceTitleMediumEmphasized">@style/TextAppearance.App.TitleMedium.Emphasized</item>
+        <item name="textAppearanceTitleSmallEmphasized">@style/TextAppearance.App.TitleSmall.Emphasized</item>
+
+        <item name="textAppearanceLabelLarge">@style/TextAppearance.App.LabelLarge</item>
+        <item name="textAppearanceLabelMedium">@style/TextAppearance.App.LabelMedium</item>
+        <item name="textAppearanceLabelSmall">@style/TextAppearance.App.LabelSmall</item>
+        <item name="textAppearanceLabelLargeEmphasized">@style/TextAppearance.App.LabelLarge.Emphasized</item>
+        <item name="textAppearanceLabelMediumEmphasized">@style/TextAppearance.App.LabelMedium.Emphasized</item>
+        <item name="textAppearanceLabelSmallEmphasized">@style/TextAppearance.App.LabelSmall.Emphasized</item>
+
+        <item name="textAppearanceBodyLarge">@style/TextAppearance.App.BodyLarge</item>
+        <item name="textAppearanceBodyMedium">@style/TextAppearance.App.BodyMedium</item>
+        <item name="textAppearanceBodySmall">@style/TextAppearance.App.BodySmall</item>
+        <item name="textAppearanceBodyLargeEmphasized">@style/TextAppearance.App.BodyLarge.Emphasized</item>
+        <item name="textAppearanceBodyMediumEmphasized">@style/TextAppearance.App.BodyMedium.Emphasized</item>
+        <item name="textAppearanceBodySmallEmphasized">@style/TextAppearance.App.BodySmall.Emphasized</item>
+
+        <!-- Inter has to be the default for plain TextViews and EditTexts too - including the ones
+             inside Fossify Commons' own layouts - since those resolve a widget style rather than a
+             Material type-scale role. -->
+        <item name="android:textViewStyle">@style/Widget.App.TextView</item>
+        <item name="android:editTextStyle">@style/Widget.App.EditText</item>
+
+        <!-- Corner radius, globalised. Material components resolve their shapes from these, so
+             every dialog, sheet, button, card and input follows the one scale. -->
+        <item name="shapeAppearanceCornerExtraSmall">@style/ShapeAppearance.App.Small</item>
+        <item name="shapeAppearanceCornerSmall">@style/ShapeAppearance.App.Small</item>
+        <item name="shapeAppearanceCornerMedium">@style/ShapeAppearance.App.Medium</item>
+        <item name="shapeAppearanceCornerLarge">@style/ShapeAppearance.App.Large</item>
+        <item name="shapeAppearanceCornerExtraLarge">@style/ShapeAppearance.App.Large</item>
+        <item name="shapeAppearanceSmallComponent">@style/ShapeAppearance.App.Small</item>
+        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.App.Medium</item>
+        <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.App.Large</item>
+
+        <!-- Control colours. The ripple is a state list over colorOnSurfaceVariant rather than a
+             flat grey, so presses follow the accent like everything else. -->
+        <item name="colorControlHighlight">@color/sel_compat_ripple</item>
+        <item name="colorControlNormal">?attr/colorOnSurfaceVariant</item>
+        <item name="colorControlActivated">?attr/colorPrimary</item>
+
+        <!-- Material3 hard-codes text highlight colours; these route them back to the accent. -->
+        <item name="android:textColorHighlight">@color/overlay_text_highlight</item>
+        <item name="android:textColorHighlightInverse">@color/overlay_text_highlight_inverse</item>
+
+        <!-- Fossify Commons' own views resolve these; without them its dialogs and lists
+             inflate wrong. -->
+        <item name="android:spinnerItemStyle">@style/SpinnerItem</item>
+        <item name="spinnerDropDownItemStyle">@style/SpinnerItem.DropDownItem</item>
+        <item name="android:spinnerDropDownItemStyle">@style/SpinnerItem.DropDownItem</item>
+        <item name="android:radioButtonStyle">@style/MyRadioButtonStyle</item>
+        <item name="radioButtonStyle">@style/MyRadioButtonStyle</item>
+        <item name="android:actionModeCloseDrawable">@drawable/ic_arrow_left_vector</item>
+
+        <item name="android:scrollbars">none</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="windowActionModeOverlay">true</item>
+        <item name="android:forceDarkAllowed">false</item>
+    </style>
+
+    <!-- Blue is the default below API 31, so the app never falls back to Material's purple. -->
+    <style name="Theme.Music.App" parent="Theme.Music.Blue" />
+
+    <!-- What the manifest points at. Kept under the existing name so the manifest and every
+         style that inherits from it are untouched. -->
+    <style name="AppTheme" parent="Theme.Music.App" />
+</resources>

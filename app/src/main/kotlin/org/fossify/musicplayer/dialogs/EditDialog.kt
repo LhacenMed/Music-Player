@@ -10,6 +10,7 @@ import org.fossify.musicplayer.databinding.DialogRenameSongBinding
 import org.fossify.musicplayer.extensions.audioHelper
 import org.fossify.musicplayer.data.TagHelper
 import org.fossify.musicplayer.models.Track
+import org.fossify.commons.extensions.setupDialogStuff
 
 class EditDialog(val activity: BaseSimpleActivity, val track: Track, val callback: (track: Track) -> Unit) {
     private val tagHelper = TagHelper(activity)

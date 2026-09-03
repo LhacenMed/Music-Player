@@ -2,7 +2,6 @@ package org.fossify.musicplayer.activities
 
 import android.content.Intent
 import android.content.res.ColorStateList
-import android.graphics.drawable.ColorDrawable
 import android.media.AudioManager
 import android.os.Bundle
 import android.view.View
@@ -98,22 +97,8 @@ class MainActivity : SimpleMusicActivity() {
             return
         }
 
-        updateMenuColors()
-        updateTextColors(binding.mainHolder)
         setupTabColors()
-        setupLibraryShortcutColors()
         updateFavoritesShortcutCover()
-        val properTextColor = getTintedTextColor()
-        val properPrimaryColor = accentColor
-        binding.sleepTimerHolder.background = ColorDrawable(getContentSurfaceColor())
-        binding.sleepTimerStop.applyColorFilter(properTextColor)
-        binding.loadingProgressBar.setIndicatorColor(properPrimaryColor)
-        binding.loadingProgressBar.trackColor = properPrimaryColor.adjustAlpha(LOWER_ALPHA)
-
-        getAllFragments().forEach {
-            it.setupColors(properTextColor, properPrimaryColor)
-        }
-
 
         if (storedExcludedFolders != config.excludedFolders.hashCode()) {
             refreshAllFragments()
@@ -190,17 +175,6 @@ class MainActivity : SimpleMusicActivity() {
             }
             return@setOnMenuItemClickListener true
         }
-    }
-
-    private fun updateMenuColors() {
-        binding.mainMenu.updateColors()
-        // Commons paints the app bar from the plain background, so hand the bar the surface it
-        // rests on afterwards to keep it, the tabs and the list behind them on one continuous
-        // colour, along with the step it lifts to while the list underneath is off its top.
-        binding.mainMenu.setSurfaceColors(
-            resting = getContentSurfaceColor(),
-            lifted = getLiftedSurfaceColor()
-        )
     }
 
     private fun storeStateVariables() {
@@ -370,26 +344,6 @@ class MainActivity : SimpleMusicActivity() {
         )
     }
 
-    /**
-     * Tint the shortcut row from the app's accent.
-     *
-     * The tonal style asks for M3 container roles, but Fossify only ever supplies a single accent
-     * and leaves the rest of the palette at the framework defaults, so the roles have to be filled
-     * in here or the cards resolve to unrelated colours. The container is handed over as a colour
-     * rather than a flat tint, since a card backed by artwork dims its own to a scrim.
-     */
-    private fun setupLibraryShortcutColors() = binding.libraryShortcuts.apply {
-        val containerColor = getProperBackgroundColor()
-        val iconTint = ColorStateList.valueOf(accentColor)
-        val labelColor = getTintedTextColor()
-
-        listOf(shortcutFavorites, shortcutPlaylists, shortcutRecent).forEach {
-            it.setContainerColor(containerColor)
-            it.iconTint = iconTint
-            it.setTextColor(labelColor)
-        }
-    }
-
     /** Back the favorites card with the cover of the track added to it most recently. */
     private fun updateFavoritesShortcutCover() {
         ensureBackgroundThread {
@@ -400,11 +354,41 @@ class MainActivity : SimpleMusicActivity() {
         }
     }
 
+    /**
+     * Colour what the theme cannot reach on its own.
+     *
+     * A TabLayout's text and indicator, and the shortcut tiles' container, are set through code
+     * rather than attributes, so they are resolved from the theme here. Everything else on this
+     * screen is themed by attribute and needs nothing.
+     */
     private fun setupTabColors() {
-        val properTextColor = getTintedTextColor()
-        val properPrimaryColor = accentColor
-        binding.mainTabsHolder.setTabTextColors(properTextColor.adjustAlpha(MEDIUM_ALPHA), properPrimaryColor)
-        binding.mainTabsHolder.setSelectedTabIndicatorColor(properPrimaryColor)
+        binding.mainTabsHolder.setTabTextColors(
+            getAttrColor(android.R.attr.textColorSecondary),
+            accentColor
+        )
+        binding.mainTabsHolder.setSelectedTabIndicatorColor(accentColor)
+
+        binding.libraryShortcuts.apply {
+            val containerColor = getQueueSurfaceColor()
+            val iconTint = ColorStateList.valueOf(accentColor)
+            listOf(shortcutFavorites, shortcutPlaylists, shortcutRecent).forEach {
+                it.setContainerColor(containerColor)
+                it.iconTint = iconTint
+                it.setTextColor(getTintedTextColor())
+            }
+        }
+
+        binding.mainMenu.setSurfaceColors(
+            resting = getContentSurfaceColor(),
+            lifted = getLiftedSurfaceColor()
+        )
+
+        binding.sleepTimerHolder.setBackgroundColor(getContentSurfaceColor())
+        binding.sleepTimerStop.applyColorFilter(getAttrColor(android.R.attr.textColorSecondary))
+        binding.loadingProgressBar.setIndicatorColor(accentColor)
+        binding.loadingProgressBar.trackColor = getLiftedQueueSurfaceColor()
+
+        getAllFragments().forEach { it.setupColors(getTintedTextColor(), accentColor) }
     }
 
     private fun showSortingDialog() {
@@ -499,13 +483,6 @@ class MainActivity : SimpleMusicActivity() {
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun shouldRefreshFragments(event: Events.RefreshFragments) {
         refreshAllFragments()
-    }
-
-    /** @see SimpleMusicActivity.accentColorChanged */
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    fun mainAccentColorChanged(event: Events.AccentColorChanged) {
-        setupTabColors()
-        setupLibraryShortcutColors()
     }
 
     private fun launchEqualizer() {
