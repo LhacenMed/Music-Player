@@ -6,10 +6,14 @@ jaudiotagger = "3.0.1"
 kotlin = "2.3.10"
 #KSP
 ksp = "2.3.10"
+#Compose
+composeBom = "2025.12.00"
+materialkolor = "2.1.1"
 #Detekt
 detekt = "1.23.8"
 detektCompose = "0.4.28"
 #AndroidX
+androidx-activitycompose = "1.10.1"
 androidx-constraintlayout = "2.2.2"
 androidx-swiperefreshlayout = "1.2.0"
 androidx-lifecycleprocess = "2.10.0"
@@ -46,6 +50,16 @@ androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 #Compose
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activitycompose" }
+androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
+androidx-compose-material-icons-core = { module = "androidx.compose.material:material-icons-core" }
+androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version = "1.1.7" }
+materialkolor = { module = "com.materialkolor:material-kolor", version.ref = "materialkolor" }
+androidx-compose-ui = { module = "androidx.compose.ui:ui" }
+androidx-compose-ui-graphics = { module = "androidx.compose.ui:ui-graphics" }
+androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
+androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 compose-detekt = { module = "io.nlopez.compose.rules:detekt", version.ref = "detektCompose" }
 #Fossify
 fossify-commons = { module = "org.fossify:commons", version.ref = "commons" }
@@ -64,5 +78,6 @@ room = [
 ]
 [plugins]
 android = { id = "com.android.application", version.ref = "gradlePlugins-agp" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }

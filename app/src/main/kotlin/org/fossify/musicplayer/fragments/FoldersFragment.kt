@@ -7,7 +7,8 @@ import org.fossify.commons.activities.BaseSimpleActivity
 import org.fossify.commons.extensions.*
 import org.fossify.commons.helpers.ensureBackgroundThread
 import org.fossify.musicplayer.R
-import org.fossify.musicplayer.activities.ExcludedFoldersActivity
+import org.fossify.musicplayer.nav.Dest
+import org.fossify.musicplayer.nav.toIntent
 import org.fossify.musicplayer.activities.SimpleActivity
 import org.fossify.musicplayer.activities.TracksActivity
 import org.fossify.musicplayer.adapters.FoldersAdapter
@@ -45,7 +46,7 @@ class FoldersFragment(context: Context, attributeSet: AttributeSet) : MyViewPage
                 binding.foldersPlaceholder2.underlineText()
 
                 binding.foldersPlaceholder2.setOnClickListener {
-                    activity.startActivity(Intent(activity, ExcludedFoldersActivity::class.java))
+                    activity.startActivity(Dest.ExcludedFolders.toIntent(activity))
                 }
 
                 this.folders = folders

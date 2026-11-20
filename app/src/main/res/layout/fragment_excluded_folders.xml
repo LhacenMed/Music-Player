@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Body only: the host supplies the app bar and the back arrow, so this is the list and the line
+  shown in its place while there is nothing to exclude.
+-->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/excluded_folders_wrapper"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:scrollbars="none">
+
+    <org.fossify.commons.views.MyRecyclerView
+        android:id="@+id/excluded_folders_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:scrollbars="vertical"
+        app:layoutManager="org.fossify.commons.views.MyLinearLayoutManager" />
+
+    <org.fossify.commons.views.MyTextView
+        android:id="@+id/excluded_folders_placeholder"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:paddingLeft="@dimen/big_margin"
+        android:paddingTop="@dimen/activity_margin"
+        android:paddingRight="@dimen/big_margin"
+        android:text="@string/exclude_folder_description" />
+
+</RelativeLayout>

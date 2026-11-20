@@ -26,6 +26,8 @@ import org.fossify.musicplayer.extensions.*
 import org.fossify.musicplayer.helpers.*
 import org.fossify.musicplayer.models.Events
 import org.fossify.musicplayer.models.Playlist
+import org.fossify.musicplayer.nav.Dest
+import org.fossify.musicplayer.nav.toIntent
 import org.fossify.musicplayer.playback.CustomCommands
 import org.fossify.musicplayer.update.UpdateChecker
 import org.fossify.musicplayer.views.FadingAppBarOffsetListener
@@ -330,7 +332,7 @@ class MainActivity : SimpleMusicActivity() {
 
         binding.libraryShortcuts.shortcutPlaylists.setOnClickListener {
             hideKeyboard()
-            startActivity(Intent(applicationContext, PlaylistsActivity::class.java))
+            startActivity(Dest.Playlists.toIntent(applicationContext))
         }
     }
 
@@ -492,7 +494,7 @@ class MainActivity : SimpleMusicActivity() {
 
     private fun launchSettings() {
         hideKeyboard()
-        startActivity(Intent(applicationContext, SettingsActivity::class.java))
+        startActivity(Dest.Settings.toIntent(this))
     }
 
     private fun launchAbout() {

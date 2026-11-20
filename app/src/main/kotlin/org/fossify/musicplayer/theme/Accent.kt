@@ -57,6 +57,9 @@ value class Accent private constructor(val index: Int) {
         }
 
         fun from(index: Int) = Accent(if (index in 0 until MAX) index else DEFAULT)
+
+        /** The Material You entry's fixed index, regardless of which accent is currently chosen. */
+        val DYNAMIC_INDEX = ACCENT_THEMES.lastIndex
     }
 }
 

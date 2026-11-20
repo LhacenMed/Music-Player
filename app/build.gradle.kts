@@ -5,6 +5,7 @@ import java.io.FileInputStream
 
 plugins {
     alias(libs.plugins.android)
+    alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     alias(libs.plugins.detekt)
 }
@@ -63,6 +64,7 @@ android {
     }
 
     buildFeatures {
+        compose = true
         viewBinding = true
         buildConfig = true
     }
@@ -107,6 +109,9 @@ android {
         compilerOptions.jvmTarget.set(
             JvmTarget.fromTarget(project.libs.versions.app.build.kotlinJVMTarget.get())
         )
+        // MaterialKolor ships metadata from a newer Kotlin than this project's compiler reads;
+        // its public API surface used here (dynamicColorScheme, PaletteStyle) is stable regardless.
+        compilerOptions.freeCompilerArgs.add("-Xskip-metadata-version-check")
     }
 
     namespace = project.property("APP_ID").toString()
@@ -133,6 +138,14 @@ detekt {
     allRules = false
 }
 
+configurations.all {
+    resolutionStrategy {
+        // materialkolor pulls a newer kotlin-stdlib than this project's Kotlin compiler
+        // understands; force it back down to the version everything else here compiles against.
+        force("org.jetbrains.kotlin:kotlin-stdlib:${libs.versions.kotlin.get()}")
+    }
+}
+
 dependencies {
     implementation(libs.fossify.commons)
     // Pinned ahead of the version Commons pulls in: the M3 Expressive button size overlays and
@@ -150,6 +163,17 @@ dependencies {
     implementation(libs.autofittextview)
     implementation(libs.jaudiotagger)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
+
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material.icons.core)
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.graphics)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    debugImplementation(libs.androidx.compose.ui.tooling)
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.materialkolor)
 
     implementation(libs.bundles.room)
     ksp(libs.androidx.room.compiler)

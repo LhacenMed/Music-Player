@@ -107,10 +107,16 @@
             android:configChanges="orientation"
             android:exported="false"
             android:label="@string/customize_colors"
-            android:parentActivityName=".activities.SettingsActivity" />
+            android:parentActivityName=".activities.ScreenHostActivity" />
 
+        <!--
+            The one entry serving every Dest: Settings, excluded folders, and any screen added
+            later. A screen joins the app by appearing in Dest, never by being declared here.
+            The system's "app settings" action lands here too - it names the screen by its action,
+            which the host maps to Dest.Settings.
+        -->
         <activity
-            android:name=".activities.SettingsActivity"
+            android:name=".activities.ScreenHostActivity"
             android:configChanges="orientation"
             android:exported="true"
             android:label="@string/settings"
@@ -123,24 +129,10 @@
         </activity>
 
         <activity
-            android:name=".activities.ExcludedFoldersActivity"
-            android:configChanges="orientation"
-            android:exported="false"
-            android:label="@string/excluded_folders"
-            android:parentActivityName=".activities.SettingsActivity" />
-
-        <activity
             android:name=".activities.EqualizerActivity"
             android:configChanges="orientation"
             android:exported="false"
             android:label="@string/equalizer"
-            android:parentActivityName=".activities.MainActivity" />
-
-        <activity
-            android:name=".activities.PlaylistsActivity"
-            android:configChanges="orientation"
-            android:exported="false"
-            android:label="@string/playlists"
             android:parentActivityName=".activities.MainActivity" />
 
         <activity

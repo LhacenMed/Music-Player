@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  Host for every Dest, plus the shared mini player every hosted screen shows (see
+  ScreenHostActivity, which now extends SimpleMusicActivity for it). A Compose Dest owns its own
+  top bar inside its Compose body; host_appbar/host_toolbar exist only for a native Dest.fragment()
+  destination, which still needs Commons' chrome, and stay gone otherwise.
+-->
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/playback_coordinator"
@@ -16,23 +22,22 @@
             android:layout_height="match_parent">
 
             <org.fossify.commons.views.MyAppBarLayout
-                android:id="@+id/playlists_appbar"
+                android:id="@+id/host_appbar"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:visibility="gone">
 
                 <com.google.android.material.appbar.MaterialToolbar
-                    android:id="@+id/playlists_toolbar"
+                    android:id="@+id/host_toolbar"
                     android:layout_width="match_parent"
                     android:layout_height="?attr/actionBarSize"
                     android:background="@color/color_primary"
-                    app:title="@string/playlists"
                     app:titleTextAppearance="@style/AppTheme.ActionBar.TitleTextStyle" />
 
             </org.fossify.commons.views.MyAppBarLayout>
 
-            <include
-                android:id="@+id/playlists_fragment"
-                layout="@layout/fragment_playlists"
+            <FrameLayout
+                android:id="@+id/host_body"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 app:layout_behavior="@string/appbar_scrolling_view_behavior" />
